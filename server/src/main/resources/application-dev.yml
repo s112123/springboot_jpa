@@ -23,3 +23,17 @@ spring:
         show_sql: true
         format_sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
+
+# File
+servlet:
+  multipart:
+    max-file-size: 3MB
+    max-request-size: 10MB
+
+# Upload File Path
+file:
+  upload:
+    root: D://uploads/
+    directories:
+      profiles: profiles
+      boards: boards

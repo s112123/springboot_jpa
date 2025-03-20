@@ -1,3 +1,8 @@
+# Server
+server:
+  port: 8081
+
+# Spring
 spring:
   # DataSource
   datasource:
@@ -7,7 +12,7 @@ spring:
     password: '0000'
   # Redis
   redis:
-    host: localhost
+    host: redis_host
     port: 6379
   # JPA
   jpa:
@@ -17,6 +22,19 @@ spring:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
+  # File
+  servlet:
+    multipart:
+      max-file-size: 3MB
+      max-request-size: 10MB
+
+# Upload File Path
+file:
+  upload:
+    root: s112123/tomcat/webapps/ROOT/WEB-INF/classes/static/uploads/
+    directories:
+      profiles: profiles
+      boards: boards
 
 # Logging
 logging:
