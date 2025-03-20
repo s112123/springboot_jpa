@@ -1,0 +1,241 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.profile-wrap {
+  width: 650px;
+  padding: 50px;
+}
+
+.profile-wrap p {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* TOP */
+.profile-box .profile-box-top {
+  margin-top: 20px;
+  padding: 30px 0px;
+  border-top: 1px solid rgb(200, 200, 200);
+  border-bottom: 1px solid rgb(200, 200, 200);
+  display: flex;
+  justify-content: flex-start;
+}
+
+.profile-box .profile-box-top .profile-image-box {
+  width: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-box .profile-box-top .profile-image-box .profile-image {
+  text-align: center;
+}
+
+.profile-box .profile-box-top .profile-image-box .profile-image img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 15px;
+  border-radius: 15px;
+}
+
+.profile-box .profile-box-top .profile-image-box .profile-image .profile-image-file {
+  height: 30px;
+}
+
+.profile-box .profile-box-top .profile-image-box .profile-image label[for=profile-file] {
+  width: 80px;
+  padding: 3px 5px;
+  background-color: rgb(225, 225, 225);
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+  cursor:pointer;
+}
+
+.profile-box .profile-box-top .profile-image-box .profile-image #profile-file {
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+}
+
+.profile-box .profile-box-top .profile-information {
+  margin-left: 15px;
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-item {
+  margin-bottom: 8px;
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-item label {
+  font-size: 13px;
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-item input {
+  width: 280px;
+  height: 30px;
+  margin-top: 3px;
+  border: 1px solid rgb(180, 180, 180);
+  padding-left: 8px;
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-item input::placeholder {
+	font-size: 12px;
+	font-weight: 300;
+	color: rgb(160, 160, 160);
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-item .information-password input {
+	width: 83%;
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-item .information-password button {
+	width: 40px;
+	height: 30px;
+	background-color: #fff;
+  border: 1px solid rgb(180, 180, 180);
+	margin-left: 2px;
+	font-size: 13px;
+	font-weight: 500;
+	color: rgb(140, 140, 140);
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-item .information-password button:hover {
+  border: 1px solid rgb(210, 40, 40);
+  color: rgb(210, 40, 40);
+}
+
+.error {
+  width: 100%;
+  padding: 5px 10px;
+  margin-top: 10px;
+  background-color: rgba(210, 40, 40, 0.2);
+  color: rgb(210, 40, 40);
+  font-weight: 500;
+  display: none;
+}
+
+#updated-message {
+  width: 100%;
+  padding: 5px 10px;
+  margin-top: 10px;
+  background-color: rgba(65, 196, 118, 0.2);
+  color: rgb(34, 116, 67);
+  font-weight: 500;
+  display: none;
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-action {
+  margin-top: 10px;
+  float: right;
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-action button {
+  width: 65px;
+  height: 25px;
+  margin-left: 3px;
+  border: 1px solid rgb(225, 225, 225);
+  background-color: rgb(225, 225, 225);
+  font-weight: 500;
+  color: #000;
+}
+
+.profile-box .profile-box-top .profile-information .profile-information-action #update-my-info {
+  border: 1px solid rgb(210, 40, 40);
+  background-color: rgb(210, 40, 40);
+  color: white;
+}
+
+/* BOTTOM */
+.profile-box .profile-box-bottom {
+  margin: 55px 0px 0px 0px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-box .profile-box-bottom p {
+  font-size: 16px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+
+.profile-box .profile-box-bottom ul {
+  height: 250px;
+  padding: 5px;
+  list-style: none;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border-top: 1px solid rgb(200, 200, 200);
+  border-bottom: 1px solid rgb(200, 200, 200);
+}
+
+.profile-box .profile-box-bottom ul::-webkit-scrollbar {
+	width: 8px;
+	background-color: rgb(240, 240, 240);
+}
+
+.profile-box .profile-box-bottom ul::-webkit-scrollbar-thumb {
+	background-color: rgba(210, 40, 40, 0.5);
+	border-radius: 100px;
+}
+
+.profile-box .profile-box-bottom ul li {
+  height: 50px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgb(220, 220, 220);
+}
+
+.chat-box .chat-list ul li a {
+  width: 100%;
+  line-height: 30px;
+}
+
+.profile-box .profile-box-bottom .subscribe-list {
+  width: 325px;
+}
+
+.profile-box .profile-box-bottom .subscribe-list .subscribe-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-box .profile-box-bottom .subscribe-list .subscribe-item .subscribe-info {
+  display: flex;
+  align-items: center;
+}
+
+.profile-box .profile-box-bottom .subscribe-list .subscribe-item .subscribe-info img {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  border-radius: 10px;
+}
+
+.profile-box .profile-box-bottom .subscribe-list .subscribe-item .subscribe-info span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-box .profile-box-bottom .subscribe-list .subscribe-item .subscribe-btn button {
+  width: 55px;
+  height: 22px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #000;
+  border: 1px solid rgb(225, 225, 225);
+  background-color: rgb(225, 225, 225);
+}
+
+.profile-box .profile-box-bottom .subscribe-list .subscribe-item .subscribe-btn .btn-subscribe {
+  border: 1px solid rgb(210, 40, 40);
+  background-color: rgb(210, 40, 40);
+  color: #fff;
+}
+
+
+

@@ -1,0 +1,98 @@
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#register-message {
+  width: 100%;
+  padding: 5px 10px;
+  margin-bottom: 20px;
+  background-color: rgba(65, 196, 118, 0.2);
+  color: rgb(34, 116, 67);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sign-in-box {
+  width: 400px;
+  padding: 50px 50px;
+	box-shadow: 0 0 5px rgb(150, 150, 150);
+	border-radius: 5px;
+}
+
+.sign-in-box h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.sign-in-box .sign-in-item {
+  margin-bottom: 10px;
+}
+
+.sign-in-box .sign-in-item input {
+  width: 100%;
+  height: 35px;
+  padding: 8px;
+  border: 1px solid rgb(180, 180, 180);
+  border-radius: 2px;
+}
+
+.error {
+  width: 100%;
+  padding: 5px 10px;
+  margin: 10px 0px;
+  background-color: rgba(210, 40, 40, 0.2);
+  color: rgb(210, 40, 40);
+  font-weight: 500;
+  display: none;
+}
+
+.sign-in-box .sign-in-chk input {
+	position: relative;
+	margin-left: 0;
+	top: 2px;
+}
+
+.sign-in-box .sign-in-chk span {
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.sign-in-box #btn-sign-in {
+  width: 100%;
+  height: 35px;
+  margin: 25px 0px 35px; 0px;
+  padding: 5px 0px;
+  border: 1px solid rgb(210, 40, 40);
+  background-color: rgb(210, 40, 40);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 2px;
+}
+
+/* SIGN UP & FIND PASSWORD */
+.sign-in-box .sign-in-box-more-action {
+  font-size: 13px;
+  text-align: center;
+}
+
+.sign-in-box .sign-in-box-more-action a {
+  color: rgb(100, 100, 100);
+}
+
+.sign-in-box .sign-in-box-more-action a:hover {
+  color: rgb(210, 40, 40);
+}
+
+.sign-in-box .more-action-divider {
+  display: inline-block;
+  margin: 0 8px;
+  width: 1px;
+  height: 10px;
+  border-right: 1px solid rgb(100, 100, 100);
+}
+
