@@ -1,0 +1,95 @@
+header {
+  min-width: 1250px;
+  box-shadow: 0 5px 5px -5px rgb(150, 150, 150);
+}
+
+#header {
+  width: 1200px;
+  height: 95px;
+  margin: 0 auto;
+  padding: 30px 0px 20px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* HEADER-LOGO */
+#header #logo {
+  height: 38px;
+  display: flex;
+}
+
+#header #logo a {
+  font-family: "Roboto", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 38px;
+}
+
+/* HEADER-SEARCH */
+#header .search-box {
+  padding: 4px 2px;
+  height: 38px;
+  border: 1px solid rgb(180, 180, 180);
+  border-radius: 8px;
+}
+
+#header #search {
+  width: 500px;
+  height: 30px;
+  padding: 8px;
+  float: left;
+}
+
+#header #btn-search {
+  width: 30px;
+  height: 30px;
+  padding: 0px 23px;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#header #btn-search i {
+  font-size: 18px;
+  color: rgb(95, 95, 95);
+}
+
+#header #btn-search i:hover {
+  color: rgb(210, 40, 40);
+}
+
+/* HEADER-NAV */
+#header nav {
+  height: 38px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#header nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#header nav ul li {
+  margin-left: 25px;
+}
+
+#header nav ul li i {
+  font-size: 20px;
+  color: rgb(120, 120, 120);
+  cursor: pointer;
+}
+
+#header nav ul #login i {
+  font-size: 20px;
+  color: rgb(210, 40, 40);
+}
+
+#header nav ul li i:hover {
+  color: rgb(210, 40, 40);
+}

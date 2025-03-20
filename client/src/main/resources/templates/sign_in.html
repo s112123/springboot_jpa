@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>SIGN IN</title>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/sign_in.css" />
+    <!-- axios -->
+    <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- javascript -->
+    <script defer src="/js/sign_in.js"></script>
+</head>
+<body>
+    <div layout:fragment="content" class="container">
+        <div>
+            <p th:if="${register}" id="register-message">회원가입을 축하드립니다<br/>로그인 후, 서비스를 이용해주시기 바랍니다</p>
+            <div class="sign-in-box">
+                <h2>로그인</h2>
+                <div class="sign-in-item">
+                    <input type="text" id="email" placeholder="이메일" th:value="${remember}" />
+                    <small class="error" id="error-email"></small>
+                </div>
+                <div class="sign-in-item">
+                    <input type="password" id="password" placeholder="비밀번호" />
+                    <small class="error" id="error-password"></small>
+                </div>
+                <small class="error" id="error-global"></small>
+                <div class="sign-in-chk">
+                    <input type="checkbox" id="remember" th:checked="${!#strings.isEmpty(remember)}" />
+                    <span>아이디 저장</span>
+                    <!--<span>자동 로그인</span>-->
+                </div>
+                <button type="button" id="btn-sign-in">로그인</button>
+                <p class="sign-in-box-more-action">
+                    <a href="/member/add">회원가입</a>
+                    <span class="more-action-divider"></span>
+                    <a href="javascript:void(0);" id="find-password">비밀번호 찾기</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

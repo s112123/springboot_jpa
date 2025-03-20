@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+    <aside th:fragment="aside" id="aside">
+        <ul>
+            <li class="item" th:classappend="${menuOption == 0} ? 'menu-active' : 'menu-deactive'">
+                <span><i class="fa-regular fa-address-card"></i></span>
+                <a href="/my/profile">내 프로필</a>
+            </li>
+            <li class="item" th:classappend="${menuOption == 1} ? 'menu-active' : 'menu-deactive'">
+                <span><i class="fa-solid fa-pen-to-square"></i></span>
+                <a href="/my/review">내가 쓴 리뷰</a>
+            </li>
+            <!--    <li><i class="fa-solid fa-reply fa-rotate-180"></i><a href="#">내가 쓴 댓글</a></li>-->
+            <li class="item" th:classappend="${menuOption == 2} ? 'menu-active' : 'menu-deactive'">
+                <span><i class="fa-regular fa-heart"></i></span>
+                <a href="/my/good">내가 찜한 리뷰</a>
+            </li>
+            <li class="item" th:classappend="${menuOption == 3} ? 'menu-active' : 'menu-deactive'">
+                <span><i class="fa-regular fa-bell"></i></span>
+                <a href="/my/notification">알림 내역</a>
+            </li>
+            <li class="item" th:classappend="${menuOption == 4} ? 'menu-active' : 'menu-deactive'">
+                <span><i class="fa-solid fa-comments fa-sm"></i></span>
+                <a href="/my/chat">1:1 채팅</a>
+            </li>
+        </ul>
+    </aside>
+</body>
+</html>

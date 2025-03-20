@@ -1,0 +1,35 @@
+aside {
+  min-width: 220px;
+  height: 100vh;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+
+#aside ul {
+  list-style: none;
+  padding: 50px 0px;
+}
+
+#aside ul li {
+  margin-bottom: 8px;
+  padding: 5px 20px;
+  cursor: pointer;
+}
+
+#aside ul li span {
+  margin-right: 5px;
+}
+
+.menu-active {
+  background-color: rgb(210, 40, 40);
+}
+
+.menu-active a,
+.menu-active span {
+  color: white;
+}
+
+.menu-deactive {
+  background-color: #fff;
+  color: #000;
+}

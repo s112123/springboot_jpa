@@ -1,0 +1,49 @@
+main {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+/* PAGINATION */
+.pageable {
+	width: 100%;
+	padding: 15px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.pageable ul {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.pageable ul li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.pageable ul li a {
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	line-height: 28px;
+	margin: 0 5px;
+	border-radius: 50%;
+	background-color: white;
+/*	color: rgb(150, 150, 150);*/
+	font-size: 16px;
+	text-align: center;
+}
+
+.pageable ul li a.active {
+	background-color: rgb(210, 40, 40);
+	color: white;
+}
+
+/*
+.pageable ul li a:not([class="active"]):hover {
+	background-color: #eee;
+}
+*/

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>SIGN UP</title>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/sign_up.css" />
+    <!-- axios -->
+    <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- javascript -->
+    <script defer src="/js/sign_up.js"></script>
+</head>
+<body>
+    <div layout:fragment="content" class="container">
+        <div class="sign-up-box">
+            <h2>회원가입</h2>
+            <div class="sign-up-item">
+                <label for="email">이메일</label>
+                <div class="sign-up-email-box">
+                    <div class="sign-up-email">
+                        <input type="text" id="email" placeholder="email@email.com" />
+                    </div>
+                    <div class="btn-sign-up-email">
+                        <button type="button" id="btn-send-mail">메일인증</button>
+                    </div>
+                </div>
+                <small class="error" id="error-email"></small>
+                <small id="send-message"></small>
+            </div>
+            <div class="sign-up-item">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" placeholder="*****" />
+                <small class="error" id="error-password"></small>
+            </div>
+            <div class="sign-up-item">
+                <label for="re-password">비밀번호 확인</label>
+                <input type="password" id="re-password" placeholder="*****" />
+                <small class="error" id="error-re-password"></small>
+            </div>
+            <button type="click" id="btn-sign-up">가입하기</button>
+        </div>
+    </div>
+</body>
+</html>

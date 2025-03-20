@@ -1,0 +1,43 @@
+footer {
+  min-width: 1250px;
+	box-shadow: 0 -5px 5px -5px rgb(150, 150, 150);
+	background-color: rgb(45, 55, 64);
+}
+
+#footer {
+	width: 1200px;
+	margin: 0 auto;
+	padding: 38px 0;
+}
+
+#footer h3 {
+	color: rgb(220, 220, 220);
+	font-size: 18px;
+	font-weight: bold;
+}
+
+#footer p {
+	margin: 25px 0px;
+	color: rgb(220, 220, 220);
+	font-size: 15px;
+	line-height: 20px;
+}
+
+#footer .navbar {
+  list-style: none;
+	display: flex;
+}
+
+#footer .navbar li {
+	margin-right: 30px;
+}
+
+#footer .navbar li a {
+	color: rgb(220, 220, 220);
+	font-size: 18px;
+}
+
+#footer .navbar li a:hover {
+	color: rgb(210, 40, 40);
+	transition: 0.5s;
+}

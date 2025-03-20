@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>HOME</title>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/index.css" />
+    <!-- axios -->
+    <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- javascript -->
+    <script defer src="/js/index.js"></script>
+</head>
+<body>
+    <div layout:fragment="content" class="container">
+        <div class="reviews-top">
+            <ul class="reviews-top-left">
+                <li class="order-item">전체</li>
+                <li class="order-item">최근 순</li>
+                <li class="order-item">평점 순</li>
+                <!--<li>찜 많은 순</li>-->
+                <!--<li>가까운 순</li>-->
+            </ul>
+            <th:block th:if="${session.email != null}">
+                <div class="reviews-top-right">
+                    <button type="button" id="btn-review">리뷰쓰기</button>
+                </div>
+            </th:block>
+        </div>
+        <div class="reviews-middle" id="reviews-middle"></div>
+        <!--<div class="no-data" id="no-data">검색된 결과가 없습니다</div>-->
+        <div class="reviews-bottom" id="reviews-bottom"></div>
+    </div>
+</body>
+</html>
