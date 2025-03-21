@@ -1,12 +1,66 @@
 // 변수 선언
 var email = document.getElementById('email');
 var password = document.getElementById('password');
-var remember = document.getElementById('remember');
+var btnSignIn = document.getElementById('btn-sign-in');
 var errors = document.querySelectorAll('.error');
 var errorEmail = document.getElementById('error-email');
 var errorPassword = document.getElementById('error-password');
+
+// 로그인
+btnSignIn.addEventListener('click', () => {
+    // 에러 메시지 모두 숨김
+    errors.forEach((error) => {
+        error.style.display = 'none';
+    });
+
+    // 유효성 검사 → 이메일 입력 여부
+    if (email.value.trim().length === 0) {
+        errorEmail.innerText = '이메일을 입력하세요';
+        errorEmail.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 비밀번호
+    if (password.value.trim().length === 0) {
+        errorPassword.innerText = '비밀번호를 입력하세요';
+        errorPassword.style.display = 'block';
+        return false;
+    }
+
+    // 로그인 정보
+    const formData = {
+        'email': email.value.trim(),
+        'password': password.value.trim()
+    }
+
+    // 로그인 처리
+    login(formData).then(response => {
+        localStorage.setItem('accessToken', response.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+        location.replace('http://localhost:8080/');
+    })
+    .catch(error => {
+        // 인증 실패
+        if (error.response.data.status === 401) {
+            errorPassword.innerText = error.response.data.message;
+            errorPassword.style.display = 'block';
+            return;
+        }
+    });
+});
+
+// 로그인 API
+async function login(formData) {
+    const response = await axios.post('http://localhost:8081/api/v1/login', formData, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    return response;
+}
+
+/*
+// 변수 선언
 var errorGlobal = document.getElementById('error-global');
-var btnSignIn = document.getElementById('btn-sign-in');
 var btnFindPassword = document.getElementById('find-password');
 var isValid = true;
 
@@ -101,3 +155,4 @@ function validateLogin(results) {
 
   return true;
 }
+*/

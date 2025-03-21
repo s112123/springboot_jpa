@@ -29,7 +29,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:8080/")
+//@CrossOrigin(origins = "http://localhost:8080/")
 public class MemberController {
 
     private final MemberService memberService;
