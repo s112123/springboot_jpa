@@ -41,21 +41,25 @@
 	color: rgb(130, 130, 130);
 }
 
-.sign-up-box .sign-up-item .sign-up-email-box {
+.sign-up-box .sign-up-item .sign-up-email-box,
+.sign-up-box .sign-up-item .sign-up-confirm-box {
   display: flex;
   justify-content: space-between;
 }
 
-.sign-up-box .sign-up-item .sign-up-email-box .sign-up-email input {
+.sign-up-box .sign-up-item .sign-up-email-box .sign-up-email input,
+.sign-up-box .sign-up-item .sign-up-confirm-box .sign-up-confirm input {
   width: 235px;
 }
 
-.sign-up-box .sign-up-item .sign-up-email-box .btn-sign-up-email {
+.sign-up-box .sign-up-item .sign-up-email-box .btn-sign-up-email,
+.sign-up-box .sign-up-item .sign-up-confirm-box .btn-sign-up-confirm {
   display: inline-block;
   padding-top: 5px;
 }
 
-.sign-up-box .sign-up-item .sign-up-email-box .btn-sign-up-email button {
+.sign-up-box .sign-up-item .sign-up-email-box .btn-sign-up-email button,
+.sign-up-box .sign-up-item .sign-up-confirm-box .btn-sign-up-confirm button {
   display: inline-block;
   width: 60px;
   height: 100%;
@@ -64,6 +68,16 @@
   font-size: 12px;
   font-weight: 500;
   border-radius: 3px;
+}
+
+#btn-confirm-code {
+  background-color: rgb(200, 200, 200);
+  color: #000;
+}
+
+
+#confirm-code-box {
+  display: none;
 }
 
 .error {

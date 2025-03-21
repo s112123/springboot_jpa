@@ -13,12 +13,10 @@ public class DBInit {
     @Bean
     public CommandLineRunner init(MemberService memberService) {
         return args -> {
-            for (int i = 0; i < 5; i++) {
-                MemberSaveRequest memberSaveRequest = new MemberSaveRequest();
-                memberSaveRequest.setEmail("user" + i + "@test.com");
-                memberSaveRequest.setPassword("a123412341234");
-                memberService.save(memberSaveRequest);
-            }
+            MemberSaveRequest memberSaveRequest = new MemberSaveRequest();
+            memberSaveRequest.setEmail("admin@test.com");
+            memberSaveRequest.setPassword("a123412341234");
+            memberService.save(memberSaveRequest);
         };
     }
 }

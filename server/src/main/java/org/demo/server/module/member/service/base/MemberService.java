@@ -35,4 +35,12 @@ public interface MemberService {
      * @param memberId 삭제 할 회원의 memberId
      */
     void deleteById(Long memberId);
+
+    /**
+     * 이메일이 존재하는지 여부
+     *
+     * @param email 존재하는지 확인 할 이메일
+     * @return 존재하면 true, 존재하지 않으면 false
+     */
+    boolean existsEmail(String email);
 }

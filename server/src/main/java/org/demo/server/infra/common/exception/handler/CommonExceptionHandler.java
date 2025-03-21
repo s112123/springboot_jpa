@@ -2,11 +2,13 @@ package org.demo.server.infra.common.exception.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.common.exception.NotFoundException;
+import org.demo.server.infra.common.exception.response.BindErrorResponse;
 import org.demo.server.infra.common.exception.response.ErrorResponse;
 import org.demo.server.module.member.exception.InvalidVerificationCodeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,13 +27,13 @@ public class CommonExceptionHandler {
      * @return 에러 내용 응답
      */
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<List<ErrorResponse>> handleBindException(BindException e) {
+    public ResponseEntity<List<BindErrorResponse>> handleBindException(BindException e) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
 
         // 모든 에러 메시지
-        List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
-        List<ErrorResponse> errorResponses = allErrors.stream()
-                .map(error -> new ErrorResponse(httpStatus.value(), error.getDefaultMessage()))
+        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
+        List<BindErrorResponse> errorResponses = fieldErrors.stream()
+                .map(err -> new BindErrorResponse(httpStatus.value(), err.getField(), err.getDefaultMessage()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.status(httpStatus).body(errorResponses);

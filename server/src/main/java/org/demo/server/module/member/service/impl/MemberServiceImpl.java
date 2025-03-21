@@ -9,6 +9,7 @@ import org.demo.server.module.member.dto.response.MemberResponse;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.entity.ProfileImage;
 import org.demo.server.module.member.entity.Role;
+import org.demo.server.module.member.exception.DuplicatedEmailException;
 import org.demo.server.module.member.repository.MemberRepository;
 import org.demo.server.module.member.service.base.MemberService;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,11 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public MemberResponse save(MemberSaveRequest memberSaveRequest) {
+        // 이메일 중복 체크
+        if (existsEmail(memberSaveRequest.getEmail())) {
+            throw new DuplicatedEmailException("이미 존재하는 이메일입니다");
+        }
+
         // 기본 프로필 이미지 등록
         ProfileImage profileImage = ProfileImage.builder()
                 .originalFileName("original")
@@ -116,5 +122,16 @@ public class MemberServiceImpl implements MemberService {
     private Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다"));
+    }
+
+    /**
+     * 이메일이 존재하는지 여부
+     *
+     * @param email 존재하는지 확인 할 이메일
+     * @return 존재하면 true, 존재하지 않으면 false
+     */
+    @Override
+    public boolean existsEmail(String email) {
+        return memberRepository.existsByEmail(email);
     }
 }

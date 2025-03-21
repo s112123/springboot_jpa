@@ -6,11 +6,11 @@ import org.demo.server.infra.common.dto.PagedListResponse;
 import org.demo.server.infra.common.util.file.FileDetails;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
-import org.demo.server.infra.common.util.send.base.SendUtils;
 import org.demo.server.module.member.dto.request.MemberSaveRequest;
 import org.demo.server.module.member.dto.response.MemberResponse;
 import org.demo.server.module.member.service.base.MemberService;
-import org.demo.server.module.member.service.impl.EmailService;
+import org.demo.server.module.member.util.confirm.base.ConfirmCodeUtils;
+import org.demo.server.module.member.util.confirm.dto.ConfirmCodeRequest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -24,16 +24,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:8080/")
 public class MemberController {
 
     private final MemberService memberService;
-    private final EmailService emailService;
     private final FileUtils fileUtils;
-    private final SendUtils sendUtils;
+    private final ConfirmCodeUtils confirmCodeUtils;
 
     /**
      * 회원 등록
@@ -47,7 +48,6 @@ public class MemberController {
     ) throws BindException {
         // 유효성 검사 (입력 값)
         if (bindingResult.hasErrors()) {
-            // @RestControllerAdvice → MemberExceptionHandler
             throw new BindException(bindingResult);
         }
 
@@ -63,30 +63,38 @@ public class MemberController {
     }
 
     /**
-     * 인증 코드 (6자리) 메일 발송
+     * 인증 메일 발송
      *
      * @param email 인증 코드를 보낼 메일 주소
-     * @return 인증 코드
      */
-    @PostMapping("/codes/{email}")
-    public ResponseEntity<String> sendConfirmationEmail(@PathVariable("email") String email) {
-        String code = sendUtils.sendConfirmationCode(email);
-        emailService.saveConfirmationCode(email, code);
-        return ResponseEntity.ok().body(code);
+    @PostMapping("/codes")
+    public ResponseEntity<Map<String, String>> sendConfirmationEmail(@RequestBody String email) {
+        confirmCodeUtils.sendConfirmCode(email);
+        return ResponseEntity.ok().body(Map.of("status", ""));
     }
 
     /**
      * 인증 메일 확인
      * Redis 에 저장된 인증 코드와 이메일로 전송된 인증 코드를 전송하여 유효한 사용자인지 확인
      *
-     * @param email 인증 코드를 보낸 이메일 주소
-     * @param code 보낸 인증 코드
-     * @return "confirmed" 가 보내지면 인증된 것이다
+     * @param body 인증 코드 확인에 필요한 이메일과 인증 코드 값이 담겨있다
      */
-    @GetMapping("/codes/check/{code}")
-    public ResponseEntity<String> checkConfirmationCode(@PathVariable("email") String email, @PathVariable("code") String code) {
-        emailService.confirmCode(email, code);
-        return ResponseEntity.ok().body("confirmed");
+    @PostMapping("/codes/check")
+    public ResponseEntity<Void> checkConfirmationCode(@RequestBody Map<String, String> body) {
+        confirmCodeUtils.validateConfirmCode(body.get("email"), body.get("code"));
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 이메일 중복 확인
+     *
+     * @param email 입력받은 이메일
+     * @return 이메일이 중복이면 true, 중복이 아니면 false 반환
+     */
+    @PostMapping("/emails/check")
+    public ResponseEntity<Boolean> checkExistsEmail(@RequestBody String email) {
+        boolean isExists = memberService.existsEmail(email);
+        return ResponseEntity.ok().body(isExists);
     }
 
     /**

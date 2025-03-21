@@ -1,151 +1,231 @@
 // 변수 선언
 var email = document.getElementById('email');
+var confirmCode = document.getElementById('confirm-code');
 var password = document.getElementById('password');
 var rePassword = document.getElementById('re-password');
+var msgSendMail = document.getElementById('send-message');
+var confirmCodeBox = document.getElementById('confirm-code-box');
+var btnSignUp = document.getElementById('btn-sign-up');
+var btnSendMail = document.getElementById('btn-send-mail');
+var btnConfirmCode = document.getElementById('btn-confirm-code');
 var errors = document.querySelectorAll('.error');
 var errorEmail = document.getElementById('error-email');
 var errorPassword = document.getElementById('error-password');
 var errorRePassword = document.getElementById('error-re-password');
-var msgSendMail = document.getElementById('send-message');
-var btnSendMail = document.getElementById('btn-send-mail');
-var btnSignUp = document.getElementById('btn-sign-up');
-var isValid = true;
+var isSentConfirmCode = false;
+var isValidConfirmCode = false;
 var isDuplicatedEmail = false;
-var isValidEmail = false;
 
-// 이메일 중복 검사
+// 이메일 입력 시
 email.addEventListener("keyup", () => {
-  var formData = {
-    'email': email.value.trim()
-  };
+    // 이메일을 입력하고 인증 메일을 보낸 후, 다시 이메일을 입력할 수 있다
+    isDuplicatedEmail = false;
+    isSentConfirmCode = false;
+    confirmCodeBox.style.display = 'none';
+    msgSendMail.style.display = 'none';
 
-  isExistsEmail(formData).then(response => {
-    var res = response.data;
-    if (res.isExists) {
-      errorEmail.textContent = '중복된 이메일입니다';
-      errorEmail.style.display = 'block';
-      isDuplicatedEmail = true;
-    } else {
-      errorEmail.style.display = 'none';
-      isDuplicatedEmail = false;
+    // 에러 메시지 모두 숨김
+    errors.forEach((error) => {
+        error.style.display = 'none';
+    });
+
+    // 이메일 중복 검사
+    if (email.value.trim().length !== 0) {
+        isExistsEmail(email.value.trim()).then(response => {
+            var isDuplicatedEmail = response.data;
+            if (isDuplicatedEmail) {
+                errorEmail.textContent = '이미 존재하는 이메일입니다';
+                errorEmail.style.display = 'block';
+                isDuplicatedEmail = true;
+            } else {
+                errorEmail.style.display = 'none';
+                isDuplicatedEmail = false;
+            }
+        });
     }
-  });
 });
 
-// 이메일 중복 검사
-async function isExistsEmail(formData) {
-  var response = await axios.post('/members/exists_email', formData);
-  return response;
+// 이메일 중복 검증 API
+async function isExistsEmail(email) {
+    var response = await axios.post('http://localhost:8081/api/v1/members/emails/check', email, {
+        headers: {
+            'Content-Type': 'text/plain'
+        }
+    });
+    return response;
 }
 
-// 인증 메일 발송 (유효성 검사: 이메일 입력 여부, 이메일 형식 확인)
+// 인증 메일 발송
 btnSendMail.addEventListener('click', () => {
-  var formData = {
-    'email': email.value.trim()
-  };
+    // 에러 메시지 숨김
+    errorEmail.style.display = 'none';
 
-  // 인증 메일 발송
-  console.log(isDuplicatedEmail);
-  if (!isDuplicatedEmail) {
-    sendValidEmail(formData).then(response => {
-      var res = response.data;
+    // 유효성 검사 → 이메일
+    if (email.value.trim().length === 0) {
+        errorEmail.innerText = '이메일은 필수입니다';
+        errorEmail.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 이메일 형식 여부
+    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email.value.trim())) {
+        errorEmail.innerText = '이메일 형식이 아닙니다';
+        errorEmail.style.display = 'block';
+        return false;
+    }
 
-      // 이메일이 입력되지 않은 경우
-      errorEmail.textContent = res.defaultMessage;
-      errorEmail.style.display = 'block';
-
-      // 이메일 인증 메일이 발송된 경우
-      if (res.send) {
-        msgSendMail.innerText = res.defaultMessage;
+    // 인증 메일 발송
+    sendConfirmCodeEmail(email.value.trim()).then(response => {
+        isSentConfirmCode = true;
+        confirmCodeBox.style.display = 'flex';
+        msgSendMail.innerText = '인증 메일이 발송되었습니다';
         errorEmail.style.display = 'none';
         msgSendMail.style.display = 'block';
-      }
     });
-  }
 });
 
-// 이메일 인증코드 발송
-async function sendValidEmail(formData) {
-  var response = await axios.post('/members/send_email', formData);
-  return response;
+// 인증 메일 발송 API
+async function sendConfirmCodeEmail(email) {
+    var response = await axios.post('http://localhost:8081/api/v1/members/codes', email, {
+        headers: {
+            'Content-Type': 'text/plain'
+        }
+    });
+    return response;
 }
 
-// 회원가입 버튼 (유효성 검사: 이메일 입력 여부, 인증 여부, 비밀번호 입력 여부, 비밀번호 일치 여부)
-btnSignUp.addEventListener('click', () => {
-  console.log(isDuplicatedEmail);
+// 인증 확인
+btnConfirmCode.addEventListener('click', () => {
+    // 인증 메일이 발송되었다는 메시지 숨김
+    msgSendMail.style.display = 'none';
 
-  var formData = {
-    'email': email.value.trim(),
-    'password': password.value.trim()
-  };
-
-  addMember(formData).then(response => {
-    var res = response.data;
-
-    // 유효성 검사
-    isValid = validateSignUp(res);
-
-    // 회원가입 성공시, 로그인 페이지로 이동
-    if (isValid) {
-      location.replace('/login?register=true');
-    }
-  });
-});
-
-// 회원 등록
-async function addMember(formData) {
-  var response = axios.post('/members', formData);
-  return response;
-}
-
-// 회원가입 유효성 검사
-function validateSignUp(response) {
-  errors.forEach((error) => {
-    error.style.display = 'none';
-  });
-
-  // 이메일 중복 여부
-  if (isDuplicatedEmail) {
-    errorEmail.textContent = '중복된 이메일입니다';
-    errorEmail.style.display = 'block';
-    return false;
-  }
-
-  // 이메일 입력 여부 및 이메일 형식 여부, 비밀번호 입력 여부
-  if (Array.isArray(response)) {
-    for (var i = 0; i < response.length; i++) {
-      if (response[i].field === 'email') {
-        errorEmail.innerText = response[i].defaultMessage;
+    // 유효성 검사 → 입력 여부
+    if (confirmCode.value.trim().length === 0) {
+        errorEmail.innerText = '인증 코드를 입력하세요 (유효시간: 3분)';
         errorEmail.style.display = 'block';
-      }
-      if (response[i].field === 'password') {
-        errorPassword.innerText = response[i].defaultMessage;
-        errorPassword.style.display = 'block';
-      }
+        return false;
     }
-    return false;
-  }
 
-  // 비밀번호 확인 여부
-  if (rePassword.value.trim().length === 0) {
-    errorRePassword.innerText = "비밀번호를 확인해주세요";
-    errorRePassword.style.display = 'block';
-    return false;
-  }
+    // 입력한 회원 정보
+    var formData = {
+        'email': email.value.trim(),
+        'code': confirmCode.value.trim()
+    };
 
-  // 비밀번호 확인 일치 여부
-  if (password.value.trim() !== rePassword.value.trim()) {
-    errorRePassword.innerText = "비밀번호가 일치하지 않습니다";
-    errorRePassword.style.display = 'block';
-    return false;
-  }
+    // 인증 확인
+    validateConfirmCode(formData).then(response => {
+        isValidConfirmCode = true;
+        msgSendMail.innerText = '인증이 완료되었습니다';
+        errorEmail.style.display = 'none';
+        msgSendMail.style.display = 'block';
+        confirmCodeBox.style.display = 'none';
+        confirmCode.value = '';
+    })
+    .catch (error => {
+        errorEmail.innerText = error.response.data.message;
+        errorEmail.style.display = 'block';
+    });
+});
 
-  // 이메일 인증 여부
-  if (response.defaultMessage !== 'success') {
-    errorEmail.innerText = response.defaultMessage;
-    errorEmail.style.display = 'block';
-    return false;
-  }
+// 인증 확인 API
+async function validateConfirmCode(formData) {
+    var response = await axios.post('http://localhost:8081/api/v1/members/codes/check', formData, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    return response;
+}
 
-  return true;
+// 회원 가입
+btnSignUp.addEventListener('click', () => {
+    // 에러 메시지 모두 숨김
+    errors.forEach((error) => {
+        error.style.display = 'none';
+    });
+
+    // 유효성 검사 → 이메일
+    if (email.value.trim().length === 0) {
+        errorEmail.innerText = '이메일은 필수입니다';
+        errorEmail.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 이메일 형식 여부
+    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email.value.trim())) {
+        errorEmail.innerText = '이메일 형식이 아닙니다';
+        errorEmail.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 메일 인증 여부
+    if (!isSentConfirmCode || !isValidConfirmCode) {
+        errorEmail.innerText = '메일이 인증되지 않았습니다';
+        errorEmail.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 이메일 중복 여부
+    if (isDuplicatedEmail) {
+        errorEmail.innerText = '이미 존재하는 이메일입니다';
+        errorEmail.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 비밀번호
+    if (password.value.trim().length === 0) {
+        errorPassword.innerText = '비밀번호는 필수입니다';
+        errorPassword.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 비밀번호 형식 일치 여부
+    var passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
+    if (!passwordRegex.test(password.value.trim())) {
+        errorPassword.innerText = '영어와 숫자를 포함하여 10자리 이상이어야 합니다';
+        errorPassword.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 비밀번호 확인 여부
+    if (rePassword.value.trim().length === 0) {
+        errorRePassword.innerText = '비밀번호를 확인해주세요';
+        errorRePassword.style.display = 'block';
+        return false;
+    }
+    // 유효성 검사 → 비밀번호 확인 일치 여부
+    if (password.value.trim() !== rePassword.value.trim()) {
+        errorRePassword.innerText = '비밀번호가 일치하지 않습니다';
+        errorRePassword.style.display = 'block';
+        return false;
+    }
+    // 입력한 회원 정보
+    var formData = {
+        'email': email.value.trim(),
+        'password': password.value.trim()
+    };
+
+    // 회원 가입
+    addMember(formData).then(response => {
+        location.replace('/login?register=true');
+    })
+    .catch(error => {
+        // 에러 메시지 출력
+        var errorList = error.response.data;
+        for (var i = 0; i < errorList.length; i++) {
+            if (errorList[i].field === 'email') {
+                errorEmail.innerText = errorList[i].message;
+                errorEmail.style.display = 'block';
+            }
+            if (errorList[i].field === 'password') {
+                errorPassword.innerText = errorList[i].message;
+                errorPassword.style.display = 'block';
+            }
+        }
+    });
+});
+
+// 회원 가입 API
+async function addMember(formData) {
+    var response = await axios.post('http://localhost:8081/api/v1/members', formData, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    return response;
 }
