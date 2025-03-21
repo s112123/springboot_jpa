@@ -13,7 +13,7 @@ var page = 1;
 // HTML 로드
 document.addEventListener('DOMContentLoaded', () => {
   // 리뷰 목록 반환: renderReviews(0, '', 1);
-  renderReviews(sortOption, searchKeyword, page);
+  //renderReviews(sortOption, searchKeyword, page);
 });
 
 // 리뷰 검색
