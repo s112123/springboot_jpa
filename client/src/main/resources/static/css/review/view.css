@@ -1,0 +1,188 @@
+.container {
+  margin: 0px 150px 200px 150px;
+}
+
+/* TOP */
+.review-top {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* TOP: MAP */
+.review-top .review-map {
+  width: 350px;
+  height: 250px;
+  border: 1px solid rgb(200, 200, 200);
+}
+
+/* TOP: STORE */
+.review-top #review-store {
+  width: 550px;
+  height: 250px;
+  border: 1px solid rgb(200, 200, 200);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.review-top #review-store .review-store-box {
+  width: 100%;
+}
+
+.review-top #review-store .store-name {
+  margin: 25px 0px 10px 0px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.review-top #review-store .store-address {
+  margin-bottom: 16px;
+  text-align: center;
+  color: rgb(110, 110, 110);
+  font-size: 14px;
+}
+
+.review-top #review-store .store-mark {
+  margin: 30px 0px 30px 0px;
+  text-align: center;
+}
+
+.review-top #review-store .store-mark p {
+  margin-bottom: 5px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.review-top #review-store .store-mark ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.review-top #review-store .store-mark ul li {
+  margin-left: 2px;
+  color: rgb(200, 200, 200);
+  font-size: 18px;
+}
+
+.review-top #review-store .store-heart {
+	width: 50px;
+	height: 50px;
+	background-color: transparent;
+	text-align: center;
+	float: right;
+}
+.review-top #review-store .store-heart i {
+  line-height: 50px;
+  color: rgb(210, 40, 40);
+  font-size: 24px;
+}
+
+#good {
+  display: none;
+}
+
+/* TOP: WRITER */
+.review-top #review-writer {
+  width: 400px;
+  height: 250px;
+  border: 1px solid rgb(200, 200, 200);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.review-top #review-writer .writer-image {
+  width: 100%;
+  text-align: center;
+}
+
+.review-top #review-writer .writer-image img {
+  width: 80px;
+  height: 80px;
+  border-radius: 15px;
+}
+
+.review-top #review-writer .writer-info {
+/*  margin: 20px 0px;*/
+}
+
+.review-top #review-writer .writer-info .writer-name {
+  margin: 15px 0px 20px 0px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.review-top #review-writer .writer-info .writer-introduce {
+  font-size: 14px;
+  text-align: center;
+}
+
+.review-top #review-writer .writer-action {
+  width: 100%;
+  text-align: center;
+}
+
+.review-top #review-writer .writer-action button {
+  margin: 0px 3px;
+  padding: 3px 7px;
+  background-color: rgb(230, 230, 230);
+  border-radius: 5px;
+}
+
+.review-top #review-writer .writer-action .subscribed {
+  background-color: rgb(230, 230, 230);
+  color: #000;
+}
+
+.review-top #review-writer .writer-action .not-subscribed {
+  background-color: rgb(210, 40, 40);
+  color: #fff;
+}
+
+/* MIDDLE */
+.review-middle .review-title {
+  margin-top: 40px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgb(200, 200, 200);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.review-middle .review-content {
+  border-bottom: 1px solid rgb(200, 200, 200);
+  margin: 10px 0px;
+  padding: 35px 0px 100px 0px;
+}
+
+.review-middle .review-content .image img {
+  max-width: 100%;
+  height: 100%;
+  /* object-fit: scale-down; */
+}
+
+.review-middle .review-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-middle .review-btn button {
+  width: 70px;
+  height: 30px;
+  margin-bottom: 50px;
+  color: #fff;
+  background-color: rgb(210, 40, 40);
+}
+
+.review-middle .review-btn .review-btn-right button {
+  color: #000;
+  background-color: rgb(230, 230, 230);
+}
+
+

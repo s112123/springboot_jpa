@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>MYPAGE > REVIEWS</title>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/my/fragments/aside.css" />
+    <link rel="stylesheet" href="/css/my/review.css" />
+    <!-- javascript -->
+    <script defer src="/js/my/fragments/aside.js"></script>
+    <script defer src="/js/my/review.js"></script>
+</head>
+<body>
+    <div layout:fragment="content" class="container">
+        <div th:replace="my/fragments/aside::aside"></div>
+        <div class="my-reviews-wrap">
+            <p>내가 쓴 리뷰</p>
+            <div class="my-reviews-box">
+                <form id="my-reviews-form">
+                    <div class="my-reviews-list">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th><input type="checkbox" onclick="checkAll(this)" /></th>
+                                <th>리뷰</th>
+                                <th>상호명</th>
+                                <th>받은 찜 </th>
+                                <th>조회 수</th>
+                                <th>등록일</th>
+                                <th>-</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <th:block th:if="${#lists.size(reviews) > 0}">
+                                <tr th:each="review : ${reviews}">
+                                    <td><input type="checkbox" class="checkItem" th:name="checkItem" th:value="${review.reviewId}" /></td>
+                                    <td><a th:href="@{/review/view(review_id=${review.reviewId})}" th:text="${review.title}"></a></td>
+                                    <td th:text="${review.storeName}"></td>
+                                    <td th:text="${review.good}"></td>
+                                    <td th:text="${review.hits}"></td>
+                                    <td th:text="${#temporals.format(review.regDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                    <td>
+                                        <a href="javascript:;" th:onclick="removeReview([[${review.reviewId}]], [[${pageable.page}]])">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </th:block>
+                            <th:block th:if="${#lists.size(reviews) == 0}">
+                                <tr>
+                                    <td colspan="7">등록된 리뷰가 없습니다</td>
+                                </tr>
+                            </th:block>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="remove-reviews">
+                        <button type="button" id="remove-reviews"
+                                th:onclick="removeReviews([[${pageable.page}]])">선택삭제</button>
+                    </div>
+                </form>
+                <!--/*
+                <div class="my-reviews-search">
+                  <select name="my-reviews-search-option">
+                    <option>선택</option>
+                    <option>작성자</option>
+                    <option>제목</option>
+                  </select>
+                  <input type="text" id="search-keyword" placeholder="search" />
+                  <button type="button">검색</button>
+                </div>
+                */-->
+                <div class="my-reviews-pageable">
+                    <div class="pageable">
+                        <ul>
+                            <!--/* 이전 버튼 */-->
+                            <li th:if="${pageable.prev}">
+                                <a th:href="@{/my/review(page=${pageable.start - 1})}"
+                                   th:data-num="${pageable.start - 1}">
+                                    <i class="fa-solid fa-angle-left" th:data-num="${pageable.start - 1}"></i>
+                                </a>
+                            </li>
+                            <!--/* 페이지 번호 */-->
+                            <th:block th:if="${pageable.end} > 1" th:each="pageNum : ${#numbers.sequence(pageable.start, pageable.end)}">
+                                <li>
+                                    <a th:href="@{/my/review(page=${pageNum})}"
+                                       th:data-num="${pageNum}"
+                                       th:classappend="${pageable.page == pageNum} ? 'active' : ''"
+                                       th:text="${pageNum}"></a>
+                                </li>
+                            </th:block>
+                            <!--/* 다음 버튼 */-->
+                            <li th:if="${pageable.next}">
+                                <a th:href="@{/my/review(page=${pageable.end + 1})}"
+                                   th:data-num="${pageable.end + 1}">
+                                    <i class="fa-solid fa-angle-right" th:data-num="${pageable.end + 1}"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

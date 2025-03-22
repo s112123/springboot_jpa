@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>MYPAGE > NOTIFICATION</title>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/my/fragments/aside.css" />
+    <link rel="stylesheet" href="/css/my/notification.css" />
+    <!-- axios -->
+    <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- javascript -->
+    <script defer src="/js/my/fragments/aside.js"></script>
+    <script defer src="/js/my/notification.js"></script>
+</head>
+<body>
+    <div layout:fragment="content" class="container">
+        <div th:replace="my/fragments/aside::aside"></div>
+        <div class="notification-wrap">
+            <p>알림 내역</p>
+            <div class="notification-box">
+                <div class="notification-tool">
+                    <div class="notification-no-read">읽지 않은 알림 <span class="no-read-count" th:text="${cntNoRead}"></span> 개</div>
+                    <div><button type="button" id="all-read"><i class="fa-solid fa-check"></i>모두 읽음</button></div>
+                </div>
+                <div class="notification-list">
+                    <th:block th:if="${#lists.size(notifications) > 0}" th:each="notification : ${notifications}">
+                        <div class="notification-content">
+                            <div>
+                                <i class="fa-solid fa-circle fa-2xs"
+                                   th:classappend="${!notification.isRead} ? 'no-read' : ''"></i>
+                                <a href="javascript:;" th:text="${notification.content}"
+                                   th:classappend="${!notification.isRead} ? 'no-read-content' : 'read-content'"
+                                   th:data-notification-url="${notification.url}" th:data-notification-id="${notification.notificationId}"></a>
+                            </div>
+                            <div th:text="${#temporals.format(notification.regDate, 'yyyy-MM-dd HH:mm:ss')}"></div>
+                        </div>
+                    </th:block>
+                    <th:block th:if="${#lists.size(notifications) == 0}">
+                        <div class="notification-content">
+                            <div>알림 내역이 없습니다</div>
+                        </div>
+                    </th:block>
+                </div>
+                <div class="my-notification-pageable">
+                    <div class="pageable">
+                        <ul>
+                            <!--/* 이전 버튼 */-->
+                            <li th:if="${pageable.prev}">
+                                <a th:href="@{/my/notification(page=${pageable.start - 1})}"
+                                   th:data-num="${pageable.start - 1}">
+                                    <i class="fa-solid fa-angle-left" th:data-num="${pageable.start - 1}"></i>
+                                </a>
+                            </li>
+                            <!--/* 페이지 번호 */-->
+                            <th:block th:if="${pageable.end} > 1" th:each="pageNum : ${#numbers.sequence(pageable.start, pageable.end)}">
+                                <li>
+                                    <a th:href="@{/my/notification(page=${pageNum})}"
+                                       th:data-num="${pageNum}"
+                                       th:classappend="${pageable.page == pageNum} ? 'active' : ''"
+                                       th:text="${pageNum}"></a>
+                                </li>
+                            </th:block>
+                            <!--/* 다음 버튼 */-->
+                            <li th:if="${pageable.next}">
+                                <a th:href="@{/my/notification(page=${pageable.end + 1})}"
+                                   th:data-num="${pageable.end + 1}">
+                                    <i class="fa-solid fa-angle-right" th:data-num="${pageable.end + 1}"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -12,16 +12,12 @@
             </div>
             <nav>
                 <ul>
-                    <th:block th:if="${session.email == null}">
-                        <li id="login"><a href="/login"><i class="fa-solid fa-right-to-bracket"></i></a></li>
-                    </th:block>
-                    <th:block th:if="${session.email != null}">
-                        <li><a href="/my/notification"><i class="fa-regular fa-bell" id="bell"></i></a></li>
-                        <!--<li id="bell"><a href="/my/notification"><i class="fa-regular fa-bell fa-shake"></i></a></li>-->
-                        <li><a href="/my/profile"><i class="fa-solid fa-user"></i></a></li>
-                        <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
-                        <input type="hidden" id="email" th:value="${session.email}" />
-                    </th:block>
+                    <li id="login"><a href="/login"><i class="fa-solid fa-right-to-bracket"></i></a></li>
+                    <li id="notification"><a href="/my/notification"><i class="fa-regular fa-bell" id="bell"></i></a></li>
+                    <!--<li id="bell"><a href="/my/notification"><i class="fa-regular fa-bell fa-shake"></i></a></li>-->
+                    <li id="profile"><a href="/my/profile"><i class="fa-solid fa-user"></i></a></li>
+                    <li id="admin"><a href="/admin/member"><i class="fa-solid fa-gear"></i></i></a></li>
+                    <li id="logout"><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
                 </ul>
             </nav>
         </div>

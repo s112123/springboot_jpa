@@ -23,6 +23,14 @@ public interface MemberService {
     MemberResponse findById(Long memberId);
 
     /**
+     * username 로 회원 정보 조회
+     *
+     * @param username 조회 할 회원의 username
+     * @return 조회된 회원 정보를 반환하고 회원이 존재하지 않으면 NotFoundMemberException
+     */
+    MemberResponse findByUsername(String username);
+
+    /**
      * 회원 목록 조회
      *
      * @return createdAt 을 기준으로 내림차순으로 정렬한 회원 목록

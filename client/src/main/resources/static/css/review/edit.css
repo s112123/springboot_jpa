@@ -1,0 +1,97 @@
+.container {
+  margin: 0 150px;
+}
+
+.review-edit-wrap {
+  margin-top: 50px;
+  margin-bottom: 200px;
+}
+
+.review-edit-wrap h3 {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgb(200, 200, 200);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.review-edit-wrap .review-edit-box {
+  margin-top: 25px;
+}
+
+.review-edit-wrap .review-edit-box .review-edit-box-item {
+  margin-bottom: 10px;
+}
+
+.review-edit-wrap .review-edit-box input {
+  width: 100%;
+  height: 35px;
+  padding: 8px;
+  border: 1px solid rgb(200, 200, 200);
+}
+
+.error {
+  width: 100%;
+  padding: 5px 10px;
+  margin-top: 10px;
+  background-color: rgba(210, 40, 40, 0.2);
+  color: rgb(210, 40, 40);
+  font-weight: 500;
+  display: none;
+}
+
+.review-edit-wrap .review-edit-box .review-edit-btn {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.review-edit-wrap .review-edit-box .review-edit-btn button {
+  width: 70px;
+  height: 30px;
+  margin-top: 15px;
+  margin-left: 5px;
+  background-color: rgb(230, 230, 230);
+}
+
+.review-edit-wrap .review-edit-box .review-edit-btn #edit-review {
+  color: #fff;
+  background-color: rgb(210, 40, 40);
+}
+
+.review-edit-wrap .review-edit-box .store-mark-reviewer .store-mark-reviewer-star {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.review-edit-wrap .review-edit-box .store-mark-reviewer .reviewer-star {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.review-edit-wrap .review-edit-box .store-mark-reviewer ul {
+  list-style: none;
+  margin-left: 10px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.review-edit-wrap .review-edit-box .store-mark-reviewer ul li {
+  margin-left: 2px;
+  font-size: 15px;
+  color: rgb(200, 200, 200);
+  cursor: pointer;
+}
+
+/* CKEditor 5 start */
+/* 높이 설정 */
+.ck-editor__editable:not(.ck-editor__nested-editable) {
+  height: 500px;
+}
+
+/* 글자 크기 */
+.ck-content {
+  font-size: 14px;
+}
+/* CKEditor 5 end */

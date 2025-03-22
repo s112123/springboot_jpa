@@ -1,0 +1,91 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.notification-wrap {
+  width: 100%;
+  padding: 50px 0px 50px 50px;
+}
+
+.notification-wrap p {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.notification-box {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* TOOL */
+.notification-box .notification-tool {
+  height: 50px;
+  padding: 0px 10px;
+  background-color: rgba(230, 230, 230, 0.5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-box .notification-tool .notification-no-read {
+  font-weight: 600;
+}
+
+.notification-box .notification-tool .notification-no-read .no-read-count {
+  color: rgb(210, 40, 40);
+  font-weight: 600;
+}
+
+.notification-box .notification-tool #all-read {
+  width: 120px;
+  height: 30px;
+  background-color: transparent;
+}
+
+.notification-box .notification-tool #all-read i {
+  margin-right: 5px;
+}
+
+.notification-box .notification-tool #all-read:hover {
+  color: rgb(210, 40, 40);
+  transition: 0.2s;
+}
+
+/* LIST */
+.notification-box .notification-list {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.notification-box .notification-list .notification-content {
+  height: 50px;
+  padding: 0px 20px 0px 10px;
+  border-bottom: 0.5px solid rgb(230, 230, 230);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-box .notification-list .notification-content i {
+  margin-right: 8px;
+  color: rgb(220, 220, 220);
+  font-size: 8px;
+}
+
+.notification-box .notification-list .notification-content a {
+  font-size: 14px;
+}
+
+.notification-box .notification-list .notification-content div:nth-child(2) { /* 알림 받은 시간 */
+  font-size: 14px;
+}
+
+.notification-box .notification-list .notification-content .no-read {
+  color: rgb(210, 40, 40);
+}
+
+.notification-box .notification-list .notification-content .no-read-content {
+  font-weight: 500;
+}

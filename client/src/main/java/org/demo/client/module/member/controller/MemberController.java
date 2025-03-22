@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/member")
 public class MemberController {
 
+    /**
+     * 회원가입 페이지
+     * 
+     * @return
+     */
     @GetMapping("/add")
     public String home() {
         return "sign_up";
