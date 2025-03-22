@@ -1,0 +1,145 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.my-reviews-wrap {
+  width: 100%;  /* 650px */
+  padding: 50px 0px 50px 50px;
+}
+
+.my-reviews-wrap p {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.my-reviews-box {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.my-reviews-box .my-reviews-list {
+  margin-bottom: 10px;
+}
+
+/* TABLE */
+.my-reviews-box .my-reviews-list table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.my-reviews-box .my-reviews-list table tr {
+	height: 45px;
+	border: 1px solid #ccc;
+}
+
+.my-reviews-box .my-reviews-list table thead tr {
+	border-top: 3px solid rgb(52, 52, 54);
+}
+
+.my-reviews-box .my-reviews-list table th {
+	font-weight: bold;
+}
+
+.my-reviews-box .my-reviews-list table th, table td{
+	padding: 0 10px;
+	font-size: 14px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.my-reviews-list td:nth-child(1) {
+	width: 8%;
+}
+
+.my-reviews-list td:nth-child(2) {
+	width: 32%;
+	text-align: left;
+}
+
+.my-reviews-list td:nth-child(2) a {
+/*  color: rgb(210, 40, 40);*/
+  font-weight: 600;
+}
+
+.my-reviews-list td:nth-child(2) a:hover {
+	color: rgb(210, 40, 40);
+	transition: 0.1s;
+}
+
+.my-reviews-list td:nth-child(3) {
+	width: 15%;
+}
+
+.my-reviews-list td:nth-child(4) {
+	width: 10%;
+}
+
+.my-reviews-list td:nth-child(5) {
+	width: 10%;
+}
+
+.my-reviews-list td:nth-child(6) {
+	width: 17%;
+	font-size: 14px;
+}
+
+.my-reviews-list td:nth-child(7) {
+	width: 8%;
+}
+
+.my-reviews-list td:nth-child(7) a {
+	color: rgb(150, 150, 150);
+}
+
+.my-reviews-list td:nth-child(7) a:hover {
+	color: rgb(210, 40, 40);
+	transition: 0.1s;
+}
+
+#remove-reviews {
+  margin-bottom: 20px;
+  padding: 5px 8px;
+/*  border: 1px solid rgb(230, 230, 230);*/
+/*  background-color: rgb(230, 230, 230);*/
+  background-color: rgb(210, 40, 40);
+  color: #fff;
+  font-weight: 400;
+}
+
+/* SEARCH
+.my-reviews-search {
+  text-align: right;
+}
+
+.my-reviews-search select,
+.my-reviews-search input,
+.my-reviews-search button {
+	height: 30px;
+	padding: 3px 5px;
+}
+
+.my-reviews-search select {
+  width: 90px;
+  border: 1px solid rgb(180, 180, 180);
+}
+
+.my-reviews-search input {
+	width: 150px;
+	border: 1px solid rgb(180, 180, 180);
+	padding-left: 10px;
+}
+
+.my-reviews-search input::placeholder {
+	font-weight: 300;
+	color: rgb(160, 160, 160);
+}
+
+.my-reviews-search button {
+  width: 65px;
+	border: 1px solid rgb(210, 40, 40);
+	background-color: rgb(210, 40, 40);
+	color: white;
+}
+*/

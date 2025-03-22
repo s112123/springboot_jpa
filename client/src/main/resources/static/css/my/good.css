@@ -1,0 +1,89 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.my-goods-wrap {
+  width: 100%;
+  padding: 50px 0px 50px 50px;
+}
+
+.my-goods-wrap p {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.my-goods-box {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.my-goods-box .my-goods-list {
+  margin-bottom: 20px;
+}
+
+/* TABLE */
+.my-goods-box .my-goods-list table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.my-goods-box .my-goods-list table tr {
+	height: 45px;
+	border: 1px solid #ccc;
+}
+
+.my-goods-box .my-goods-list table thead tr {
+	border-top: 3px solid rgb(52, 52, 54);
+}
+
+.my-goods-box .my-goods-list table th {
+	font-weight: bold;
+}
+
+.my-goods-box .my-goods-list table th, table td{
+	padding: 0 10px;
+	font-size: 14px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.my-goods-list td:nth-child(1) {
+	width: 9%;
+}
+
+.my-goods-list td:nth-child(2) {
+	width: 32%;
+	text-align: left;
+}
+
+.my-goods-list td:nth-child(2) a {
+/*  color: rgb(210, 40, 40);*/
+  font-weight: 600;
+}
+
+.my-goods-list td:nth-child(2) a:hover {
+	color: rgb(210, 40, 40);
+	transition: 0.1s;
+}
+
+.my-goods-list td:nth-child(3) {
+	width: 14%;
+}
+
+.my-goods-list td:nth-child(4) {
+	width: 14%;
+}
+
+.my-goods-list td:nth-child(5) {
+	width: 10%;
+}
+
+.my-goods-list td:nth-child(6) {
+	width: 10%;
+}
+
+.my-goods-list td:nth-child(7) {
+	width: 15%;
+}

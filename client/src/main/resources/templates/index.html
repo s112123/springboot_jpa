@@ -22,11 +22,9 @@
                 <!--<li>찜 많은 순</li>-->
                 <!--<li>가까운 순</li>-->
             </ul>
-            <th:block th:if="${session.email != null}">
-                <div class="reviews-top-right">
-                    <button type="button" id="btn-review">리뷰쓰기</button>
-                </div>
-            </th:block>
+            <div class="reviews-top-right">
+                <button type="button" id="btn-review">리뷰쓰기</button>
+            </div>
         </div>
         <div class="reviews-middle" id="reviews-middle"></div>
         <!--<div class="no-data" id="no-data">검색된 결과가 없습니다</div>-->

@@ -16,7 +16,7 @@
 </head>
 <body>
     <div layout:fragment="content" class="container">
-        <div th:replace="my/fragments/aside::aside"></div>
+        <div th:replace="~{my/fragments/aside::aside}"></div>
         <div class="profile-wrap">
             <p>내 정보</p>
             <div class="profile-box">
@@ -36,23 +36,21 @@
                     <div class="profile-information">
                         <div class="profile-information-item">
                             <p><label for="email">이메일</label></p>
-<!--                            <input type="text" th:field="${member.email}" placeholder="email" readonly />-->
                             <input type="text" id="email" placeholder="email" readonly />
                         </div>
                         <div class="profile-information-item">
-                            <p><label for="nickName">닉네임</label></p>
-<!--                            <input type="text" th:field="${member.nickName}" placeholder="nick_name" />-->
-                            <input type="text" id="nickName" placeholder="nick_name" />
+                            <p><label for="username">닉네임</label></p>
+                            <input type="text" id="username" placeholder="username" />
                             <small class="error">닉네임은 필수입니다</small>
                             <small class="error">이미 존재하는 닉네임입니다</small>
                         </div>
-<!--                        <div class="profile-information-item">-->
-<!--                            <p><label for="password">비밀번호</label></p>-->
-<!--                            <div class="information-password">-->
-<!--                                <input type="password" th:field="${member.password}" placeholder="password" readonly />-->
-<!--                                <button id="btn-change-pass"><i class="fa-solid fa-pen-to-square"></i></button>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <div class="profile-information-item">
+                            <p><label for="password">비밀번호</label></p>
+                            <div class="information-password">
+                                <input type="password" id="password" placeholder="password" readonly />
+                                <button id="btn-change-pass"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </div>
 <!--                        <div class="profile-information-action">-->
 <!--                            <button type="button" id="update-my-info">변경</button>-->
 <!--                            <button type="button" id="withdraw-membership">회원탈퇴</button>-->

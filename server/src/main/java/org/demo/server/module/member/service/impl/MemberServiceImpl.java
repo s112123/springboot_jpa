@@ -82,6 +82,20 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
+     * username 로 회원 정보 조회
+     *
+     * @param username 조회 할 회원의 username
+     * @return 조회된 회원 정보를 반환하고 회원이 존재하지 않으면 NotFoundMemberException
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public MemberResponse findByUsername(String username) {
+        Member findMember = getMemberByUsername(username);
+        MemberDetails memberDetails = Member.toMemberDetails(findMember);
+        return MemberDetails.toMemberResponse(memberDetails);
+    }
+
+    /**
      * 회원 목록 조회
      *
      * @return createdAt 을 기준으로 내림차순으로 정렬한 회원 목록과 회원 수
@@ -121,6 +135,17 @@ public class MemberServiceImpl implements MemberService {
      */
     private Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다"));
+    }
+
+    /**
+     * username 로 회원 정보를 조회하는 Private 메서드
+     *
+     * @param username 조회 할 회원의 username
+     * @return Member Entity
+     */
+    private Member getMemberByUsername(String username) {
+        return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다"));
     }
 

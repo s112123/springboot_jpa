@@ -3,14 +3,15 @@ package org.demo.server.module.member.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.demo.server.infra.common.dto.PagedListResponse;
+import org.demo.server.infra.common.exception.NotFoundException;
 import org.demo.server.infra.common.util.file.FileDetails;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
 import org.demo.server.module.member.dto.request.MemberSaveRequest;
 import org.demo.server.module.member.dto.response.MemberResponse;
 import org.demo.server.module.member.service.base.MemberService;
-import org.demo.server.module.member.util.confirm.base.ConfirmCodeUtils;
-import org.demo.server.module.member.util.confirm.dto.ConfirmCodeRequest;
+import org.demo.server.module.member.util.send.impl.confirm.base.SendConfirmCode;
+import org.demo.server.module.member.util.send.impl.password.base.SendTempPassword;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -29,12 +30,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "http://localhost:8080/")
 public class MemberController {
 
     private final MemberService memberService;
     private final FileUtils fileUtils;
-    private final ConfirmCodeUtils confirmCodeUtils;
+    private final SendConfirmCode sendConfirmCode;
+    private final SendTempPassword sendTempPassword;
 
     /**
      * 회원 등록
@@ -69,7 +70,7 @@ public class MemberController {
      */
     @PostMapping("/codes")
     public ResponseEntity<Map<String, String>> sendConfirmationEmail(@RequestBody String email) {
-        confirmCodeUtils.sendConfirmCode(email);
+        sendConfirmCode.send(email);
         return ResponseEntity.ok().body(Map.of("status", ""));
     }
 
@@ -81,7 +82,7 @@ public class MemberController {
      */
     @PostMapping("/codes/check")
     public ResponseEntity<Void> checkConfirmationCode(@RequestBody Map<String, String> body) {
-        confirmCodeUtils.validateConfirmCode(body.get("email"), body.get("code"));
+        sendConfirmCode.validate(body.get("email"), body.get("code"));
         return ResponseEntity.ok().build();
     }
 
@@ -98,14 +99,42 @@ public class MemberController {
     }
 
     /**
-     * memberId 로 회원 정보 조회
+     * 임시 이메일 전송
      *
-     * @param memberId 조회 할 회원의 memberId
+     * @param email
+     * @return
+     */
+    @PostMapping("/send-password")
+    public ResponseEntity<Void> sendTempPassword(@RequestBody String email) {
+        // 회원이 존재하는지 확인
+        if (!memberService.existsEmail(email)) {
+            throw new NotFoundException("가입되지 않은 이메일 주소입니다");
+        }
+        sendTempPassword.send(email);
+        return ResponseEntity.ok().build();
+    }
+
+//    /**
+//     * memberId 로 회원 정보 조회
+//     *
+//     * @param memberId 조회 할 회원의 memberId
+//     * @return 조회된 회원 정보를 반환하고 회원이 존재하지 않으면 NotFoundMemberException
+//     */
+//    @GetMapping("/{memberId}")
+//    public ResponseEntity<MemberResponse> findMemberById(@PathVariable("memberId") Long memberId) {
+//        MemberResponse response = memberService.findById(memberId);
+//        return ResponseEntity.ok().body(response);
+//    }
+
+    /**
+     * username 로 회원 정보 조회
+     *
+     * @param username 조회 할 회원의 username
      * @return 조회된 회원 정보를 반환하고 회원이 존재하지 않으면 NotFoundMemberException
      */
-    @GetMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> findMemberById(@PathVariable("memberId") Long memberId) {
-        MemberResponse response = memberService.findById(memberId);
+    @GetMapping("/{username}")
+    public ResponseEntity<MemberResponse> findMemberByUsername(@PathVariable("username") String username) {
+        MemberResponse response = memberService.findByUsername(username);
         return ResponseEntity.ok().body(response);
     }
 

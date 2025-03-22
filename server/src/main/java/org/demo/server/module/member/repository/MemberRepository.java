@@ -22,4 +22,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      * @return 회원 정보
      */
     Optional<Member> findByEmail(String email);
+
+    /**
+     * username 을 사용하여 회원 정보 조회
+     *
+     * @param username 회원의 닉네임 (username)
+     * @return 회원 정보
+     */
+    Optional<Member> findByUsername(String username);
 }

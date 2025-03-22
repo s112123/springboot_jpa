@@ -21,11 +21,11 @@
 </head>
 <body>
     <div id="wrap">
-        <div th:replace="layouts/fragments/header::header"></div>
+        <div th:replace="~{layouts/fragments/header::header}"></div>
         <main>
             <div layout:fragment="content"></div>
         </main>
-        <div th:replace="layouts/fragments/footer::footer"></div>
+        <div th:replace="~{layouts/fragments/footer::footer}"></div>
     </div>
 </body>
 </html>

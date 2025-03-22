@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout.html}" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>ADMINISTRATE</title>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/my/fragments/aside.css" />
+    <link rel="stylesheet" href="/css/my/profile.css" />
+    <!-- axios -->
+    <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- javascript -->
+    <script defer src="/js/my/fragments/aside.js"></script>
+    <script defer src="/js/my/profile.js"></script>
+</head>
+<body>
+    <div layout:fragment="content" class="container">
+        <div th:replace="~{admin/fragments/aside_admin::aside}"></div>
+        <div class="profile-wrap">
+            <p>회원관리</p>
+            <table>
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>email</th>
+                    <th>username</th>
+                    <th>role</th>
+                    <th>registration_at</th>
+                    <th>-</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>3</td>
+                    <td>a1234@test.com</td>
+                    <td>a1234</td>
+                    <td>USER</td>
+                    <td>2010-01-01</td>
+                    <td>삭제</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>a1234@test.com</td>
+                    <td>a1234</td>
+                    <td>USER</td>
+                    <td>2010-01-01</td>
+                    <td>삭제</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>a1234@test.com</td>
+                    <td>a1234</td>
+                    <td>USER</td>
+                    <td>2010-01-01</td>
+                    <td>삭제</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="profile-box">
+                <small id="updated-message">회원정보가 변경되었습니다</small>
+                <div class="profile-box-top">
+<!--                    <div class="profile-image-box">-->
+<!--                        <div class="profile-image">-->
+<!--                            <img th:src="${member.imageUrl}" id="profile-image" />-->
+<!--                            <div class="profile-image-file">-->
+<!--                                <input type="hidden" th:field="${member.fileName}" />-->
+<!--                                <input type="hidden" th:field="${member.imageUrl}" />-->
+<!--                                <label for="profile-file">이미지 선택</label>-->
+<!--                                <input type="file" id="profile-file" accept="image/*" />-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <div class="profile-information">
+                        <div class="profile-information-item">
+                            <p><label for="email">이메일</label></p>
+<!--                            <input type="text" th:field="${member.email}" placeholder="email" readonly />-->
+                            <input type="text" id="email" placeholder="email" readonly />
+                        </div>
+                        <div class="profile-information-item">
+                            <p><label for="nickName">닉네임</label></p>
+<!--                            <input type="text" th:field="${member.nickName}" placeholder="nick_name" />-->
+                            <input type="text" id="nickName" placeholder="nick_name" />
+                            <small class="error">닉네임은 필수입니다</small>
+                            <small class="error">이미 존재하는 닉네임입니다</small>
+                        </div>
+<!--                        <div class="profile-information-item">-->
+<!--                            <p><label for="password">비밀번호</label></p>-->
+<!--                            <div class="information-password">-->
+<!--                                <input type="password" th:field="${member.password}" placeholder="password" readonly />-->
+<!--                                <button id="btn-change-pass"><i class="fa-solid fa-pen-to-square"></i></button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="profile-information-action">-->
+<!--                            <button type="button" id="update-my-info">변경</button>-->
+<!--                            <button type="button" id="withdraw-membership">회원탈퇴</button>-->
+<!--                        </div>-->
+                    </div>
+                </div>
+<!--                <div class="profile-box-bottom">-->
+<!--                    <div class="subscribe-list">-->
+<!--                        <p>내가 구독한 사람</p>-->
+<!--                        <ul>-->
+<!--                            <li class="subscribe-item" th:each="publisher : ${publishers}">-->
+<!--                                <div class="subscribe-info">-->
+<!--                                    <img th:src="${publisher.publisher_image_url}" />-->
+<!--                                    <span th:text="${publisher.publisher_nick_name}"></span>-->
+<!--                                </div>-->
+<!--                                <div class="subscribe-btn">-->
+<!--                                    <input type="hidden" th:value="${publisher.publisher_email}" />-->
+<!--                                    <button type="button" class="btn-subscribe-cancel">구독취소</button>-->
+<!--                                </div>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </div>-->
+<!--                    <div class="subscribe-list">-->
+<!--                        <p>나를 구독한 사람</p>-->
+<!--                        <ul>-->
+<!--                            <li class="subscribe-item" th:each="subscriber : ${subscribers}">-->
+<!--                                <div class="subscribe-info">-->
+<!--                                    <img th:src="${subscriber.image_url}" />-->
+<!--                                    <span th:text="${subscriber.nick_name}"></span>-->
+<!--                                </div>-->
+<!--                                <div class="subscribe-btn">-->
+<!--                                    <input type="hidden" th:value="${subscriber.subscriber_email}" />-->
+<!--                                    <button type="button" class="btn-subscribe">구독하기</button>-->
+<!--                                </div>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </div>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

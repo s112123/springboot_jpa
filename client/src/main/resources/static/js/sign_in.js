@@ -2,9 +2,24 @@
 var email = document.getElementById('email');
 var password = document.getElementById('password');
 var btnSignIn = document.getElementById('btn-sign-in');
+var btnFindPassword = document.getElementById('find-password');
 var errors = document.querySelectorAll('.error');
 var errorEmail = document.getElementById('error-email');
 var errorPassword = document.getElementById('error-password');
+
+// 이메일을 입력하고 Enter 를 누르면 비밀번호 입력 칸으로 이동
+email.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        password.focus();
+    }
+});
+
+// 비밀번호를 입력하고 Enter 를 누르면 로그인 버튼 클릭
+password.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        btnSignIn.click();
+    }
+});
 
 // 로그인
 btnSignIn.addEventListener('click', () => {
@@ -39,6 +54,11 @@ btnSignIn.addEventListener('click', () => {
         location.replace('http://localhost:8080/');
     })
     .catch(error => {
+        // 서버 연결이 되지 않은 경우 → undefined, null
+        if (!error.response) {
+            alert('not connected server');
+            return;
+        }
         // 인증 실패
         if (error.response.data.status === 401) {
             errorPassword.innerText = error.response.data.message;
@@ -58,66 +78,53 @@ async function login(formData) {
     return response;
 }
 
+// 비밀번호 찾기
+btnFindPassword.addEventListener('click', () => {
+    // 유효성 검사 → 이메일 입력 여부
+    if (email.value.trim().length === 0) {
+        alert('임시 비밀번호를 전송할 이메일 주소를 입력해주세요');
+        email.style.borderColor = 'rgb(210, 40, 40)';
+        email.focus();
+        return false;
+    }
+    // 유효성 검사 → 이메일 형식 여부
+    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email.value.trim())) {
+        alert('이메일 주소 형식이 아닙니다');
+        email.focus();
+        return false;
+    }
+
+    // 임시 비밀번호를 메일로 발송
+    if (confirm('입력하신 이메일 주소로 임시 비밀번호를 전송하시겠습니까?')) {
+        sendTempPassword(email.value.trim()).then(response => {
+            alert('임시 비밀번호가 전송되었습니다');
+            email.style.borderColor = 'rgb(180, 180, 180)';
+            password.style.borderColor = 'rgb(210, 40, 40)';
+            password.focus();
+        })
+        .catch (error => {
+            if (error.response.data.status === 404) {
+                alert('가입되지 않은 이메일 주소입니다');
+                return;
+            }
+        });
+    }
+});
+
+// 비밀번호 찾기 API
+async function sendTempPassword(email) {
+    const response = await axios.post('http://localhost:8081/api/v1/members/send-password', email, {
+        headers: {
+            'Content-Type': 'text/plain'
+        }
+    });
+}
+
 /*
 // 변수 선언
 var errorGlobal = document.getElementById('error-global');
-var btnFindPassword = document.getElementById('find-password');
 var isValid = true;
-
-// 로그인 버튼 클릭
-btnSignIn.addEventListener('click', () => {
-  var formData = {
-    'email': email.value.trim(),
-    'password': password.value.trim(),
-    'remember': remember.checked
-  };
-
-  // 로그인 처리
-  login(formData).then((response) => {
-    var results = response.data;
-    // 유효성 검사
-    isValid = validateLogin(results);
-    // 로그인 성공시
-    if (isValid) {
-      // 메인 페이지로 이동
-      location.replace('/');
-    }
-  });
-});
-
-// 비밀번호 찾기 버튼 클릭
-btnFindPassword.addEventListener('click', () => {
-  // 이메일 입력 여부 확인
-  if (email.value.trim().length === 0) {
-    alert('이메일을 입력해주세요');
-    return;
-  }
-  // 이메일 형식 여부 확인
-  regex = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
-  isRegex = regex.test(email.value.trim());
-  if (!isRegex) {
-    alert('이메일 형식이 아닙니다');
-    return;
-  }
-
-  // 임시 비밀번호 발송
-  if (confirm('입력하신 이메일 주소로 임시 비밀번호를 전송하시겠습니까?')) {
-    sendTempPassword(email).then(response => {
-      var isExistsEmail = response.data;
-      if (!isExistsEmail) {
-        alert('가입되지 않은 이메일 입니다');
-        return;
-      }
-      alert('이메일로 임시 비밀번호가 전송되었습니다');
-    });
-  }
-});
-
-// 임시 비밀번호 발송
-async function sendTempPassword(email) {
-  var response = await axios.get(`/mail/temp-password/${email.value.trim()}`);
-  return response;
-}
 
 // 로그인 처리
 async function login(formData) {

@@ -46,7 +46,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers(HttpMethod.POST, "/api/v1/members/send-password").permitAll()
+                        .anyRequest().permitAll());
 
         return http.build();
     }

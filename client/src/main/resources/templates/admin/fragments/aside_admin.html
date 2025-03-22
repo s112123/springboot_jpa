@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+    <aside th:fragment="aside_admin" id="aside">
+        <ul>
+            <li class="item" th:classappend="${menuOption == 0} ? 'menu-active' : 'menu-deactive'">
+                <span><i class="fa-solid fa-user-group"></i></span>
+                <a href="/admin/member">회원관리</a>
+            </li>
+            <li class="item" th:classappend="${menuOption == 1} ? 'menu-active' : 'menu-deactive'">
+                <span><i class="fa-solid fa-bullhorn"></i></span>
+                <a href="/admin/notice">공지하기</a>
+            </li>
+        </ul>
+    </aside>
+</body>
+</html>
