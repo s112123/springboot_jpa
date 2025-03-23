@@ -2,6 +2,7 @@ package org.demo.server.infra.security.config;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.server.infra.security.filter.LoginFilter;
+import org.demo.server.infra.security.filter.AccessTokenCheckFilter;
 import org.demo.server.infra.security.util.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,19 +35,22 @@ public class SecurityConfig {
         // 시큐리티 필터
         LoginFilter loginFilter = new LoginFilter("/api/v1/login", jwtUtils);
         loginFilter.setAuthenticationManager(authenticationManager());
+        AccessTokenCheckFilter accessTokenCheckFilter = new AccessTokenCheckFilter(jwtUtils);
 
         // 시큐리티 설정
         http
-                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(accessTokenCheckFilter, UsernamePasswordAuthenticationFilter.class);
 
         // 경로 권한 설정
         http
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/members/send-password").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/members/profile-images/**").permitAll()
                         .anyRequest().permitAll());
 
         return http.build();
@@ -61,7 +65,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:8080"));
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setMaxAge(1000L * 60 * 60 * 24);

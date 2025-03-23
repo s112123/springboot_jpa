@@ -16,6 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
@@ -81,18 +82,18 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
     ) throws IOException, ServletException {
         // JWT 에 담을 사용자 정보 → username, authorities
         String username = authentication.getName();
-        List<String> authorities = authentication.getAuthorities().stream()
+        List<String> roles = authentication.getAuthorities().stream()
                 .map(grantedAuthority -> grantedAuthority.getAuthority())
                 .toList();
 
         // JWT 페이로드 생성
         Claims claims = Jwts.claims();
         claims.put("username", username);
-        claims.put("authorities", authorities);
+        claims.put("roles", roles);
 
         // JWT 생성
-        String accessToken = jwtUtils.create(claims, 1);
-        String refreshToken = jwtUtils.create(claims, 2);
+        String accessToken = jwtUtils.create(claims, 30000);
+        String refreshToken = jwtUtils.create(claims, 50000);
 
         // 응답 보내기
         ObjectMapper objectMapper = new ObjectMapper();

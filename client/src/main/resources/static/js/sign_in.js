@@ -6,16 +6,32 @@ var btnFindPassword = document.getElementById('find-password');
 var errors = document.querySelectorAll('.error');
 var errorEmail = document.getElementById('error-email');
 var errorPassword = document.getElementById('error-password');
+var errorCapsLock = document.getElementById('error-capslock');
 
 // 이메일을 입력하고 Enter 를 누르면 비밀번호 입력 칸으로 이동
 email.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-        password.focus();
+        if (password.value().length.trim > 0) {
+            btnSignIn.click();
+        } else {
+            password.focus();
+        }
     }
 });
 
 // 비밀번호를 입력하고 Enter 를 누르면 로그인 버튼 클릭
 password.addEventListener('keydown', (e) => {
+    // 비밀번호 입력 칸에서 CapsLock 키를 눌렀는지 여부
+    if (e.getModifierState('CapsLock')) {
+        // CapsLock 키가 눌렸을 때
+        errorCapsLock.innerText = 'CapsLock 키가 활성화되어 있습니다';
+        errorCapsLock.style.display = 'block';
+    } else {
+        // CapsLock 키가 눌려지지 않았을 때
+        errorCapsLock.style.display = 'none';
+    }
+
+    // 비밀번호 입력 칸에서 CapsLock 키를 눌렀는지 여부
     if (e.key === 'Enter') {
         btnSignIn.click();
     }
@@ -25,19 +41,23 @@ password.addEventListener('keydown', (e) => {
 btnSignIn.addEventListener('click', () => {
     // 에러 메시지 모두 숨김
     errors.forEach((error) => {
-        error.style.display = 'none';
+        if (error.id !== 'error-capslock') {
+            error.style.display = 'none';
+        }
     });
 
     // 유효성 검사 → 이메일 입력 여부
     if (email.value.trim().length === 0) {
         errorEmail.innerText = '이메일을 입력하세요';
         errorEmail.style.display = 'block';
+        email.focus();
         return false;
     }
     // 유효성 검사 → 비밀번호
     if (password.value.trim().length === 0) {
         errorPassword.innerText = '비밀번호를 입력하세요';
         errorPassword.style.display = 'block';
+        password.focus();
         return false;
     }
 
@@ -48,7 +68,7 @@ btnSignIn.addEventListener('click', () => {
     }
 
     // 로그인 처리
-    login(formData).then(response => {
+    loginProcess(formData).then(response => {
         localStorage.setItem('accessToken', response.data.accessToken);
         localStorage.setItem('refreshToken', response.data.refreshToken);
         location.replace('http://localhost:8080/');
@@ -69,7 +89,7 @@ btnSignIn.addEventListener('click', () => {
 });
 
 // 로그인 API
-async function login(formData) {
+async function loginProcess(formData) {
     const response = await axios.post('http://localhost:8081/api/v1/login', formData, {
         headers: {
             'Content-Type': 'application/json'
@@ -132,34 +152,4 @@ async function login(formData) {
   return response;
 }
 
-// 유효성 검사
-function validateLogin(results) {
-  isValid = true;
-
-  errors.forEach((error) => {
-    error.style.display = 'none';
-  });
-
-  if (Array.isArray(results)) {
-    for (var i = 0; i < results.length; i++) {
-      if (results[i].field === 'email') {
-        errorEmail.innerText = results[i].defaultMessage;
-        errors[0].style.display = 'block';
-      }
-      if (results[i].field === 'password') {
-        errorPassword.innerText = results[i].defaultMessage;
-        errors[1].style.display = 'block';
-      }
-    }
-    return false;
-  }
-
-  if (results.res === -1) {
-    errorGlobal.innerText = results.defaultMessage;
-    errorGlobal.style.display = 'block';
-    return false;
-  }
-
-  return true;
-}
 */

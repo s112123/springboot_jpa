@@ -32,7 +32,7 @@ email.addEventListener("keyup", () => {
     // 이메일 중복 검사
     if (email.value.trim().length !== 0) {
         isExistsEmail(email.value.trim()).then(response => {
-            var isDuplicatedEmail = response.data;
+            isDuplicatedEmail = response.data;
             if (isDuplicatedEmail) {
                 errorEmail.textContent = '이미 존재하는 이메일입니다';
                 errorEmail.style.display = 'block';

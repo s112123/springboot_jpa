@@ -1,26 +1,56 @@
 // 변수 선언
-var email = document.getElementById('email');
-var username = document.getElementById('nickName');
+var accessToken = undefined;
+var eleEmail = document.getElementById('email');
+var eleUsername = document.getElementById('username');
+var elePassword = document.getElementById('password');
+var eleProfileImage = document.getElementById('profile-image');
+var eleImageFile = document.getElementById('profile-file');
+var eleImageFileName = document.getElementById('file-name');
+var eleUpdatedMessage = document.getElementById('updated-message');
+var btnChangePassword = document.getElementById('btn-change-pass');
+var btnUpdate = document.getElementById('update-my-info');
+var btnWithdrawMembership = document.getElementById('withdraw-membership');
+var errors = document.querySelectorAll('.error');
+var errorCapsLock = document.querySelector('.error-capslock');
+var errorPassword = document.querySelector('.error-password');
+var deletedImageFiles = new Set();
+var isDuplicatedUsername = false;
 
 // HTML 로드
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Access Token 확인
+    accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        // Access Token 이 없으면 로그인 페이지로 이동
+        location.href = '/login';
+    }
+
+    // Access Token 에서 username 가져오기
+    const username = getUsernameFromAccessToken(accessToken);
+
     // 회원 정보 조회
-    findMember(username).then(response => {
-        console.log(response.data);
-    })
-    .catch(error => {
-        console.log(error.response.data);
-    });
+    try {
+        const response = await findMember(username, accessToken);
+        const body = response.data;
+
+        // 사용자 정보
+        eleEmail.value = body.email;
+        eleUsername.value = body.username;
+
+        // 프로필 이미지
+        const profileImage = body.profileImage;
+        eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + profileImage.savedFileName;
+    } catch (error) {
+        // 회원을 찾을 수 없으면 로그인 페이지로 이동하여 Access Token 을 재발급 받아야 한다
+        if (error.response && error.response.data.status === 404) {
+            location.href = '/login';
+        };
+    }
 });
 
 // 회원 정보 조회 API
-async function findMember(username) {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-        console.error("Not Found Access Token");
-        return;
-    }
-    const response = await axios.get(`http://localhost:8081/api/v1/members/${username}`, {
+async function findMember(username, accessToken) {
+    const response = await axios.get('http://localhost:8081/api/v1/members/' + username, {
         headers: {
             'Authorization': 'Bearer ' + accessToken
         }
@@ -28,185 +58,291 @@ async function findMember(username) {
     return response;
 }
 
+// JWT 는 Base64 로 인코딩 되어 있으므로 Access Token 에서 디코딩하여 username 추출
+// JWT 에 한글이 포함되면 한글은 UTF-8 로 인코딩된 후, Base64 로 인코딩된다
+// 그래서 한글이 포함된 경우 atob() 로 Base64 를 디코딩하면 UTF-8 로 인코딩된 한글이 있다
+// 그리고 UTF-8 을 다시 디코딩 해주면 된다
+// 영어는 ASCII 를 사용하므로 상관없다
+function getUsernameFromAccessToken(token) {
+    // 페이로드 추출 → 헤더.페이로드.서명
+    const payload = token.split('.')[1];
+    // atob() → Javascript 에 내장된 Base64 인코딩 데이터를 디코딩하는 함수
+    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    // 디코딩이 한글인 경우, UTF-8 로 변환
+    const jsonPayload = decodeURIComponent(escape(decoded));
+    return JSON.parse(jsonPayload).username;
+}
+
+// 프로필 이미지 변경
+eleImageFile.addEventListener('change', (e) => {
+    // 이미지 변경 시, 현재 이미지 파일 이름을 저장한다
+    var imageUrl = eleProfileImage.src;
+    var currentImageFileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+    deletedImageFiles.add(currentImageFileName);
+
+    // 선택된 이미지 파일 이름
+    eleImageFileName.value = eleImageFile.value.replace(/^C:\\fakepath\\/i, '');
+
+    // 선택된 이미지 파일
+    var formData = new FormData();
+    formData.append('profile-file', e.target.files[0]);
+
+    // DB에 등록하지 않고 서버에만 저장
+    saveSelectedImageFile(formData, accessToken).then(response => {
+        eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + response.data.savedFileName;
+        imageUrl = eleProfileImage.src;
+        currentImageFileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+        deletedImageFiles.add(currentImageFileName);
+    });
+});
+
+// 프로필 이미지 변경 API
+async function saveSelectedImageFile(formData, accessToken) {
+    const response = await axios.post('http://localhost:8081/api/v1/members/profile-images', formData, {
+        headers: {
+            'Authorization': 'Bearer ' + accessToken
+        }
+    });
+    return response;
+};
+
+// 회원 정보 수정
+btnUpdate.addEventListener('click', () => {
+    // 에러 메시지 모두 숨김
+    errors.forEach(error => {
+        error.style.display = 'none';
+    });
+
+    // 유효성 검사 → 닉네임 입력 여부
+    if (eleUsername.value.trim().length < 1 || eleUsername.value.trim().length > 10) {
+        eleUsername.nextElementSibling.style.display = 'block';
+        eleUsername.focus();
+        return false;
+    }
+
+    // 회원 정보 수정
+    if (confirm("회원정보를 변경하시겠습니까?")) {
+        // 프로필 이미지 변경에 사용된 모든 임시 파일 삭제
+        // deletedImageFiles (Set 객체) 에서 마지막 파일만 놔두고 모두 삭제
+        let lastChangedImageFileName = undefined;
+        if (deletedImageFiles.size > 0) {
+            let tempArray = [...deletedImageFiles];
+            lastChangedImageFileName = tempArray.pop();
+            deletedImageFiles.clear();
+            tempArray.forEach(fileName => {
+                if (fileName !== 'default.png') {
+                    deletedImageFiles.add(fileName);
+                }
+            });
+            // 변경에 의해 임시로 저장된 모든 이미지 모두 삭제
+            // Set 객체는 배열로 변환해야 한다 → Array.from(deletedImageFiles) 또는 [...deletedImageFiles]
+            deleteImageFiles([...deletedImageFiles], accessToken).then(response => {
+                // Set 객체 비우기
+                deletedImageFiles.clear();
+            });
+        }
+
+        // Access Token 에서 username 가져오기
+        const originalUsername = getUsernameFromAccessToken(accessToken);
+
+        // 변경 정보
+        const changedUserInfo = {
+            'username': eleUsername.value.trim(),
+            'password': (elePassword.value.trim().length === 0) ? undefined : elePassword.value.trim(),
+            'originalFileName': eleImageFileName.value.length === 0 ? undefined: eleImageFileName.value,
+            'savedFileName': lastChangedImageFileName
+        };
+
+        // 회원 정보 수정 처리
+        updateMember(originalUsername, changedUserInfo, accessToken).then(response => {
+            // 새롭게 발급받은 Access Token 을 갱신
+            const newAccessToken = response.data.accessToken;
+            localStorage.setItem('accessToken', newAccessToken);
+
+            // 회원 정보 변경 완료 메시지
+            eleUpdatedMessage.style.display = 'block';
+            setTimeout(() => {
+                eleUpdatedMessage.style.display = 'none';
+            }, 2000);
+
+            // 비밀번호 입력 칸을 공백 처리
+            elePassword.value = '';
+        });
+    }
+});
+
+// 닉네임 중복 여부
+eleUsername.addEventListener('keyup', () => {
+    // 에러 메시지 모두 숨김
+    errors.forEach((error) => {
+        error.style.display = 'none';
+    });
+
+    // 중복 체크
+    isDuplicatedEmail = false;
+    if (eleUsername.value.trim().length > 0) {
+        isExistsUsername(eleUsername.value.trim(), accessToken).then(response => {
+            isDuplicatedUsername = response.data;
+            if (isDuplicatedUsername) {
+                eleUsername.nextElementSibling.nextElementSibling.style.display = 'block';
+                eleUsername.focus();
+            } else {
+                eleUsername.nextElementSibling.nextElementSibling.style.display = 'none';
+            }
+        });
+    }
+});
+
+// 닉네임 중복 검증 API
+async function isExistsUsername(username, accessToken) {
+    var response = await axios.post('http://localhost:8081/api/v1/members/username/check', username, {
+        headers: {
+            'Authorization': 'Bearer ' + accessToken,
+            'Content-Type': 'text/plain'
+        }
+    });
+    return response;
+}
+
+// 비밀번호 입력 활성화
+btnChangePassword.addEventListener('click', () => {
+    // 비밀번호 관련 에러 메시지 모두 숨김
+    errorPassword.style.display = 'none';
+    errorCapsLock.style.display = 'none';
+
+    // 비밀번호 입력 창 활성화
+    elePassword.style.border = '1px solid rgb(210, 40, 40)';
+    elePassword.readOnly = false;
+    elePassword.focus();
+});
+
+// 비밀번호를 입력하고 다른 곳을 클릭하면 비활성화
+elePassword.addEventListener('blur', () => {
+    // 유효성 검사 → 비밀번호 형식 일치 여부
+    if (elePassword.value.trim().length > 0) {
+        var passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
+        if (!passwordRegex.test(elePassword.value.trim())) {
+            errorPassword.style.display = 'block';
+            return false;
+        }
+    }
+
+    elePassword.style.border = '1px solid rgb(180, 180, 180)';
+    elePassword.readOnly = true;
+    errorPassword.style.display = 'none';
+    errorCapsLock.style.display = 'none';
+});
+
+// 비밀번호를 입력하고 Enter 를 누르면 비활성화
+elePassword.addEventListener('keydown', (e) => {
+    // 비밀번호 입력 칸에서 CapsLock 키를 눌렀는지 여부
+    if (e.getModifierState('CapsLock')) {
+        // CapsLock 키가 눌렸을 때
+        errorCapsLock.style.display = 'block';
+    } else {
+        // CapsLock 키가 눌려지지 않았을 때
+        errorCapsLock.style.display = 'none';
+    }
+
+    // Enter 키를 눌렀을 때
+    if (e.key === 'Enter') {
+        // 유효성 검사 → 비밀번호 형식 일치 여부
+        if (elePassword.value.trim().length > 0) {
+            var passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
+            if (!passwordRegex.test(elePassword.value.trim())) {
+                errorPassword.style.display = 'block';
+                return false;
+            }
+        }
+
+        elePassword.style.border = '1px solid rgb(180, 180, 180)';
+        elePassword.readOnly = true;
+        errorPassword.style.display = 'none';
+        errorCapsLock.style.display = 'none';
+    }
+});
+
+// 프로필 이미지 삭제 API
+async function deleteImageFiles(imageFileNames, accessToken) {
+    const response = await axios.delete('http://localhost:8081/api/v1/members/profile-images', {
+        headers: {
+            'Authorization': 'Bearer ' + accessToken,
+            'Content-Type': 'application/json'
+        },
+        data: imageFileNames
+    });
+    return response;
+};
+
+// 회원 정보 수정 API
+async function updateMember(username, userInfo, accessToken) {
+    const response = await axios.patch('http://localhost:8081/api/v1/members/' + username, userInfo, {
+        headers: {
+            'Authorization': 'Bearer ' + accessToken,
+            'Content-Type': 'application/json'
+        }
+    });
+    return response;
+}
+
+// 회원 탈퇴
+btnWithdrawMembership.addEventListener('click', () => {
+    if (confirm('회원탈퇴 하시겠습니까? 모든 내역이 삭제됩니다')) {
+        removeMemberShip(eleEmail.value, accessToken).then(response => {
+            // JWT 삭제
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+
+            // 탈퇴 완료
+            alert('회원 탈퇴가 완료되었습니다');
+            location.replace('http://localhost:8080/');
+        });
+    }
+});
+
+// 회원 탈퇴 API
+async function removeMemberShip(email, accessToken) {
+    var response = await axios.delete('http://localhost:8081/api/v1/members/' + email, {
+        headers: {
+            'Authorization': 'Bearer ' + accessToken
+        }
+    });
+    return response;
+}
+
+// 페이지를 벗어날 때
+window.addEventListener('beforeunload', () => {
+    // 이미지 파일을 변경 중이었다면 원래 프로필 이미지는 놔두고 변경으로 인해 서버에 저장되었던 파일 삭제
+    if (deletedImageFiles.size > 0) {
+        // 첫 번째 저장된 이미지 파일 제외한 Set 객체
+        let isFirst = true;
+        deletedImageFiles.forEach((fileName) => {
+            if (isFirst) {
+                deletedImageFiles.delete(fileName);
+                isFirst = false;
+            } else {
+                deletedImageFiles.add(fileName);
+            }
+        });
+
+        // 변경에 의해 임시로 저장된 모든 이미지 모두 삭제
+        // Set 객체는 배열로 변환해야 한다 → Array.from(deletedImageFiles) 또는 [...deletedImageFiles]
+        deleteImageFiles([...deletedImageFiles], accessToken).then(response => {
+            // Set 객체 비우기
+            deletedImageFiles.clear();
+        });
+    }
+});
 
 
 /////////////////////////////////////////
 //// 변수 선언
-//var password = document.getElementById('password');
-//var errors = document.querySelectorAll('.error');
-//var btnUpdate = document.getElementById('update-my-info');
-//var btnChangePassword = document.getElementById('btn-change-pass');
-//var btnWithdrawMembership = document.getElementById('withdraw-membership');
-//var updatedMessage = document.getElementById('updated-message');
-//var profileImage = document.getElementById('profile-image');
-//var file = document.getElementById('profile-file');
-//var fileName = document.getElementById('fileName');
-//var imageUrl = document.getElementById('imageUrl');
 //var btnSubscribeCancels = document.querySelectorAll('.btn-subscribe-cancel');
 //var btnSubscribes = document.querySelectorAll('.btn-subscribe');
+//var imageUrl = document.getElementById('image-url');
 //var isChangePassword = false;
 //var isValid = true;
-//
-//// 입력 폼
-//var form = {
-//  'email': email,
-//  'nickName': nickName,
-//  'password': password,
-//  'imageUrl': imageUrl,
-//  'fileName': fileName
-//};
-//
-//// 회원 정보 수정
-//btnUpdate.addEventListener('click', () => {
-//  // 유효성 검사
-//  errors.forEach(error => {
-//    error.style.display = 'none';
-//  });
-//
-//  if (!validateForm(form)) {
-//    return;
-//  }
-//
-//  // 닉네임 중복 여부
-//  checkDuplicateNickName(form).then(response => {
-//    var isDuplicated = response.data;
-//    if (isDuplicated) {
-//      form.nickName.nextElementSibling.nextElementSibling.style.display = 'block';
-//      return;
-//    }
-//
-//    // 회원정보 수정하기
-//    if (confirm("회원정보를 변경하시겠습니까?")) {
-//      // 파일 담기
-//      var formData = new FormData();
-//      formData.append('profile-file', file.files[0]);
-//
-//      // 이미지 파일 저장
-//      saveProfileImage(formData).then(response => {
-//        // 첨부 파일 정보 변경
-//        updateImageInfo(response);
-//      })
-//      .finally(() => {
-//        // 수정된 회원정보 전달
-//        editMember().then(response => {
-//          result = response.data;
-//          if (result === 'updated') {
-//            updatedMessage.style.display = 'block';
-//            setTimeout(() => {
-//              updatedMessage.style.display = 'none';
-//            }, 3000);
-//            password.value = '';
-//          }
-//        });
-//      });
-//    }
-//  });
-//});
-//
-//// 프로필 이미지 파일 변경
-//file.addEventListener('change', (event) => {
-//  //fileName.value = file.value.replace(/^C:\\fakepath\\/i, '');
-//
-//  // 파일 담기
-//  var formData = new FormData();
-//  formData.append('profile-file', event.target.files[0]);
-//
-//  // 임시 파일 저장
-//  saveTempProfileImage(formData).then((response) => {
-//    // 첨부 파일 정보 변경
-//    updateImageInfo(response);
-//  });
-//});
-//
-//// 비밀번호 입력 버튼 클릭
-//btnChangePassword.addEventListener('click', () => {
-//  // 비밀번호 입력 창 활성화
-//  password.style.border = '1px solid rgb(210, 40, 40)';
-//  password.readOnly = false;
-//  password.focus();
-//
-//  // 비밀번호 입력 창 비활성화
-//  password.addEventListener('blur', () => {
-//    password.style.border = '1px solid rgb(180, 180, 180)';
-//    password.readOnly = true;
-//  });
-//});
-//
-//// 회원탈퇴 버튼 클릭
-//btnWithdrawMembership.addEventListener('click', () => {
-//  if (confirm('회원탈퇴 하시겠습니까? 모든 내역이 삭제됩니다')) {
-//    removeMemberShip().then(response => {
-//      location.replace('/');
-//    });
-//  }
-//});
-//
-//// 회원탈퇴
-//async function removeMemberShip() {
-//  var response = await axios.get(`/my/profile/remove`);
-//  return response;
-//}
-//
-//// 유효성 검사
-//function validateForm(form) {
-//  isValid = true;
-//  if (form.nickName.value.trim().length === 0) {
-//    // 닉네임 입력 여부
-//    form.nickName.nextElementSibling.style.display = 'block';
-//    isValid = false;
-//  }
-//  return isValid;
-//}
-//
-//// 닉네임 중복 여부
-//async function checkDuplicateNickName(form) {
-//  var response = await axios.get(`/members/check_nickname/${form.nickName.value}`);
-//  return response;
-//}
-//
-//// 수정하기
-//async function editMember() {
-//  var editForm = {
-//    'nickName': nickName.value.trim(),
-//    'password': password.value.trim(),
-//    'imageUrl': imageUrl.value.trim(),
-//    'fileName': fileName.value.trim(),
-//  };
-//  var response = await axios.patch(`/members/${email.value}`, editForm);
-//  return response;
-//}
-//
-//// 이미지 파일 저장
-//async function saveProfileImage(formData) {
-//  var headers = {
-//    'Content-Type': 'multipart/form-data'
-//  };
-//  var response = await axios.post('/members/image/save', formData, {headers: headers});
-//  return response;
-//}
-//
-//// 이미지 임시 파일 저장
-//async function saveTempProfileImage(formData) {
-//  var headers = {
-//    'Content-Type': 'multipart/form-data'
-//  };
-//  var response = await axios.post('/members/temp_image/save', formData, {headers: headers});
-//  return response;
-//}
-//
-//// 첨부 파일 정보 변경
-//function updateImageInfo(response) {
-//  // 응답받은 이미지 경로
-//  var $imageUrl = response.data;
-//  // 프로필 이미지에 변경된 이미지 표시
-//  profileImage.src = $imageUrl;
-//  // 이미지 경로
-//  imageUrl.value = $imageUrl;
-//  // 이미지 파일 이름
-//  fileName.value = $imageUrl;
-//  fileName.value = fileName.value.substring(fileName.value.lastIndexOf('/') + 1);
-//}
-//
+
 //// 내가 구독한 사람에서 구독취소 버튼 클릭
 //btnSubscribeCancels.forEach((btnSubscribeCancel) => {
 //  btnSubscribeCancel.addEventListener('click', () => {
