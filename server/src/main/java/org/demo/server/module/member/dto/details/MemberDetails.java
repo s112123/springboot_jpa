@@ -29,6 +29,7 @@ public class MemberDetails {
     public static MemberResponse toMemberResponse(MemberDetails memberDetails) {
         return MemberResponse.builder()
                 .memberId(memberDetails.getMemberId())
+                .email(memberDetails.getEmail())
                 .username(memberDetails.getUsername())
                 .role(memberDetails.getRole())
                 .createdAt(memberDetails.getCreatedAt())

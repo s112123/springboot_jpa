@@ -22,17 +22,17 @@
             <div class="profile-box">
                 <small id="updated-message">회원정보가 변경되었습니다</small>
                 <div class="profile-box-top">
-<!--                    <div class="profile-image-box">-->
-<!--                        <div class="profile-image">-->
-<!--                            <img th:src="${member.imageUrl}" id="profile-image" />-->
-<!--                            <div class="profile-image-file">-->
-<!--                                <input type="hidden" th:field="${member.fileName}" />-->
-<!--                                <input type="hidden" th:field="${member.imageUrl}" />-->
-<!--                                <label for="profile-file">이미지 선택</label>-->
-<!--                                <input type="file" id="profile-file" accept="image/*" />-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <div class="profile-image-box">
+                        <div class="profile-image">
+                            <img id="profile-image" />
+                            <div class="profile-image-file">
+                                <input type="hidden" id="file-name" />
+<!--                                <input type="hidden" id="image-url" />-->
+                                <label for="profile-file">이미지 선택</label>
+                                <input type="file" id="profile-file" accept="image/*" />
+                            </div>
+                        </div>
+                    </div>
                     <div class="profile-information">
                         <div class="profile-information-item">
                             <p><label for="email">이메일</label></p>
@@ -41,7 +41,7 @@
                         <div class="profile-information-item">
                             <p><label for="username">닉네임</label></p>
                             <input type="text" id="username" placeholder="username" />
-                            <small class="error">닉네임은 필수입니다</small>
+                            <small class="error">닉네임은 1글자 이상, 10글자 이하입니다</small>
                             <small class="error">이미 존재하는 닉네임입니다</small>
                         </div>
                         <div class="profile-information-item">
@@ -50,11 +50,13 @@
                                 <input type="password" id="password" placeholder="password" readonly />
                                 <button id="btn-change-pass"><i class="fa-solid fa-pen-to-square"></i></button>
                             </div>
+                            <small class="error error-capslock">CapsLock 키가 활성화되어 있습니다</small>
+                            <small class="error error-password">영어와 숫자를 포함하여 10자리 이상입니다</small>
                         </div>
-<!--                        <div class="profile-information-action">-->
-<!--                            <button type="button" id="update-my-info">변경</button>-->
-<!--                            <button type="button" id="withdraw-membership">회원탈퇴</button>-->
-<!--                        </div>-->
+                        <div class="profile-information-action">
+                            <button type="button" id="update-my-info">변경</button>
+                            <button type="button" id="withdraw-membership">회원탈퇴</button>
+                        </div>
                     </div>
                 </div>
 <!--                <div class="profile-box-bottom">-->

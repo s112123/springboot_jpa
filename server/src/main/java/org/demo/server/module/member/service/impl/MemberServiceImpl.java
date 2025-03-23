@@ -3,8 +3,11 @@ package org.demo.server.module.member.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.demo.server.infra.common.dto.PagedListResponse;
 import org.demo.server.infra.common.exception.NotFoundException;
+import org.demo.server.infra.common.util.file.FileUtils;
+import org.demo.server.infra.common.util.file.UploadDirectory;
 import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.request.MemberSaveRequest;
+import org.demo.server.module.member.dto.request.MemberUpdateRequest;
 import org.demo.server.module.member.dto.response.MemberResponse;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.entity.ProfileImage;
@@ -16,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.method.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +34,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final FileUtils fileUtils;
 
     /**
      * 회원 등록
@@ -46,8 +51,8 @@ public class MemberServiceImpl implements MemberService {
 
         // 기본 프로필 이미지 등록
         ProfileImage profileImage = ProfileImage.builder()
-                .originalFileName("original")
-                .savedFileName("saved")
+                .originalFileName("default.png")
+                .savedFileName("default.png")
                 .extension("png")
                 .build();
 
@@ -116,6 +121,44 @@ public class MemberServiceImpl implements MemberService {
         return new PagedListResponse<>(findMembers);
     }
 
+    @Override
+    public MemberDetails update(String username, MemberUpdateRequest updateRequest) {
+        // 기존 엔티티를 영속성 컨텍스트에 넣는다
+        Member findMember = getMemberByUsername(username);
+
+        // 업데이트 정보
+        String newUsername = updateRequest.getUsername();
+        String newPassword = (updateRequest.getPassword() != null) ?
+                passwordEncoder.encode(updateRequest.getPassword()) : findMember.getPassword();
+        String newOriginalFileName = (updateRequest.getOriginalFileName() != null) ?
+                updateRequest.getOriginalFileName() : findMember.getProfileImage().getOriginalFileName();
+        String newSavedFileName = (updateRequest.getSavedFileName() != null) ?
+                updateRequest.getSavedFileName() : findMember.getProfileImage().getSavedFileName();
+
+        // ProfileImage 의 변경 정보
+        ProfileImage profileImage = ProfileImage.builder()
+                .profileImageId(findMember.getProfileImage().getProfileImageId())
+                .originalFileName(newOriginalFileName)
+                .savedFileName(newSavedFileName)
+                .extension(findMember.getProfileImage().getExtension())
+                .build();
+
+        // 기존 엔티티와 memberId 가 동일한 새로운 엔티티 객체를 만든다
+        Member member = Member.builder()
+                .memberId(findMember.getMemberId())
+                .email(findMember.getEmail())
+                .password(newPassword)
+                .username(newUsername)
+                .role(findMember.getRole())
+                .profileImage(profileImage)
+                .build();
+
+        // @Transactional 안에 있지만 현재 엔티티는 final 로 불변이므로 변경 감지를 활용할 수 없다
+        // 변경 감지는 final 이 없고 Setter 와 같이 엔티티의 속성 값을 변경할 수 있어야 한다
+        Member updatedMember = memberRepository.save(member);
+        return Member.toMemberDetails(updatedMember);
+    }
+
     /**
      * memberId 로 회원 정보 삭제
      *
@@ -125,6 +168,25 @@ public class MemberServiceImpl implements MemberService {
     public void deleteById(Long memberId) {
         getMemberById(memberId);
         memberRepository.deleteById(memberId);
+    }
+
+    /**
+     * email 로 회원 정보 삭제
+     *
+     * @param email 삭제 할 회원의 email
+     */
+    @Override
+    public void deleteByEmail(String email) {
+        // 회원 조회
+        Member findMember = getMemberByEmail(email);
+        // 프로필 이미지 파일 삭제
+        String profileImageName = findMember.getProfileImage().getSavedFileName();
+        if (!profileImageName.equals("default.png")) {
+            fileUtils.deleteFile(profileImageName, UploadDirectory.PROFILES);
+        }
+        // todo: 게시물 첨부 파일 삭제 처리
+        // 회원 삭제
+        memberRepository.deleteByEmail(email);
     }
 
     /**
@@ -150,6 +212,17 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
+     * 회원 정보를 조회하는 Private 메서드
+     *
+     * @param email 조회 할 회원의 email
+     * @return 조회된 회원 엔티티
+     */
+    private Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다"));
+    }
+
+    /**
      * 이메일이 존재하는지 여부
      *
      * @param email 존재하는지 확인 할 이메일
@@ -158,5 +231,16 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean existsEmail(String email) {
         return memberRepository.existsByEmail(email);
+    }
+
+    /**
+     * 닉네임이 존재하는지 여부
+     *
+     * @param username 존재하는지 확인 할 닉네임
+     * @return 존재하면 true, 존재하지 않으면 false
+     */
+    @Override
+    public boolean existsUsername(String username) {
+        return memberRepository.existsByUsername(username);
     }
 }

@@ -9,14 +9,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DBInit {
 
-    // 최초 관리자 등록
     @Bean
     public CommandLineRunner init(MemberService memberService) {
         return args -> {
-            MemberSaveRequest memberSaveRequest = new MemberSaveRequest();
-            memberSaveRequest.setEmail("admin@test.com");
-            memberSaveRequest.setPassword("a123412341234");
-            memberService.save(memberSaveRequest);
+            MemberSaveRequest admin = new MemberSaveRequest();
+            admin.setEmail("admin@test.com");
+            admin.setPassword("a123412341234");
+            memberService.save(admin);
+
+            MemberSaveRequest user = new MemberSaveRequest();
+            user.setEmail("user@test.com");
+            user.setPassword("a123412341234");
+            memberService.save(user);
         };
     }
 }

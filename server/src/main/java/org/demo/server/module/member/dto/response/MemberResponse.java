@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class MemberResponse {
 
     private Long memberId;
+    private String email;
     private String username;
     private Role role;
     private LocalDateTime createdAt;

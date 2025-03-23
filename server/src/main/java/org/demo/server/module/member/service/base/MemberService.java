@@ -1,7 +1,9 @@
 package org.demo.server.module.member.service.base;
 
 import org.demo.server.infra.common.dto.PagedListResponse;
+import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.request.MemberSaveRequest;
+import org.demo.server.module.member.dto.request.MemberUpdateRequest;
 import org.demo.server.module.member.dto.response.MemberResponse;
 
 public interface MemberService {
@@ -37,6 +39,9 @@ public interface MemberService {
      */
     PagedListResponse<MemberResponse> findAll(int page);
 
+    // 회원 수정하기
+    MemberDetails update(String username, MemberUpdateRequest updateRequest);
+
     /**
      * memberId 로 회원 정보 삭제
      *
@@ -45,10 +50,25 @@ public interface MemberService {
     void deleteById(Long memberId);
 
     /**
+     * email 로 회원 정보 삭제
+     *
+     * @param email 삭제 할 회원의 email
+     */
+    void deleteByEmail(String email);
+
+    /**
      * 이메일이 존재하는지 여부
      *
      * @param email 존재하는지 확인 할 이메일
      * @return 존재하면 true, 존재하지 않으면 false
      */
     boolean existsEmail(String email);
+
+    /**
+     * 닉네임이 존재하는지 여부
+     *
+     * @param username 존재하는지 확인 할 닉네임
+     * @return 존재하면 true, 존재하지 않으면 false
+     */
+    boolean existsUsername(String username);
 }

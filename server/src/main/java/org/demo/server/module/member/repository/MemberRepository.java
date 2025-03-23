@@ -16,7 +16,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByEmail(String email);
 
     /**
-     * email 을 사용하여 회원 정보 조회
+     * 닉네임이 존재하는지 여부
+     *
+     * @param username 존재하는지 확인 할 닉네임
+     * @return 존재하면 true, 존재하지 않으면 false
+     */
+    boolean existsByUsername(String username);
+
+    /**
+     * 회원 정보 조회
      *
      * @param email 회원의 email
      * @return 회원 정보
@@ -24,10 +32,17 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
     /**
-     * username 을 사용하여 회원 정보 조회
+     * 회원 정보 조회
      *
      * @param username 회원의 닉네임 (username)
      * @return 회원 정보
      */
     Optional<Member> findByUsername(String username);
+
+    /**
+     * 회원 삭제
+     *
+     * @param email 삭제할 회원의 email
+     */
+    void deleteByEmail(String email);
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.demo.server.infra.common.entity.BaseEntity;
 import org.demo.server.module.member.dto.details.MemberDetails;
+import org.demo.server.module.member.dto.request.MemberUpdateRequest;
 
 
 import java.time.LocalDateTime;

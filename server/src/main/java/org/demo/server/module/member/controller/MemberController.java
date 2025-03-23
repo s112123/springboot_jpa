@@ -1,5 +1,7 @@
 package org.demo.server.module.member.controller;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.demo.server.infra.common.dto.PagedListResponse;
@@ -7,7 +9,10 @@ import org.demo.server.infra.common.exception.NotFoundException;
 import org.demo.server.infra.common.util.file.FileDetails;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
+import org.demo.server.infra.security.util.JwtUtils;
+import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.request.MemberSaveRequest;
+import org.demo.server.module.member.dto.request.MemberUpdateRequest;
 import org.demo.server.module.member.dto.response.MemberResponse;
 import org.demo.server.module.member.service.base.MemberService;
 import org.demo.server.module.member.util.send.impl.confirm.base.SendConfirmCode;
@@ -25,6 +30,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -36,6 +42,7 @@ public class MemberController {
     private final FileUtils fileUtils;
     private final SendConfirmCode sendConfirmCode;
     private final SendTempPassword sendTempPassword;
+    private final JwtUtils jwtUtils;
 
     /**
      * 회원 등록
@@ -114,20 +121,8 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-//    /**
-//     * memberId 로 회원 정보 조회
-//     *
-//     * @param memberId 조회 할 회원의 memberId
-//     * @return 조회된 회원 정보를 반환하고 회원이 존재하지 않으면 NotFoundMemberException
-//     */
-//    @GetMapping("/{memberId}")
-//    public ResponseEntity<MemberResponse> findMemberById(@PathVariable("memberId") Long memberId) {
-//        MemberResponse response = memberService.findById(memberId);
-//        return ResponseEntity.ok().body(response);
-//    }
-
     /**
-     * username 로 회원 정보 조회
+     * 회원 정보 조회
      *
      * @param username 조회 할 회원의 username
      * @return 조회된 회원 정보를 반환하고 회원이 존재하지 않으면 NotFoundMemberException
@@ -151,15 +146,53 @@ public class MemberController {
     }
 
     /**
-     * memberId 로 회원 정보 삭제
+     * 회원 정보 수정
      *
-     * @param memberId 삭제 할 회원의 memberId
-     * @return 정상 삭제인 경우, 반환값이 없고 삭제하려는 회원이 존재하지 않으면 NotFoundException
+     * @param username 회원의 기존 username
+     * @param memberUpdateRequest 변경된 회원 정보
+     * @return 새로운 Access Token
      */
-    @DeleteMapping("/{memberId}")
-    public ResponseEntity<Void> deleteMemberById(@PathVariable("memberId") Long memberId) {
-        memberService.deleteById(memberId);
-        return ResponseEntity.ok().build();
+    @PatchMapping("/{username}")
+    public ResponseEntity<Map<String, String>> updateMemberByUsername(
+            @PathVariable("username") String username,
+            @RequestBody MemberUpdateRequest memberUpdateRequest
+    ) {
+        // 회원 정보 변경
+        MemberDetails memberDetails = memberService.update(username, memberUpdateRequest);
+
+        // Access Token 재발급
+        Claims claims = Jwts.claims();
+        claims.put("username", memberDetails.getUsername());
+        claims.put("roles", List.of(memberDetails.getRole()));
+        String accessToken = jwtUtils.create(claims);
+
+        // ResponseBody
+        Map<String, String> responseBody = Map.of("accessToken", accessToken);
+        return ResponseEntity.ok().body(responseBody);
+    }
+
+    /**
+     * 닉네임 중복 확인
+     *
+     * @param username 입력받은 닉네임
+     * @return 닉네임이 중복이면 true, 중복이 아니면 false 반환
+     */
+    @PostMapping("/username/check")
+    public ResponseEntity<Boolean> checkExistsUsername(@RequestBody String username) {
+        boolean isExists = memberService.existsUsername(username);
+        return ResponseEntity.ok().body(isExists);
+    }
+
+    /**
+     * email 로 회원 정보 삭제
+     *
+     * @param email 삭제 할 회원의 email
+     * @return 정상 삭제인 경우, 204 반환
+     */
+    @DeleteMapping("/{email}")
+    public ResponseEntity<Void> deleteMemberByEmail(@PathVariable("email") String email) {
+        memberService.deleteByEmail(email);
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -170,7 +203,7 @@ public class MemberController {
      */
     @PostMapping("/profile-images")
     public ResponseEntity<FileDetails> uploadProfileImage(
-            @RequestPart(value = "file", required = false) MultipartFile multipartFile
+            @RequestPart(value = "profile-file", required = false) MultipartFile multipartFile
     ) {
         FileDetails fileDetails = fileUtils.saveFile(multipartFile, UploadDirectory.PROFILES);
         return ResponseEntity.ok().body(fileDetails);
@@ -193,5 +226,17 @@ public class MemberController {
             throw new RuntimeException(e);
         }
         return ResponseEntity.ok().headers(headers).body(resource);
+    }
+
+    /**
+     * 프로필 이미지 파일 삭제
+     *
+     * @param imageFileNames 삭제할 프로필 이미지 파일 이름 목록
+     * @return 삭제에 성공하면 204 응답, 파일이 존재하지 않으면 404 반환
+     */
+    @DeleteMapping("/profile-images")
+    public ResponseEntity<Void> deleteProfileImages(@RequestBody List<String> imageFileNames) {
+        fileUtils.deleteFiles(imageFileNames, UploadDirectory.PROFILES);
+        return ResponseEntity.noContent().build();
     }
 }
