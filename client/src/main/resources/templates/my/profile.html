@@ -15,7 +15,7 @@
     <script defer src="/js/my/profile.js"></script>
 </head>
 <body>
-    <div layout:fragment="content" class="container">
+    <div layout:fragment="content" class="container" id="profile-page">
         <div th:replace="~{my/fragments/aside::aside}"></div>
         <div class="profile-wrap">
             <p>내 정보</p>
@@ -27,7 +27,6 @@
                             <img id="profile-image" />
                             <div class="profile-image-file">
                                 <input type="hidden" id="file-name" />
-<!--                                <input type="hidden" id="image-url" />-->
                                 <label for="profile-file">이미지 선택</label>
                                 <input type="file" id="profile-file" accept="image/*" />
                             </div>

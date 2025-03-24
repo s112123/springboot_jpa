@@ -36,7 +36,8 @@ file:
     root: D://uploads/
     directories:
       profiles: profiles/
-      boards: boards/
+      reviews: reviews/
+      temps: temps/
 
 # JWT
 jwt:

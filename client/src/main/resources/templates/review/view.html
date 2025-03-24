@@ -8,9 +8,9 @@
     <!-- css -->
     <link rel="stylesheet" href="/css/review/view.css" />
     <!-- kakao map -->
-    <script defer src="/js/review/kakao_map.js"></script>
-    <script type="text/javascript"
-            th:src="@{//dapi.kakao.com/v2/maps/sdk.js(appkey=${serviceKey}, libraries=services)}"></script>
+<!--    <script defer src="/js/review/kakao_map.js"></script>-->
+<!--    <script type="text/javascript"-->
+<!--            th:src="@{//dapi.kakao.com/v2/maps/sdk.js(appkey=${serviceKey}, libraries=services)}"></script>-->
     <!-- axios -->
     <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- javascript -->
@@ -20,18 +20,18 @@
 </head>
 <body>
     <div layout:fragment="content" class="container">
-        <input type="hidden" id="email" th:value="${session.email}" />
-        <input type="hidden" id="writer" th:value="${writer.email}" />
-        <input type="hidden" id="member-nickname" th:if="${session.email != null}" th:value="${member.nickName}" />
+<!--        <input type="hidden" id="email" th:value="${session.email}" />-->
+<!--        <input type="hidden" id="writer" th:value="${writer.email}" />-->
+<!--        <input type="hidden" id="member-nickname" th:if="${session.email != null}" th:value="${member.nickName}" />-->
         <div class="review-top">
-            <div class="review-map" id="map"></div>
+<!--            <div class="review-map" id="map"></div>-->
             <div id="review-store">
                 <div class="review-store-box">
-                    <div class="store-name" th:text="${review.storeName}"></div>
-                    <div class="store-address" id="store-address" th:text="${review.storeAddress}"></div>
+                    <div class="store-name" id="store-name"></div>
+                    <div class="store-address" id="store-address"></div>
                     <div class="store-mark">
                         <p>리뷰어 평점</p>
-                        <ul id="reviewer-star" th:data-reviewer-star="${review.star}">
+                        <ul id="reviewer-star">
                             <li><i class="fa-solid fa-star"></i></li>
                             <li><i class="fa-solid fa-star"></i></li>
                             <li><i class="fa-solid fa-star"></i></li>
@@ -39,50 +39,48 @@
                             <li><i class="fa-solid fa-star"></i></li>
                         </ul>
                     </div>
-                    <th:block th:if="${session.email == null} or ${session.email != writer.email}">
-                        <div class="store-heart" id="store-heart" th:data-is-good="${isGood}">
-                            <a href="javascript:;" id="good" th:data-review-id="${review.reviewId}">
-                                <i class="fa-solid fa-heart"></i>
-                            </a>
-                            <a href="javascript:;" id="not-good" th:data-review-id="${review.reviewId}">
-                                <i class="fa-regular fa-heart"></i>
-                            </a>
-                        </div>
-                    </th:block>
+<!--                    <th:block th:if="${session.email == null} or ${session.email != writer.email}">-->
+<!--                        <div class="store-heart" id="store-heart" th:data-is-good="${isGood}">-->
+<!--                            <a href="javascript:;" id="good" th:data-review-id="${review.reviewId}">-->
+<!--                                <i class="fa-solid fa-heart"></i>-->
+<!--                            </a>-->
+<!--                            <a href="javascript:;" id="not-good" th:data-review-id="${review.reviewId}">-->
+<!--                                <i class="fa-regular fa-heart"></i>-->
+<!--                            </a>-->
+<!--                        </div>-->
+<!--                    </th:block>-->
                 </div>
             </div>
-            <div id="review-writer">
-                <div class="review-writer-box">
-                    <div class="writer-image">
-                        <img th:src="${writer.imageUrl}" art="profile-image" />
-                    </div>
-                    <div class="writer-info">
-                        <p class="writer-name" id="writer-name"
-                           th:text="${writer.nickName}" th:data-writer-email="${writer.email}"></p>
-                    </div>
-                    <th:block th:if="${session.email == null} or ${session.email != writer.email}">
-                        <div class="writer-action">
-                            <button id="btn-subscribe"
-                                    th:classappend="${isSubscribed} ? subscribed : not-subscribed"
-                                    th:text="${isSubscribed} ? 구독취소 : 구독하기">구독하기</button>
-                            <!--            <button id="btn-chat">1:1 채팅</button>-->
-                        </div>
-                    </th:block>
-                </div>
-            </div>
+<!--            <div id="review-writer">-->
+<!--                <div class="review-writer-box">-->
+<!--                    <div class="writer-image">-->
+<!--                        <img th:src="${writer.imageUrl}" art="profile-image" />-->
+<!--                    </div>-->
+<!--                    <div class="writer-info">-->
+<!--                        <p class="writer-name" id="writer-name"-->
+<!--                           th:text="${writer.nickName}" th:data-writer-email="${writer.email}"></p>-->
+<!--                    </div>-->
+<!--                    <th:block th:if="${session.email == null} or ${session.email != writer.email}">-->
+<!--                        <div class="writer-action">-->
+<!--                            <button id="btn-subscribe"-->
+<!--                                    th:classappend="${isSubscribed} ? subscribed : not-subscribed"-->
+<!--                                    th:text="${isSubscribed} ? 구독취소 : 구독하기">구독하기</button>-->
+<!--                            &lt;!&ndash;            <button id="btn-chat">1:1 채팅</button>&ndash;&gt;-->
+<!--                        </div>-->
+<!--                    </th:block>-->
+<!--                </div>-->
+<!--            </div>-->
         </div>
         <div class="review-middle">
-            <p class="review-title" id="review-title" th:text="${review.title}"></p>
-            <div class="review-content" th:utext="${review.content}"></div>
+            <p class="review-title" id="review-title"></p>
+            <div class="review-content" id="review-content"></div>
             <div class="review-btn">
                 <div class="review-btn-left">
                     <button id="go-home">HOME</button>
                 </div>
-                <th:block th:if="${session.email != null} and ${session.email == writer.email}">
-                    <div class="review-btn-right">
-                        <button id="update-review" th:data-review-id="${review.reviewId}">편집</button>
-                    </div>
-                </th:block>
+                <div class="review-btn-right">
+                    <button id="update-review">편집</button>
+                </div>
             </div>
         </div>
         <!--

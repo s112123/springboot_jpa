@@ -1,8 +1,8 @@
 package org.demo.server.infra.security.config;
 
 import lombok.RequiredArgsConstructor;
-import org.demo.server.infra.security.filter.LoginFilter;
 import org.demo.server.infra.security.filter.AccessTokenCheckFilter;
+import org.demo.server.infra.security.filter.LoginFilter;
 import org.demo.server.infra.security.util.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,9 +48,11 @@ public class SecurityConfig {
         // 경로 권한 설정
         http
                 .authorizeHttpRequests(request -> request
+                        .requestMatchers(HttpMethod.GET, "/").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/pages/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/members/profile-images/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/members/send-password").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/members/profile-images/**").permitAll()
                         .anyRequest().permitAll());
 
         return http.build();

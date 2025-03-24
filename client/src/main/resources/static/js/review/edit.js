@@ -1,5 +1,7 @@
 import {reviewEditor} from './ckeditor.js';
 
+
+/*
 // 변수 선언
 var errors = document.querySelectorAll('.error');
 var storeName = document.getElementById('storeName');
@@ -184,4 +186,4 @@ reviewerStarItems.forEach((reviewerStarItem, index) => {
       reviewerStarItem.style.color = 'rgb(249, 199, 53)';
     }
 });
-
+*/

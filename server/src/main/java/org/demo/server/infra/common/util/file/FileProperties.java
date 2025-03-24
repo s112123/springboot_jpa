@@ -28,4 +28,21 @@ public class FileProperties {
     public String getUploadDirectory(UploadDirectory uploadDirectory) {
         return root + File.separator + directories.get(uploadDirectory.name().toLowerCase());
     }
+
+    /**
+     * 첨부된 파일을 저장할 경로
+     *
+     * @param uploadDirectory 저장할 폴더 이름
+     * @param subDirectories uploadDirectory 로 설정된 폴더의 자식 폴더
+     * @return 파일이 저장되는 경로
+     */
+    public String getUploadDirectory(UploadDirectory uploadDirectory, String... subDirectories) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(root + File.separator);
+        sb.append(uploadDirectory.name().toLowerCase() + File.separator);
+        for (String subDirectory : subDirectories) {
+            sb.append(subDirectory + File.separator);
+        }
+        return sb.toString();
+    }
 }

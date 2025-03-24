@@ -1,20 +1,20 @@
 // 변수 선언
-var email = document.getElementById('email');
-var confirmCode = document.getElementById('confirm-code');
-var password = document.getElementById('password');
-var rePassword = document.getElementById('re-password');
-var msgSendMail = document.getElementById('send-message');
-var confirmCodeBox = document.getElementById('confirm-code-box');
-var btnSignUp = document.getElementById('btn-sign-up');
-var btnSendMail = document.getElementById('btn-send-mail');
-var btnConfirmCode = document.getElementById('btn-confirm-code');
-var errors = document.querySelectorAll('.error');
-var errorEmail = document.getElementById('error-email');
-var errorPassword = document.getElementById('error-password');
-var errorRePassword = document.getElementById('error-re-password');
-var isSentConfirmCode = false;
-var isValidConfirmCode = false;
-var isDuplicatedEmail = false;
+let email = document.getElementById('email');
+let confirmCode = document.getElementById('confirm-code');
+let password = document.getElementById('password');
+let rePassword = document.getElementById('re-password');
+let msgSendMail = document.getElementById('send-message');
+let confirmCodeBox = document.getElementById('confirm-code-box');
+let btnSignUp = document.getElementById('btn-sign-up');
+let btnSendMail = document.getElementById('btn-send-mail');
+let btnConfirmCode = document.getElementById('btn-confirm-code');
+let errors = document.querySelectorAll('.error');
+let errorEmail = document.getElementById('error-email');
+let errorPassword = document.getElementById('error-password');
+let errorRePassword = document.getElementById('error-re-password');
+let isSentConfirmCode = false;
+let isValidConfirmCode = false;
+let isDuplicatedEmail = false;
 
 // 이메일 입력 시
 email.addEventListener("keyup", () => {
@@ -47,7 +47,7 @@ email.addEventListener("keyup", () => {
 
 // 이메일 중복 검증 API
 async function isExistsEmail(email) {
-    var response = await axios.post('http://localhost:8081/api/v1/members/emails/check', email, {
+    let response = await axios.post('http://localhost:8081/api/v1/members/emails/check', email, {
         headers: {
             'Content-Type': 'text/plain'
         }
@@ -60,14 +60,14 @@ btnSendMail.addEventListener('click', () => {
     // 에러 메시지 숨김
     errorEmail.style.display = 'none';
 
-    // 유효성 검사 → 이메일
+    // 유효성 검사 → 이메일 입력 여부
     if (email.value.trim().length === 0) {
         errorEmail.innerText = '이메일은 필수입니다';
         errorEmail.style.display = 'block';
         return false;
     }
     // 유효성 검사 → 이메일 형식 여부
-    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email.value.trim())) {
         errorEmail.innerText = '이메일 형식이 아닙니다';
         errorEmail.style.display = 'block';
@@ -86,7 +86,7 @@ btnSendMail.addEventListener('click', () => {
 
 // 인증 메일 발송 API
 async function sendConfirmCodeEmail(email) {
-    var response = await axios.post('http://localhost:8081/api/v1/members/codes', email, {
+    let response = await axios.post('http://localhost:8081/api/v1/members/codes', email, {
         headers: {
             'Content-Type': 'text/plain'
         }
@@ -107,7 +107,7 @@ btnConfirmCode.addEventListener('click', () => {
     }
 
     // 입력한 회원 정보
-    var formData = {
+    let formData = {
         'email': email.value.trim(),
         'code': confirmCode.value.trim()
     };
@@ -129,7 +129,7 @@ btnConfirmCode.addEventListener('click', () => {
 
 // 인증 확인 API
 async function validateConfirmCode(formData) {
-    var response = await axios.post('http://localhost:8081/api/v1/members/codes/check', formData, {
+    let response = await axios.post('http://localhost:8081/api/v1/members/codes/check', formData, {
         headers: {
             'Content-Type': 'application/json'
         }
@@ -151,7 +151,7 @@ btnSignUp.addEventListener('click', () => {
         return false;
     }
     // 유효성 검사 → 이메일 형식 여부
-    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email.value.trim())) {
         errorEmail.innerText = '이메일 형식이 아닙니다';
         errorEmail.style.display = 'block';
@@ -176,7 +176,7 @@ btnSignUp.addEventListener('click', () => {
         return false;
     }
     // 유효성 검사 → 비밀번호 형식 일치 여부
-    var passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
+    let passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
     if (!passwordRegex.test(password.value.trim())) {
         errorPassword.innerText = '영어와 숫자를 포함하여 10자리 이상이어야 합니다';
         errorPassword.style.display = 'block';
@@ -195,7 +195,7 @@ btnSignUp.addEventListener('click', () => {
         return false;
     }
     // 입력한 회원 정보
-    var formData = {
+    let formData = {
         'email': email.value.trim(),
         'password': password.value.trim()
     };
@@ -206,8 +206,8 @@ btnSignUp.addEventListener('click', () => {
     })
     .catch(error => {
         // 에러 메시지 출력
-        var errorList = error.response.data;
-        for (var i = 0; i < errorList.length; i++) {
+        let errorList = error.response.data;
+        for (let i = 0; i < errorList.length; i++) {
             if (errorList[i].field === 'email') {
                 errorEmail.innerText = errorList[i].message;
                 errorEmail.style.display = 'block';
@@ -222,7 +222,7 @@ btnSignUp.addEventListener('click', () => {
 
 // 회원 가입 API
 async function addMember(formData) {
-    var response = await axios.post('http://localhost:8081/api/v1/members', formData, {
+    let response = await axios.post('http://localhost:8081/api/v1/members', formData, {
         headers: {
             'Content-Type': 'application/json'
         }

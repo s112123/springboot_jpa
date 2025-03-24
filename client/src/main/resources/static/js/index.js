@@ -1,5 +1,7 @@
 // 변수 선언
-var btnReview = document.getElementById('btn-review');
+let btnReview = document.getElementById('btn-review');
+let middle = document.getElementById('reviews-middle');
+let noData = document.getElementById('no-data');
 
 // HTML 로드
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,29 +12,87 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         btnReview.style.display = 'none';
     }
+
+    // 리뷰 목록
+    getReviews(1).then(response => {
+        console.log(response.data.data);
+        // 리뷰 목록을 작성한 HTML 반환
+        let reviews = getReviewsHTML(response.data.data);
+
+        // 리뷰 목록 렌더링
+        if (reviews.length === 0) {
+            middle.innerHTML = '<div class="no-data" id="no-data">검색된 결과가 없습니다</div>';
+        } else {
+            middle.innerHTML = reviews;
+        }
+    });
 });
+
+// 리뷰 목록
+async function getReviews(page) {
+    const response = await axios.get('http://localhost:8081/api/v1/reviews/pages/' + page);
+    return response;
+}
+
+// 리뷰 목록 HTML 반환
+function getReviewsHTML(reviews) {
+  let html = ``;
+
+  // 리뷰 목록
+  for (let review of reviews) {
+    html += `<div class="review-wrap" onclick="viewReview(${review.reviewId})">`;
+    html += `  <div class="review-box">`;
+    html += `    <div class="review-image">`;
+    html += `      <img src="${review.thumbnailUrl}" />`;
+    html += `    </div>`;
+    html += `    <div class="review-summary">`;
+    html += `      <div class="review-summary-star">`;
+    html += `        <ul class="store-star">`;
+    for (let i = 0; i < 5; i++) {
+      if (i < review.star) {
+        html += `      <li class="star-active"><i class="fa-solid fa-star"></i></li>`;
+      } else {
+        html += `      <li><i class="fa-solid fa-star"></i></li>`;
+      }
+    }
+    html += `        </ul>`;
+    html += `      </div>`;
+//    html += `      <div class="review-summary-title">${shortTitle(review.title)}</div>`;
+//    html += `      <div class="review-summary-content">${shortContent(removeHTMLTag(review.content))}</div>`;
+    html += `      <div class="review-summary-title">${review.title}</div>`;
+    html += `      <div class="review-summary-content">${review.content}</div>`;
+    html += `    </div>`;
+    html += `  </div>`;
+    html += `</div>`;
+  }
+
+  return html;
+}
 
 // 리뷰쓰기 페이지로 이동
 if (btnReview !== null) {
     btnReview.addEventListener('click', () => {
-        console.log('click');
         location.href = '/review/add';
     });
 }
+
+// 조회 페이지 이동
+function viewReview(reviewId) {
+    location.href = "/review/view?review_id=" + reviewId;
+}
+
 
 
 
 ////////////////////////////////////////////
 // 변수 선언
-//var middle = document.getElementById('reviews-middle');
-//var noData = document.getElementById('no-data');
-//var bottom = document.getElementById('reviews-bottom');
-//var orderItems = document.querySelectorAll('.order-item');
-//var search = document.querySelector('#search');
-//var btnSearch = document.querySelector('#btn-search');
-//var sortOption = 0;
-//var searchKeyword = '';
-//var page = 1;
+//let bottom = document.getElementById('reviews-bottom');
+//let orderItems = document.querySelectorAll('.order-item');
+//let search = document.querySelector('#search');
+//let btnSearch = document.querySelector('#btn-search');
+//let sortOption = 0;
+//let searchKeyword = '';
+//let page = 1;
 //
 //// HTML 로드
 //document.addEventListener('DOMContentLoaded', () => {
@@ -70,15 +130,10 @@ if (btnReview !== null) {
 //});
 //
 
-//// 조회 페이지 이동
-//function viewReview(reviewId) {
-//  location.href = "/review/view?review_id=" + reviewId;
-//}
-//
 //// 리뷰 목록을 화면에 렌더링
 //function renderReviews(sortOption, searchKeyword, page) {
 //  // 정렬 항목 색상 처리
-//  for (var i = 0; i < orderItems.length; i++) {
+//  for (let i = 0; i < orderItems.length; i++) {
 //    if (i === sortOption) {
 //        orderItems[i].style.backgroundColor = 'rgba(210, 40, 40, 0.3)';
 //        orderItems[i].style.color = '#000';
@@ -91,7 +146,7 @@ if (btnReview !== null) {
 //  // 화면 렌더링
 //  getReviews(sortOption, searchKeyword, page).then(response => {
 //    // 리뷰 목록 렌더링
-//    var reviews = getReviewsHTML(response.data.reviews);
+//    let reviews = getReviewsHTML(response.data.reviews);
 //    if (reviews.length === 0) {
 //      middle.innerHTML = '<div class="no-data" id="no-data">검색된 결과가 없습니다</div>';
 //    } else {
@@ -99,7 +154,7 @@ if (btnReview !== null) {
 //    }
 //
 //    // 페이징 렌더링
-//    var paging = getPagingHTML(response.data);
+//    let paging = getPagingHTML(response.data);
 //    bottom.innerHTML = paging;
 //  });
 //}
@@ -107,49 +162,16 @@ if (btnReview !== null) {
 //// 리뷰 목록 (api)
 //async function getReviews(sortOption, searchKeyword, page) {
 //  //console.log(`/reviews?sort_option=${sortOption}&search=${searchKeyword}&page=${page}`);
-//  var response = await axios.get(`/reviews?sort_option=${sortOption}&search=${searchKeyword}&page=${page}`);
+//  let response = await axios.get(`/reviews?sort_option=${sortOption}&search=${searchKeyword}&page=${page}`);
 //  return response;
-//}
-//
-//// 리뷰 목록 HTML 반환
-//function getReviewsHTML(reviews) {
-//  var html = ``;
-//
-//  // 리뷰 목록
-//  for (var review of reviews) {
-//    html += `<div class="review-wrap" onclick="viewReview(${review.reviewId})">`;
-//    html += `  <div class="review-box">`;
-//    html += `    <div class="review-image">`;
-//    html += `      <img src="${review.thumbnailUrl}" />`;
-//    html += `    </div>`;
-//    html += `    <div class="review-summary">`;
-//    html += `      <div class="review-summary-star">`;
-//    html += `        <ul class="store-star">`;
-//    for (var i = 0; i < 5; i++) {
-//      if (i < review.star) {
-//        html += `      <li class="star-active"><i class="fa-solid fa-star"></i></li>`;
-//      } else {
-//        html += `      <li><i class="fa-solid fa-star"></i></li>`;
-//      }
-//    }
-//    html += `        </ul>`;
-//    html += `      </div>`;
-//    html += `      <div class="review-summary-title">${shortTitle(review.title)}</div>`;
-//    html += `      <div class="review-summary-content">${shortContent(removeHTMLTag(review.content))}</div>`;
-//    html += `    </div>`;
-//    html += `  </div>`;
-//    html += `</div>`;
-//  }
-//
-//  return html;
 //}
 //
 //// 페이지 번호 섹션 HTML 반환
 //function getPagingHTML(reviews) {
-//  var pageable = reviews.pageable;
-//  var sortOption = reviews.sortOption;
-//  var searchKeyword = reviews.search.trim();
-//  var html = ``;
+//  let pageable = reviews.pageable;
+//  let sortOption = reviews.sortOption;
+//  let searchKeyword = reviews.search.trim();
+//  let html = ``;
 //
 //  if (pageable.end > 1) {
 //    html += `<div class="pageable">`;
@@ -164,7 +186,7 @@ if (btnReview !== null) {
 //      html += `  </li>`;
 //    }
 //    // 번호 목록
-//    for (var i = pageable.start; i <= pageable.end; i++) {
+//    for (let i = pageable.start; i <= pageable.end; i++) {
 //      html += `  <li>`;
 //      html += `    <a href="javascript:;"`;
 //      html += `       ${(pageable.page === i) ? 'class="active"' : ' '} `;
@@ -211,7 +233,7 @@ if (btnReview !== null) {
 //
 //// 타이틀 글자 수 줄임
 //function shortTitle(title) {
-//  var result = title;
+//  let result = title;
 //  if (title.length > 14) {
 //    result = title.substring(0, 14) + '...';
 //  }
@@ -220,7 +242,7 @@ if (btnReview !== null) {
 //
 //// 글 내용 글자 수 줄임
 //function shortContent(content) {
-//  var result = content;
+//  let result = content;
 //  if (content.length > 32) {
 //    result = content.substring(0, 32) + '...';
 //  }

@@ -34,7 +34,8 @@ file:
     root: s112123/tomcat/webapps/ROOT/WEB-INF/classes/static/uploads/
     directories:
       profiles: profiles/
-      boards: boards/
+      reviews: reviews/
+      temps: temps/
 
 # Logging
 logging:

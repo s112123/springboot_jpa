@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.demo.server.infra.common.entity.BaseEntity;
 import org.demo.server.module.member.dto.details.MemberDetails;
-import org.demo.server.module.member.dto.request.MemberUpdateRequest;
 
 
 import java.time.LocalDateTime;
@@ -50,44 +49,42 @@ public class Member extends BaseEntity {
     }
 
     /**
-     * ProfileImage 정보를 포함해서 MemberDetails DTO 를 생성한다
+     * Member 엔티티를 MemberDetails 로 변환 (Entity → DTO)
      *
-     * @param member MemberDetails DTO 로 변경할 Member 엔티티
-     * @return MemberDetails DTO 를 반환한다
+     * @return MemberDetails
      */
-    public static MemberDetails toMemberDetails(Member member) {
+    public MemberDetails toDetails () {
         return MemberDetails.builder()
-                .memberId(member.getMemberId())
-                .email(member.getEmail())
-                .password(member.getPassword())
-                .username(member.getUsername())
-                .role(member.getRole())
-                .createdAt(member.getCreatedAt())
-                .updatedAt(member.getUpdatedAt())
-                .profileImageDetails(ProfileImage.toProfileImageDetails(member.getProfileImage()))
+                .memberId(this.getMemberId())
+                .email(this.getEmail())
+                .password(this.getPassword())
+                .username(this.getUsername())
+                .role(this.getRole())
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
+                .profileImageDetails(this.profileImage.toDetails())
                 .build();
     }
 
     /**
-     * ProfileImage 정보를 포함하지 않고 회원 정보만 가진 MemberDetails DTO 를 생성한다
+     * ProfileImage 정보를 포함하지 않고 회원 정보만 가진 MemberDetails DTO 를 생성한다 (Entity → DTO)
      *
-     * @param member MemberDetails DTO 로 변경할 Member 엔티티
      * @return MemberDetails DTO 를 반환한다
      */
-    public static MemberDetails toMemberDetailsWithoutProfileImage(Member member) {
+    public MemberDetails toDetailsWithoutProfileImage () {
         return MemberDetails.builder()
-                .memberId(member.getMemberId())
-                .email(member.getEmail())
-                .password(member.getPassword())
-                .username(member.getUsername())
-                .role(member.getRole())
-                .createdAt(member.getCreatedAt())
-                .updatedAt(member.getUpdatedAt())
+                .memberId(this.getMemberId())
+                .email(this.getEmail())
+                .password(this.getPassword())
+                .username(this.getUsername())
+                .role(this.getRole())
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
                 .build();
     }
 
     /**
-     * Member Entity 를 생성하는 Builder 생성
+     * Member 엔티티를 생성하는 Builder 생성
      *
      * @return Builder 객체 반환
      */
