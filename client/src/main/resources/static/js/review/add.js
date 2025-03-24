@@ -1,14 +1,178 @@
 import {reviewEditor} from './ckeditor.js';
 
 // 변수 선언
-var errors = document.querySelectorAll('.error');
-var storeName = document.getElementById('storeName');
-var storeAddress = document.getElementById('storeAddress');
+let accessToken = undefined;
+let btnAdd = document.getElementById('add-review');
+let btnCancel = document.getElementById('cancel-review');
+let title = document.getElementById('title');
+let storeName = document.getElementById('storeName');
+let storeAddress = document.getElementById('storeAddress');
+let star = document.getElementById('star');
+let errors = document.querySelectorAll('.error');
+
+// Access Token 확인
+accessToken = localStorage.getItem('accessToken');
+if (!accessToken) {
+    // Access Token 이 없으면 로그인 페이지로 이동
+    location.href = '/login';
+}
+
+// 리뷰 등록
+btnAdd.addEventListener('click', (e) => {
+    // 에러 표시 모두 닫기
+    errors.forEach(error => {
+        error.style.display = 'none';
+    });
+
+    // 유효성 검사 → 위치이름 입력 여부
+//    if (storeName.value.trim().length === 0) {
+//        storeName.nextElementSibling.style.display = 'block';
+//        return false;
+//    }
+    // 유효성 검사 → 위치주소 입력 여부
+//    if (storeAddress.value.trim().length === 0) {
+//        storeAddress.nextElementSibling.style.display = 'block';
+//        return false;
+//    }
+    // 유효성 검사 → 제목 입력 여부
+//    if (title.value.trim().length === 0) {
+//        title.nextElementSibling.style.display = 'block';
+//        return false;
+//    }
+    // 유효성 검사 → 글 본문에 이미지가 최소 1개는 삽입되어 있는지 여부
+    let ckEditor = document.getElementsByClassName('ck-content')[0];
+//    let imgTag = ckEditor.getElementsByTagName('img')[0];
+//    if (imgTag === undefined) {
+//        document.getElementById('editor-error').style.display = 'block';
+//        return false;
+//    }
+    // 유효성 검사 → 글 내용 입력 여부
+//    let pTag = ckEditor.getElementsByTagName('p');
+//    if (pTag.length === 0) {
+//        document.getElementById('editor-error').style.display = 'block';
+//        return false;
+//    } else {
+//        let textLength = 0;
+//        for (let i = 0; i < pTag.length; i++) {
+//            textLength += pTag[i].textContent.trim().length;
+//        }
+//        if (textLength === 0) {
+//            document.getElementById('editor-error').style.display = 'block';
+//            return false;
+//        }
+//    }
+    // 유효성 검사 → 리뷰어 평점 입력 여부
+//    if (star.value.trim().length === 0) {
+//        star.parentNode.nextElementSibling.style.display = 'block';
+//        return false;
+//    }
+
+    // Access Token 에서 username 가져오기 → 글 작성자
+    const writer = getUsernameFromAccessToken(accessToken);
+
+    // 리뷰 입력 정보
+    // reviewEditor → ckeditor.js 에 선언되어 있다
+    // reviewEditor.getData() → CkEditor 의 내용 추출
+    const formData = {
+        'writer': writer,
+        'title': title.value.trim(),
+        'storeName': storeName.value.trim(),
+        'storeAddress': storeAddress.value.trim(),
+        'content': reviewEditor.getData(),
+        'star': star.value
+    };
+
+    // 리뷰 등록 ->
+    const parser = new DOMParser();
+    const reviewEditorHTML = parser.parseFromString(reviewEditor.getData(), 'text/html');
+    //console.log(reviewEditorHTML);
+    let imgTags = reviewEditorHTML.body.querySelectorAll('img');
+    //console.log(imgTags);
+
+    imgTags.forEach((img) => {
+        // 에디터 내부의 <img>의 src 값 가져옴
+        let imgSrc = img.src;
+        console.log(img);
+        console.log(imgSrc);
+        console.log(img.getAttribute('data-image-number'));
+
+
+//        // 에디터에서 보여지는 파일이름 추출
+//        // 20240215_5329008e-acfa-45e0-bb6f-f6bb410882fe.png
+//        let uploadFileName = imgSrc.substring(imgSrc.lastIndexOf('/') + 1);
+//        uploadFileNames.push(uploadFileName);
+//        // 에디터 내부의 <img>의 src 값을 임시 이미지가 아닌 실제 사용될 이미지 경로로 처리
+//        // 변경 전: http://localhost:8080/images/review/20240215_5329008e-acfa-45e0-bb6f-f6bb410882fe.png
+//        // 변경 후: http://localhost:8080/images/review/5329008e-acfa-45e0-bb6f-f6bb410882fe.png
+//        img.src = imgSrc.substring(0, imgSrc.lastIndexOf('/') + 1)
+//        + uploadFileName.substring(uploadFileName.indexOf("_") + 1);
+    });
+
+
+//    addReview(formData, accessToken).then(response => {
+//        console.log(response.data);
+//    });
+});
+
+// 평점 선택
+let stars = [...document.querySelector('#store-star').children];
+stars.forEach((s) => {
+    s.addEventListener('click', () => {
+        let score = s.getAttribute('data-star');
+        star.value = score;
+        changeStarColor(stars, score);
+    });
+});
+
+// 평점 별표 색상 변경
+function changeStarColor(stars, score) {
+    stars.forEach((s, index) => {
+        if (index < score) {
+            s.style.color = 'rgb(249, 199, 53)';
+        } else {
+            s.style.color = 'rgb(200, 200, 200)';
+        }
+    });
+}
+
+// 리뷰 등록 API
+async function addReview(formData, accessToken) {
+    const response = await axios.post('http://localhost:8081/api/v1/reviews', formData, {
+        headers: {
+            "Authorization": accessToken,
+            "Content-Type": "application/json"
+        }
+    });
+    return response;
+}
+
+// JWT 는 Base64 로 인코딩 되어 있으므로 Access Token 에서 디코딩하여 username 추출
+// JWT 에 한글이 포함되면 한글은 UTF-8 로 인코딩된 후, Base64 로 인코딩된다
+// 그래서 한글이 포함된 경우 atob() 로 Base64 를 디코딩하면 UTF-8 로 인코딩된 한글이 있다
+// 그리고 UTF-8 을 다시 디코딩 해주면 된다
+// 영어는 ASCII 를 사용하므로 상관없다
+function getUsernameFromAccessToken(token) {
+    // 페이로드 추출 → 헤더.페이로드.서명
+    const payload = token.split('.')[1];
+    // atob() → Javascript 에 내장된 Base64 인코딩 데이터를 디코딩하는 함수
+    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    // 디코딩이 한글인 경우, UTF-8 로 변환
+    const jsonPayload = decodeURIComponent(escape(decoded));
+    return JSON.parse(jsonPayload).username;
+}
+
+// 취소 버튼 클릭
+btnCancel.addEventListener('click', () => {
+    if (confirm('리뷰 등록을 취소하시겠습니까?')) {
+        location.href = "/";
+    }
+});
+
+
+/*
+// 변수 선언
 var thumbnail = document.getElementById('thumbnailUrl');
 var thumbnailFileName = document.getElementById('thumbnailFileName');
-var star = document.getElementById('star');
-var btnAdd = document.getElementById('add-review');
-var btnCancel = document.getElementById('cancel-review');
 var form = document.getElementById('review-add-form');
 var isValid = true;
 
@@ -95,14 +259,6 @@ btnAdd.addEventListener('click', (e) => {
   }
 });
 
-// 취소 버튼 클릭
-btnCancel.addEventListener('click', () => {
-  if (confirm('리뷰 등록을 취소하시겠습니까?')) {
-    location.href = "/";
-  }
-});
-
-
 // 게시물에 첨부되었던 임시 파일 이름을 실제 업로드 되는 파일 이름으로 변경
 async function uploadFile() {
   const parser = new DOMParser();
@@ -145,25 +301,4 @@ function getThumbnailUrl(imgTag, thumbnail, thumbnailFileName) {
      thumbnailFileName.value = '';
    }
 }
-
-// 평점 선택
-const input = document.getElementById('star');
-const stars = [...document.querySelector('#store-star').children];
-stars.forEach((star) => {
-  star.addEventListener('click', () => {
-    let score = star.getAttribute('data-star');
-    input.value = score;
-    changeStarColor(stars, score);
-  });
-});
-
-// 평점 별표 색상 변경
-function changeStarColor(stars, score) {
-  stars.forEach((star, index) => {
-    if (index < score) {
-      star.style.color = 'rgb(249, 199, 53)';
-    } else {
-      star.style.color = 'rgb(200, 200, 200)';
-    }
-  });
-}
+*/

@@ -23,22 +23,28 @@
         <div class="review-add-wrap">
             <h3>리뷰 등록</h3>
             <div class="review-add-box">
-                <form action="/review/add" method="post" id="review-add-form" autocomplete="off">
-                    <input type="hidden" name="email" id="email" th:value="${session.email}" />
+<!--                <form action="/review/add" method="post" id="review-add-form" autocomplete="off">-->
+<!--                    <input type="hidden" name="email" id="email" th:value="${session.email}" />-->
                     <div class="review-add-box-item">
-                        <input type="text" name="storeName" id="storeName" placeholder="위치이름" />
-                        <small class="error">위치이름은 필수입니다</small>
+                        <input type="text" name="storeName" id="storeName" placeholder="장소이름" />
+                        <small class="error">장소이름은 필수입니다</small>
                     </div>
                     <div class="review-add-box-item">
-                        <input type="text" name="storeAddress" id="storeAddress" placeHolder="위치주소" />
-                        <small class="error">위치주소는 필수입니다</small>
+                        <input type="text" name="storeAddress" id="storeAddress" placeHolder="장소위치 (클릭)" />
+                        <small class="error">장소위치는 필수입니다</small>
                     </div>
                     <div class="review-add-box-item">
                         <input type="text" name="title" id="title" placeholder="제목" />
                         <small class="error">제목은 필수입니다</small>
                     </div>
+
+
                     <input type="hidden" name="thumbnailUrl" id="thumbnailUrl" />
                     <input type="hidden" name="thumbnailFileName" id="thumbnailFileName" />
+
+
+
+
                     <textarea name="content" id="content"></textarea>
                     <small class="error" id="editor-error">글 내용은 필수이며, 이미지가 1개 이상 삽입되어야 합니다</small>
                     <div class="store-mark-reviewer">
@@ -59,7 +65,7 @@
                         <button type="submit" id="add-review">등록</button>
                         <button type="button" id="cancel-review">취소</button>
                     </div>
-                </form>
+<!--                </form>-->
             </div>
         </div>
     </div>

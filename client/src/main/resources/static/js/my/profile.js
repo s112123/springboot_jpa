@@ -1,20 +1,20 @@
 // 변수 선언
-var accessToken = undefined;
-var eleEmail = document.getElementById('email');
-var eleUsername = document.getElementById('username');
-var elePassword = document.getElementById('password');
-var eleProfileImage = document.getElementById('profile-image');
-var eleImageFile = document.getElementById('profile-file');
-var eleImageFileName = document.getElementById('file-name');
-var eleUpdatedMessage = document.getElementById('updated-message');
-var btnChangePassword = document.getElementById('btn-change-pass');
-var btnUpdate = document.getElementById('update-my-info');
-var btnWithdrawMembership = document.getElementById('withdraw-membership');
-var errors = document.querySelectorAll('.error');
-var errorCapsLock = document.querySelector('.error-capslock');
-var errorPassword = document.querySelector('.error-password');
-var deletedImageFiles = new Set();
-var isDuplicatedUsername = false;
+let accessToken = undefined;
+let eleEmail = document.getElementById('email');
+let eleUsername = document.getElementById('username');
+let elePassword = document.getElementById('password');
+let eleProfileImage = document.getElementById('profile-image');
+let eleImageFile = document.getElementById('profile-file');
+let eleImageFileName = document.getElementById('file-name');
+let eleUpdatedMessage = document.getElementById('updated-message');
+let btnChangePassword = document.getElementById('btn-change-pass');
+let btnUpdate = document.getElementById('update-my-info');
+let btnWithdrawMembership = document.getElementById('withdraw-membership');
+let errors = document.querySelectorAll('.error');
+let errorCapsLock = document.querySelector('.error-capslock');
+let errorPassword = document.querySelector('.error-password');
+let deletedImageFiles = new Set();
+let isDuplicatedUsername = false;
 
 // HTML 로드
 document.addEventListener('DOMContentLoaded', async () => {
@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!accessToken) {
         // Access Token 이 없으면 로그인 페이지로 이동
         location.href = '/login';
+        return;
     }
 
     // Access Token 에서 username 가져오기
@@ -76,15 +77,15 @@ function getUsernameFromAccessToken(token) {
 // 프로필 이미지 변경
 eleImageFile.addEventListener('change', (e) => {
     // 이미지 변경 시, 현재 이미지 파일 이름을 저장한다
-    var imageUrl = eleProfileImage.src;
-    var currentImageFileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+    let imageUrl = eleProfileImage.src;
+    let currentImageFileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
     deletedImageFiles.add(currentImageFileName);
 
     // 선택된 이미지 파일 이름
     eleImageFileName.value = eleImageFile.value.replace(/^C:\\fakepath\\/i, '');
 
     // 선택된 이미지 파일
-    var formData = new FormData();
+    let formData = new FormData();
     formData.append('profile-file', e.target.files[0]);
 
     // DB에 등록하지 않고 서버에만 저장
@@ -195,7 +196,7 @@ eleUsername.addEventListener('keyup', () => {
 
 // 닉네임 중복 검증 API
 async function isExistsUsername(username, accessToken) {
-    var response = await axios.post('http://localhost:8081/api/v1/members/username/check', username, {
+    let response = await axios.post('http://localhost:8081/api/v1/members/username/check', username, {
         headers: {
             'Authorization': 'Bearer ' + accessToken,
             'Content-Type': 'text/plain'
@@ -220,7 +221,7 @@ btnChangePassword.addEventListener('click', () => {
 elePassword.addEventListener('blur', () => {
     // 유효성 검사 → 비밀번호 형식 일치 여부
     if (elePassword.value.trim().length > 0) {
-        var passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
+        let passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
         if (!passwordRegex.test(elePassword.value.trim())) {
             errorPassword.style.display = 'block';
             return false;
@@ -248,7 +249,7 @@ elePassword.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         // 유효성 검사 → 비밀번호 형식 일치 여부
         if (elePassword.value.trim().length > 0) {
-            var passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
+            let passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
             if (!passwordRegex.test(elePassword.value.trim())) {
                 errorPassword.style.display = 'block';
                 return false;
@@ -302,7 +303,7 @@ btnWithdrawMembership.addEventListener('click', () => {
 
 // 회원 탈퇴 API
 async function removeMemberShip(email, accessToken) {
-    var response = await axios.delete('http://localhost:8081/api/v1/members/' + email, {
+    let response = await axios.delete('http://localhost:8081/api/v1/members/' + email, {
         headers: {
             'Authorization': 'Bearer ' + accessToken
         }
@@ -337,19 +338,19 @@ window.addEventListener('beforeunload', () => {
 
 /////////////////////////////////////////
 //// 변수 선언
-//var btnSubscribeCancels = document.querySelectorAll('.btn-subscribe-cancel');
-//var btnSubscribes = document.querySelectorAll('.btn-subscribe');
-//var imageUrl = document.getElementById('image-url');
-//var isChangePassword = false;
-//var isValid = true;
+//let btnSubscribeCancels = document.querySelectorAll('.btn-subscribe-cancel');
+//let btnSubscribes = document.querySelectorAll('.btn-subscribe');
+//let imageUrl = document.getElementById('image-url');
+//let isChangePassword = false;
+//let isValid = true;
 
 //// 내가 구독한 사람에서 구독취소 버튼 클릭
 //btnSubscribeCancels.forEach((btnSubscribeCancel) => {
 //  btnSubscribeCancel.addEventListener('click', () => {
-//    var publisherEmail = btnSubscribeCancel.previousElementSibling;
+//    let publisherEmail = btnSubscribeCancel.previousElementSibling;
 //
 //    // 구독자 - 발행자
-//    var subscribe = {
+//    let subscribe = {
 //      'subscriberEmail': email.value,
 //      'publisherEmail': publisherEmail.value
 //    }
@@ -365,17 +366,17 @@ window.addEventListener('beforeunload', () => {
 //
 //// 구독취소
 //async function cancelFollow(subscribe) {
-//  var response = await axios.post(`/subscribes/cancel`, subscribe);
+//  let response = await axios.post(`/subscribes/cancel`, subscribe);
 //  return response;
 //}
 //
 //// 나를 구독한 사람에서 구독하기 버튼 클릭
 //btnSubscribes.forEach((btnSubscribe) => {
 //  btnSubscribe.addEventListener('click', () => {
-//    var publisherEmail = btnSubscribe.previousElementSibling;
+//    let publisherEmail = btnSubscribe.previousElementSibling;
 //
 //    // 구독자 - 발행자
-//    var subscribe = {
+//    let subscribe = {
 //      'subscriberEmail': email.value,
 //      'publisherEmail': publisherEmail.value
 //    }
@@ -389,7 +390,7 @@ window.addEventListener('beforeunload', () => {
 //
 //// 구독하기
 //async function follow(subscribe) {
-//  var response = await axios.post(`/subscribes`, subscribe);
+//  let response = await axios.post(`/subscribes`, subscribe);
 //  return response;
 //}
 

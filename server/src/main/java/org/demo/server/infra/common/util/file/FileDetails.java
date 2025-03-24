@@ -11,11 +11,10 @@ public class FileDetails {
 
     private final String originalFileName;
     private final String savedFileName;
-    private final String extension;
 
     public FileDetails(MultipartFile multipartFile) {
         this.originalFileName = multipartFile.getOriginalFilename();
-        this.extension = originalFileName.substring(originalFileName.indexOf(".") + 1);
+        String extension = originalFileName.substring(originalFileName.indexOf(".") + 1);
         this.savedFileName = UUID.randomUUID() + "." + extension;
     }
 }

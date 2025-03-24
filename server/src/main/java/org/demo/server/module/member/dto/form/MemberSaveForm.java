@@ -1,13 +1,12 @@
-package org.demo.server.module.member.dto.request;
+package org.demo.server.module.member.dto.form;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class MemberSaveRequest {
+public class MemberSaveForm {
 
     @NotBlank(message = "이메일은 필수입니다")
     @Email(message = "이메일 형식이 아닙니다")

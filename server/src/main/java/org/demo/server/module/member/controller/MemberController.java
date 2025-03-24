@@ -11,14 +11,15 @@ import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
 import org.demo.server.infra.security.util.JwtUtils;
 import org.demo.server.module.member.dto.details.MemberDetails;
-import org.demo.server.module.member.dto.request.MemberSaveRequest;
-import org.demo.server.module.member.dto.request.MemberUpdateRequest;
+import org.demo.server.module.member.dto.form.MemberSaveForm;
+import org.demo.server.module.member.dto.form.MemberUpdateForm;
 import org.demo.server.module.member.dto.response.MemberResponse;
 import org.demo.server.module.member.service.base.MemberService;
 import org.demo.server.module.member.util.send.impl.confirm.base.SendConfirmCode;
 import org.demo.server.module.member.util.send.impl.password.base.SendTempPassword;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -52,20 +53,21 @@ public class MemberController {
      */
     @PostMapping
     public ResponseEntity<MemberResponse> saveMember(
-            @Valid @RequestBody MemberSaveRequest form, BindingResult bindingResult
+            @Valid @RequestBody MemberSaveForm form, BindingResult bindingResult
     ) throws BindException {
         // 유효성 검사 (입력 값)
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
         }
 
-        MemberResponse response = memberService.save(form);
+        // MemberDetails → MemberResponse
+        MemberResponse response = memberService.save(form).toResponse();
 
         // HTTP Status 에서 CREATED 는 응답 헤더 중 Location 에서 리소스 위치를 전달할 수 있다
-        // Location: http://localhost:8080/api/v1/members/1
+        // Location: http://localhost:8080/api/v1/members/{username}
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(response.getMemberId())
+                .path("/{username}")
+                .buildAndExpand(response.getUsername())
                 .toUri();
         return ResponseEntity.created(location).body(response);
     }
@@ -129,7 +131,7 @@ public class MemberController {
      */
     @GetMapping("/{username}")
     public ResponseEntity<MemberResponse> findMemberByUsername(@PathVariable("username") String username) {
-        MemberResponse response = memberService.findByUsername(username);
+        MemberResponse response = memberService.findByUsername(username).toResponse();
         return ResponseEntity.ok().body(response);
     }
 
@@ -141,24 +143,25 @@ public class MemberController {
     @GetMapping("/pages/{page}")
     public ResponseEntity<PagedListResponse<MemberResponse>> findAll(@PathVariable("page") int page) {
         // 회원 목록
-        PagedListResponse<MemberResponse> findMembers = memberService.findAll(page);
-        return ResponseEntity.ok().body(findMembers);
+        Page<MemberResponse> findMembers = memberService.findAll(page)
+                .map(memberDetails -> memberDetails.toResponse());
+        return ResponseEntity.ok().body(new PagedListResponse<>(findMembers));
     }
 
     /**
      * 회원 정보 수정
      *
      * @param username 회원의 기존 username
-     * @param memberUpdateRequest 변경된 회원 정보
+     * @param memberUpdateForm 변경된 회원 정보
      * @return 새로운 Access Token
      */
     @PatchMapping("/{username}")
     public ResponseEntity<Map<String, String>> updateMemberByUsername(
             @PathVariable("username") String username,
-            @RequestBody MemberUpdateRequest memberUpdateRequest
+            @RequestBody MemberUpdateForm memberUpdateForm
     ) {
         // 회원 정보 변경
-        MemberDetails memberDetails = memberService.update(username, memberUpdateRequest);
+        MemberDetails memberDetails = memberService.update(username, memberUpdateForm);
 
         // Access Token 재발급
         Claims claims = Jwts.claims();

@@ -21,20 +21,19 @@ public class MemberDetails {
     private ProfileImageDetails profileImageDetails;
 
     /**
-     * MemberDetails DTO 를 MemberResponse DTO 를 생성한다
+     * MemberDetails DTO 를 MemberResponse DTO 를 생성한다 (DTO → DTO)
      *
-     * @param memberDetails MemberResponse DTO 로 변경할 MemberDetails DTO
      * @return MemberResponse DTO 를 반환한다
      */
-    public static MemberResponse toMemberResponse(MemberDetails memberDetails) {
+    public MemberResponse toResponse() {
         return MemberResponse.builder()
-                .memberId(memberDetails.getMemberId())
-                .email(memberDetails.getEmail())
-                .username(memberDetails.getUsername())
-                .role(memberDetails.getRole())
-                .createdAt(memberDetails.getCreatedAt())
-                .updatedAt(memberDetails.getUpdatedAt())
-                .profileImage(memberDetails.getProfileImageDetails())
+                .memberId(this.getMemberId())
+                .email(this.getEmail())
+                .username(this.getUsername())
+                .role(this.getRole())
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
+                .profileImage(this.getProfileImageDetails())
                 .build();
     }
 }

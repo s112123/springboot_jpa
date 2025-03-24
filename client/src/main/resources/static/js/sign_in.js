@@ -1,12 +1,12 @@
 // 변수 선언
-var email = document.getElementById('email');
-var password = document.getElementById('password');
-var btnSignIn = document.getElementById('btn-sign-in');
-var btnFindPassword = document.getElementById('find-password');
-var errors = document.querySelectorAll('.error');
-var errorEmail = document.getElementById('error-email');
-var errorPassword = document.getElementById('error-password');
-var errorCapsLock = document.getElementById('error-capslock');
+let email = document.getElementById('email');
+let password = document.getElementById('password');
+let btnSignIn = document.getElementById('btn-sign-in');
+let btnFindPassword = document.getElementById('find-password');
+let errors = document.querySelectorAll('.error');
+let errorEmail = document.getElementById('error-email');
+let errorPassword = document.getElementById('error-password');
+let errorCapsLock = document.getElementById('error-capslock');
 
 // 이메일을 입력하고 Enter 를 누르면 비밀번호 입력 칸으로 이동
 email.addEventListener('keydown', (e) => {
@@ -108,7 +108,7 @@ btnFindPassword.addEventListener('click', () => {
         return false;
     }
     // 유효성 검사 → 이메일 형식 여부
-    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email.value.trim())) {
         alert('이메일 주소 형식이 아닙니다');
         email.focus();
@@ -143,12 +143,12 @@ async function sendTempPassword(email) {
 
 /*
 // 변수 선언
-var errorGlobal = document.getElementById('error-global');
-var isValid = true;
+let errorGlobal = document.getElementById('error-global');
+let isValid = true;
 
 // 로그인 처리
 async function login(formData) {
-  var response = axios.post('/login', formData);
+  let response = axios.post('/login', formData);
   return response;
 }
 

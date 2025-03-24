@@ -22,28 +22,25 @@ public class ProfileImage {
     @Column(name = "saved_file_name", nullable = false)
     private final String savedFileName;
 
-    @Column(name = "extension", nullable = false)
-    private final String extension;
+//    @Column(name = "path", nullable = false)
+//    private final String path;
 
     private ProfileImage(Builder builder) {
         this.profileImageId = builder.profileImageId;
         this.originalFileName = builder.originalFileName;
         this.savedFileName = builder.savedFileName;
-        this.extension = builder.extension;
     }
 
     /**
-     * ProfileImage Entity 를 받아서 ProfileImageDetails DTO 를 생성한다
+     * ProfileImage Entity 를 받아서 ProfileImageDetails DTO 를 생성한다 (Entity → DTO)
      *
-     * @param profileImage ProfileImageDetails DTO 로 변경할 ProfileImage 엔티티
      * @return ProfileImageDetails DTO 를 반환한다
      */
-    public static ProfileImageDetails toProfileImageDetails(ProfileImage profileImage) {
+    public ProfileImageDetails toDetails() {
         return ProfileImageDetails.builder()
-                .profileImageId(profileImage.getProfileImageId())
-                .originalFileName(profileImage.getOriginalFileName())
-                .savedFileName(profileImage.getSavedFileName())
-                .extension(profileImage.getExtension())
+                .profileImageId(this.getProfileImageId())
+                .originalFileName(this.getOriginalFileName())
+                .savedFileName(this.getSavedFileName())
                 .build();
     }
 
@@ -62,7 +59,6 @@ public class ProfileImage {
         private Long profileImageId;
         private String originalFileName;
         private String savedFileName;
-        private String extension;
 
         public Builder profileImageId(Long profileImageId) {
             this.profileImageId = profileImageId;
@@ -76,11 +72,6 @@ public class ProfileImage {
 
         public Builder savedFileName(String savedFileName) {
             this.savedFileName = savedFileName;
-            return this;
-        }
-
-        public Builder extension(String extension) {
-            this.extension = extension;
             return this;
         }
 

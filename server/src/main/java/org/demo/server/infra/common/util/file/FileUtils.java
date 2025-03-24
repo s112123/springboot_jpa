@@ -18,10 +18,29 @@ public class FileUtils {
      * 서버에 파일 저장
      *
      * @param multipartFile 저장할 파일
+     * @param uploadDirectory 저장 폴더
      * @return 저장된 파일 정보
      */
     public FileDetails saveFile(MultipartFile multipartFile, UploadDirectory uploadDirectory) {
+        return saveFile(multipartFile, uploadDirectory, null);
+    }
+
+    /**
+     * 서버에 파일 저장
+     *
+     * @param multipartFile 저장할 파일
+     * @param uploadDirectory 저장 폴더
+     * @param subDirectories uploadDirectory 폴더의 자식 폴더
+     * @return 저장된 파일 정보
+     */
+    public FileDetails saveFile(
+            MultipartFile multipartFile, UploadDirectory uploadDirectory, String... subDirectories
+    ) {
+        // 저장할 폴더 경로
         String uploadDirectoryPath = fileProperties.getUploadDirectory(uploadDirectory);
+        if (subDirectories != null) {
+            uploadDirectoryPath = fileProperties.getUploadDirectory(uploadDirectory, subDirectories);
+        }
 
         // 파일이 있는지 확인
         if (isAttached(multipartFile))
@@ -99,5 +118,16 @@ public class FileUtils {
      */
     public String getUploadDirectory(UploadDirectory uploadDirectory) {
         return fileProperties.getUploadDirectory(uploadDirectory);
+    }
+
+    /**
+     * 업로드 디렉토리 경로 반환
+     *
+     * @param uploadDirectory 경로를 반환할 디렉토리 이름
+     * @param subDirectory uploadDirectory 의 하위 폴더
+     * @return 업로드 디렉토리 경로
+     */
+    public String getUploadDirectory(UploadDirectory uploadDirectory, String... subDirectory) {
+        return fileProperties.getUploadDirectory(uploadDirectory, subDirectory);
     }
 }
