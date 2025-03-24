@@ -5,7 +5,6 @@ import lombok.Getter;
 @Getter
 public class ConfirmCodeResponse {
 
-    // success, fail
     private String status;
     private String message;
 }

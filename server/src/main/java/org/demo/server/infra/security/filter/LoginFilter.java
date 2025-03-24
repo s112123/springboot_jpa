@@ -93,11 +93,13 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
 
         // JWT 생성
         String accessToken = jwtUtils.create(claims, 30000);
-        String refreshToken = jwtUtils.create(claims, 50000);
+
+        // Todo: Refresh Token 은 Redis 에 저장
+        // String refreshToken = jwtUtils.create(claims, 50000);
 
         // 응답 보내기
         ObjectMapper objectMapper = new ObjectMapper();
-        String body = objectMapper.writeValueAsString(Map.of("accessToken", accessToken, "refreshToken", refreshToken));
+        String body = objectMapper.writeValueAsString(Map.of("accessToken", accessToken));
         sendResponseJson(response, HttpServletResponse.SC_OK, body);
     }
 

@@ -1,12 +1,25 @@
 // 변수 선언
 let email = document.getElementById('email');
 let password = document.getElementById('password');
+let registerMessage = document.getElementById('register-message');
 let btnSignIn = document.getElementById('btn-sign-in');
 let btnFindPassword = document.getElementById('find-password');
 let errors = document.querySelectorAll('.error');
 let errorEmail = document.getElementById('error-email');
 let errorPassword = document.getElementById('error-password');
 let errorCapsLock = document.getElementById('error-capslock');
+
+// URL 에서 쿼리 스트링 추출
+const queryString = window.location.search;
+const params = new URLSearchParams(queryString);
+const isRegister = params.get('register');
+
+// 회원가입 시, 메시지 출력
+if (isRegister !== null && isRegister) {
+    registerMessage.style.display = 'block';
+} else {
+    registerMessage.style.display = 'none';
+}
 
 // 이메일을 입력하고 Enter 를 누르면 비밀번호 입력 칸으로 이동
 email.addEventListener('keydown', (e) => {
@@ -69,18 +82,15 @@ btnSignIn.addEventListener('click', () => {
 
     // 로그인 처리
     loginProcess(formData).then(response => {
-        localStorage.setItem('accessToken', response.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.refreshToken);
-        location.replace('http://localhost:8080/');
+        localStorage.setItem('todayReviewsAccessToken', response.data.accessToken);
+        if (isRegister) {
+            location.replace('/my/profile?register=true');
+            isRegister = false;
+        }
+        location.replace('/');
     })
     .catch(error => {
-        // 서버 연결이 되지 않은 경우 → undefined, null
-        if (!error.response) {
-            alert('not connected server');
-            return;
-        }
-        // 인증 실패
-        if (error.response.data.status === 401) {
+        if (error.response && error.response.data.status === 401) {
             errorPassword.innerText = error.response.data.message;
             errorPassword.style.display = 'block';
             return;
@@ -119,12 +129,14 @@ btnFindPassword.addEventListener('click', () => {
     if (confirm('입력하신 이메일 주소로 임시 비밀번호를 전송하시겠습니까?')) {
         sendTempPassword(email.value.trim()).then(response => {
             alert('임시 비밀번호가 전송되었습니다');
+            // 실제 메일로 보낼 때는 아래 코드는 제거해야 한다
+            alert('임시 비밀번호: ' + response.data);
             email.style.borderColor = 'rgb(180, 180, 180)';
             password.style.borderColor = 'rgb(210, 40, 40)';
             password.focus();
         })
         .catch (error => {
-            if (error.response.data.status === 404) {
+            if (error.response && error.response.data.status === 404) {
                 alert('가입되지 않은 이메일 주소입니다');
                 return;
             }
@@ -134,22 +146,10 @@ btnFindPassword.addEventListener('click', () => {
 
 // 비밀번호 찾기 API
 async function sendTempPassword(email) {
-    const response = await axios.post('http://localhost:8081/api/v1/members/send-password', email, {
+    const response = await axios.post('http://localhost:8081/api/v1/members/send-password', {'email': email}, {
         headers: {
-            'Content-Type': 'text/plain'
+            'Content-Type': 'application/json'
         }
     });
+    return response;
 }
-
-/*
-// 변수 선언
-let errorGlobal = document.getElementById('error-global');
-let isValid = true;
-
-// 로그인 처리
-async function login(formData) {
-  let response = axios.post('/login', formData);
-  return response;
-}
-
-*/

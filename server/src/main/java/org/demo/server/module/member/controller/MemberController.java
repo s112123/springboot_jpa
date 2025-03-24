@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.common.dto.PagedListResponse;
 import org.demo.server.infra.common.exception.NotFoundException;
 import org.demo.server.infra.common.util.file.FileDetails;
@@ -22,6 +23,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
@@ -78,9 +81,9 @@ public class MemberController {
      * @param email 인증 코드를 보낼 메일 주소
      */
     @PostMapping("/codes")
-    public ResponseEntity<Map<String, String>> sendConfirmationEmail(@RequestBody String email) {
-        sendConfirmCode.send(email);
-        return ResponseEntity.ok().body(Map.of("status", ""));
+    public ResponseEntity<String> sendConfirmationEmail(@RequestBody String email) {
+        String code = sendConfirmCode.send(email);
+        return ResponseEntity.ok().body(code);
     }
 
     /**
@@ -108,19 +111,19 @@ public class MemberController {
     }
 
     /**
-     * 임시 이메일 전송
+     * 임시 비밀번호 전송
      *
-     * @param email
+     * @param body
      * @return
      */
     @PostMapping("/send-password")
-    public ResponseEntity<Void> sendTempPassword(@RequestBody String email) {
+    public ResponseEntity<String> sendTempPassword(@RequestBody Map<String, String> body) {
         // 회원이 존재하는지 확인
-        if (!memberService.existsEmail(email)) {
+        if (!memberService.existsEmail(body.get("email"))) {
             throw new NotFoundException("가입되지 않은 이메일 주소입니다");
         }
-        sendTempPassword.send(email);
-        return ResponseEntity.ok().build();
+        String tempPassword = sendTempPassword.send(body.get("email"));
+        return ResponseEntity.ok().body(tempPassword);
     }
 
     /**
@@ -206,6 +209,7 @@ public class MemberController {
      */
     @PostMapping("/profile-images")
     public ResponseEntity<FileDetails> uploadProfileImage(
+            @RequestPart("email") String email,
             @RequestPart(value = "profile-file", required = false) MultipartFile multipartFile
     ) {
         FileDetails fileDetails = fileUtils.saveFile(multipartFile, UploadDirectory.PROFILES);
@@ -220,7 +224,11 @@ public class MemberController {
      */
     @GetMapping("/profile-images/{fileName}")
     public ResponseEntity<Resource> viewProfileImage(@PathVariable("fileName") String fileName) {
-        Resource resource = new FileSystemResource(fileUtils.getUploadDirectory(UploadDirectory.PROFILES) + fileName);
+        // 파일 경로
+        String filePath = fileUtils.getUploadDirectory(UploadDirectory.PROFILES);
+
+        // 파일 조회
+        Resource resource = new FileSystemResource(filePath + fileName);
         HttpHeaders headers = new HttpHeaders();
         try {
             headers.add("Content-Disposition", "attachment; filename=" + resource.getFile().toPath());

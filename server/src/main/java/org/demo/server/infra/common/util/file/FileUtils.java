@@ -49,7 +49,7 @@ public class FileUtils {
         makeIfNotExistsUploadDirectory(uploadDirectoryPath);
 
         // 파일 정보
-        FileDetails fileDetails = new FileDetails(multipartFile);
+        FileDetails fileDetails = new FileDetails(multipartFile, uploadDirectoryPath);
 
         // 파일 저장
         try {

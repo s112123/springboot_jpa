@@ -23,10 +23,11 @@ public class SendConfirmCodeConsole extends SendConfirmCode {
      * @param to 인증 코드를 보낼 이메일
      */
     @Override
-    public void send(String to) {
+    public String send(String to) {
         // 인증 코드
         String code = UUID.randomUUID().toString().substring(0, 6);
         save(to, code);
         log.info("api={}, email={}, code={}", "http://localhost:8081/api/v1/members/codes/check", to, code);
+        return "인증코드: " + code;
     }
 }

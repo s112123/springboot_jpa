@@ -19,6 +19,7 @@ public class SendConfirmCodeEmail extends SendConfirmCode {
      * @param to 인증 코드를 보낼 이메일
      */
     @Override
-    public void send(String to) {
+    public String send(String to) {
+        return null;
     }
 }
