@@ -49,7 +49,7 @@ async function getReview(reviewId) {
 }
 
 // 편집 버튼
-const accessToken = localStorage.getItem('accessToken');
+const accessToken = localStorage.getItem('todayReviewsAccessToken');
 const btnUpdate = document.getElementById('update-review');
 if (accessToken) {
     // 편집 화면으로 이동

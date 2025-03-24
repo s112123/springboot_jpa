@@ -4,6 +4,7 @@ let confirmCode = document.getElementById('confirm-code');
 let password = document.getElementById('password');
 let rePassword = document.getElementById('re-password');
 let msgSendMail = document.getElementById('send-message');
+let msgConfirmCode = document.getElementById('confirm-code-message');
 let confirmCodeBox = document.getElementById('confirm-code-box');
 let btnSignUp = document.getElementById('btn-sign-up');
 let btnSendMail = document.getElementById('btn-send-mail');
@@ -23,6 +24,7 @@ email.addEventListener("keyup", () => {
     isSentConfirmCode = false;
     confirmCodeBox.style.display = 'none';
     msgSendMail.style.display = 'none';
+    msgConfirmCode.style.display = 'none';
 
     // 에러 메시지 모두 숨김
     errors.forEach((error) => {
@@ -59,6 +61,7 @@ async function isExistsEmail(email) {
 btnSendMail.addEventListener('click', () => {
     // 에러 메시지 숨김
     errorEmail.style.display = 'none';
+    confirmCodeBox.style.display = 'none';
 
     // 유효성 검사 → 이메일 입력 여부
     if (email.value.trim().length === 0) {
@@ -76,11 +79,18 @@ btnSendMail.addEventListener('click', () => {
 
     // 인증 메일 발송
     sendConfirmCodeEmail(email.value.trim()).then(response => {
+        // 인증 유무와 상관없이 버튼을 다시 누르면 새로 인증받은 번호로 인증 받아야 한다
+        isValidConfirmCode = false;
         isSentConfirmCode = true;
         confirmCodeBox.style.display = 'flex';
-        msgSendMail.innerText = '인증 메일이 발송되었습니다';
         errorEmail.style.display = 'none';
+        msgConfirmCode.style.display = 'none';
+        msgSendMail.innerText = '인증 메일이 발송되었습니다';
         msgSendMail.style.display = 'block';
+
+        // 원래는 Email 로 받지만 현재는 Email 대신 Console 로 받는다
+        // 서버에서 이메일로 보내는 경우, 이 메세지창은 필요없다
+        alert(response.data);
     });
 });
 
@@ -101,7 +111,7 @@ btnConfirmCode.addEventListener('click', () => {
 
     // 유효성 검사 → 입력 여부
     if (confirmCode.value.trim().length === 0) {
-        errorEmail.innerText = '인증 코드를 입력하세요 (유효시간: 3분)';
+        errorEmail.innerText = '인증 코드를 입력하세요';
         errorEmail.style.display = 'block';
         return false;
     }
@@ -115,15 +125,16 @@ btnConfirmCode.addEventListener('click', () => {
     // 인증 확인
     validateConfirmCode(formData).then(response => {
         isValidConfirmCode = true;
-        msgSendMail.innerText = '인증이 완료되었습니다';
+        msgConfirmCode.innerText = '인증이 완료되었습니다';
         errorEmail.style.display = 'none';
-        msgSendMail.style.display = 'block';
+        msgConfirmCode.style.display = 'block';
         confirmCodeBox.style.display = 'none';
         confirmCode.value = '';
     })
     .catch (error => {
         errorEmail.innerText = error.response.data.message;
         errorEmail.style.display = 'block';
+        confirmCode.value = '';
     });
 });
 

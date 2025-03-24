@@ -12,4 +12,5 @@ public class ProfileImageDetails {
     private Long profileImageId;
     private String originalFileName;
     private String savedFileName;
+    private String path;
 }

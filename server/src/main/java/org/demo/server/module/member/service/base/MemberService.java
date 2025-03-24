@@ -48,6 +48,14 @@ public interface MemberService {
     MemberDetails update(String username, MemberUpdateForm updateRequest);
 
     /**
+     * 회원의 비밀번호를 임시 비밀번호로 변경
+     *
+     * @param email 회원 이메일
+     * @param tempPassword 임시 비밀번호
+     */
+    void updateTempPasswordByEmail(String email, String tempPassword);
+
+    /**
      * email 로 회원 정보 삭제
      *
      * @param email 삭제 할 회원의 email

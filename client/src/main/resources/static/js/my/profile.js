@@ -19,7 +19,7 @@ let isDuplicatedUsername = false;
 // HTML 로드
 document.addEventListener('DOMContentLoaded', async () => {
     // Access Token 확인
-    accessToken = localStorage.getItem('accessToken');
+    accessToken = localStorage.getItem('todayReviewsAccessToken');
     if (!accessToken) {
         // Access Token 이 없으면 로그인 페이지로 이동
         location.href = '/login';
@@ -40,7 +40,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 프로필 이미지
         const profileImage = body.profileImage;
-        eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + profileImage.savedFileName;
+        const profileImageFileName = profileImage.savedFileName;
+        if (profileImageFileName === 'default.png') {
+            // src > main > resources > static > images > profiles > default.png
+            eleProfileImage.src = '/images/profiles/default.png';
+        } else {
+            eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + profileImage.savedFileName;
+        }
+
+        // URL 에서 쿼리 스트링 추출
+        const queryString = window.location.search;
+        const params = new URLSearchParams(queryString);
+        const isRegister = params.get('register');
+
+        // 회원가입 후, 첫 로그인에 닉네임 변경 요구
+        if (isRegister !== null && isRegister) {
+            setTimeout(() => {
+                alert('프로필 이미지, 닉네임 등 회원 정보를 변경하세요');
+             }, 100);
+        }
     } catch (error) {
         // 회원을 찾을 수 없으면 로그인 페이지로 이동하여 Access Token 을 재발급 받아야 한다
         if (error.response && error.response.data.status === 404) {
@@ -86,9 +104,10 @@ eleImageFile.addEventListener('change', (e) => {
 
     // 선택된 이미지 파일
     let formData = new FormData();
+    formData.append('email', eleEmail.value);
     formData.append('profile-file', e.target.files[0]);
 
-    // DB에 등록하지 않고 서버에만 저장
+    // DB 에 등록하지 않고 서버에만 저장
     saveSelectedImageFile(formData, accessToken).then(response => {
         eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + response.data.savedFileName;
         imageUrl = eleProfileImage.src;
@@ -101,7 +120,8 @@ eleImageFile.addEventListener('change', (e) => {
 async function saveSelectedImageFile(formData, accessToken) {
     const response = await axios.post('http://localhost:8081/api/v1/members/profile-images', formData, {
         headers: {
-            'Authorization': 'Bearer ' + accessToken
+            'Authorization': 'Bearer ' + accessToken,
+            'Content-Type': 'multipart/form-data'
         }
     });
     return response;
@@ -158,7 +178,7 @@ btnUpdate.addEventListener('click', () => {
         updateMember(originalUsername, changedUserInfo, accessToken).then(response => {
             // 새롭게 발급받은 Access Token 을 갱신
             const newAccessToken = response.data.accessToken;
-            localStorage.setItem('accessToken', newAccessToken);
+            localStorage.setItem('todayReviewsAccessToken', newAccessToken);
 
             // 회원 정보 변경 완료 메시지
             eleUpdatedMessage.style.display = 'block';
@@ -179,18 +199,23 @@ eleUsername.addEventListener('keyup', () => {
         error.style.display = 'none';
     });
 
+    // Access Token 에서 username 가져오기
+    const username = getUsernameFromAccessToken(accessToken);
+
     // 중복 체크
-    isDuplicatedEmail = false;
-    if (eleUsername.value.trim().length > 0) {
-        isExistsUsername(eleUsername.value.trim(), accessToken).then(response => {
-            isDuplicatedUsername = response.data;
-            if (isDuplicatedUsername) {
-                eleUsername.nextElementSibling.nextElementSibling.style.display = 'block';
-                eleUsername.focus();
-            } else {
-                eleUsername.nextElementSibling.nextElementSibling.style.display = 'none';
-            }
-        });
+    if (eleUsername.value.trim() !== username) {
+        isDuplicatedEmail = false;
+        if (eleUsername.value.trim().length > 0) {
+            isExistsUsername(eleUsername.value.trim(), accessToken).then(response => {
+                isDuplicatedUsername = response.data;
+                if (isDuplicatedUsername) {
+                    eleUsername.nextElementSibling.nextElementSibling.style.display = 'block';
+                    eleUsername.focus();
+                } else {
+                    eleUsername.nextElementSibling.nextElementSibling.style.display = 'none';
+                }
+            });
+        }
     }
 });
 
@@ -291,8 +316,7 @@ btnWithdrawMembership.addEventListener('click', () => {
     if (confirm('회원탈퇴 하시겠습니까? 모든 내역이 삭제됩니다')) {
         removeMemberShip(eleEmail.value, accessToken).then(response => {
             // JWT 삭제
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('todayReviewsAccessToken');
 
             // 탈퇴 완료
             alert('회원 탈퇴가 완료되었습니다');

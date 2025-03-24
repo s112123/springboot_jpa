@@ -1,5 +1,5 @@
 // 변수 선언
-const token = localStorage.getItem('accessToken');
+const token = localStorage.getItem('todayReviewsAccessToken');
 const login = document.getElementById('login');
 const notification = document.getElementById('notification');
 const profile = document.getElementById('profile');

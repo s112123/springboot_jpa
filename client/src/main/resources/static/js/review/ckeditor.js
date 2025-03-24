@@ -1,3 +1,5 @@
+import {accessToken, username} from './add.js';
+
 // CKEditor 연결
 let reviewEditor;
 let tempImageFileNames = [];
@@ -8,14 +10,12 @@ ClassicEditor.create(document.querySelector('#content'), {
 })
 .then(editor => {
     reviewEditor = editor;
-
-    editor.model.schema.extend('imageInline', {allowAttributes: 'data-image-number'});
-    //editor.model.schema.extend('imageBlock', {allowAttributes: 'data-image-number'});
+    editor.model.schema.extend('imageInline', {allowAttributes: 'data-image-index'});
 
     // (데이터 모델 → 뷰) data-image-number 속성이 모델에서 뷰로 변환될 때 유지되도록 설정
     // downcast: 모델에서 <img> 태그로 변환할 때 data-image-number 속성 유지
     editor.conversion.for('downcast').add(dispatcher => {
-        dispatcher.on('attribute:data-image-number:imageInline', (evt, data, conversionApi) => {
+        dispatcher.on('attribute:data-image-index:imageInline', (evt, data, conversionApi) => {
             const { writer } = conversionApi;
             const viewElement = conversionApi.mapper.toViewElement(data.item);
 
@@ -23,23 +23,23 @@ ClassicEditor.create(document.querySelector('#content'), {
                 // <span> 내부의 <img>
                 const imgElement = viewElement.getChild(0);
                 if (imgElement) {
-                    writer.setAttribute('data-image-number', data.attributeNewValue, imgElement);
+                    writer.setAttribute('data-image-index', data.attributeNewValue, imgElement);
                 }
             }
         });
     });
 
-    // (뷰 → 데이터 모델) data-image-number 속성이 뷰에서 모델로 변환될 때 유지되도록 설정
-    // upcast: <img> 태그에서 data-image-number 속성을 모델로 변환
+    // (뷰 → 데이터 모델) data-image-index 속성이 뷰에서 모델로 변환될 때 유지되도록 설정
+    // upcast: <img> 태그에서 data-image-index 속성을 모델로 변환
     editor.conversion.for('upcast').attributeToAttribute({
-        view: 'data-image-number',
-        model: 'data-image-number'
+        view: 'data-image-index',
+        model: 'data-image-index'
     });
 
-    // 뷰의 속성과 모델의 속성에 data-image-number 를 추가
+    // 뷰의 속성과 모델의 속성에 data-image-index 를 추가
     editor.conversion.attributeToAttribute({
-        model: 'data-image-number',
-        view: 'data-image-number'
+        model: 'data-image-index',
+        view: 'data-image-index'
     });
 })
 .catch(error => {
@@ -70,11 +70,11 @@ class UploadAdapter {
     // 에디터에서 글 작성 중 이미지를 올리면 해당 임시 이미지를 서버에 저장하는 요청 경로
     _initRequest() {
         const xhr = this.xhr = new XMLHttpRequest();
+
         // xhr.open('POST', location.protocol + '//' + location.host + 'reviews/images/content-temp-image', true);
-        xhr.open('POST', 'http://localhost:8081/api/v1/reviews/images/content-temp-image', true);
-        // Access Token 전달
-        const accessToken = localStorage.getItem('accessToken');
+        xhr.open('POST', 'http://localhost:8081/api/v1/reviews/images/content-temp-image/' + username, true);
         xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+
         // 응답 타입
         xhr.responseType = 'json';
     }
@@ -89,34 +89,24 @@ class UploadAdapter {
         xhr.addEventListener('load', () => {
             // 서버에서 응답 본문 반환
             const response = xhr.response;
-            console.log(response);
-
             // 글 작성 중 서버에 저장된 임시 파일의 이름을 리스트에 담는다
             tempImageFileNames.push(response);
-            console.log(tempImageFileNames);
-
             // 이미지 번호
-            const imageNumber = tempImageFileNames.length - 1;
-
+            const imageIndex = tempImageFileNames.length - 1;
             // <img> 태그에 이미지 번호 추가
             this.editor.model.change(writer => {
                 // <img> 태그의 src 속성 변경
                 const imageElement = writer.createElement('imageInline', {
-                    'src': 'http://localhost:8081/api/v1/reviews/images/content-temp-image/' + response.savedFileName,
-                    'data-image-number': imageNumber
+                    'src': 'http://localhost:8081/api/v1/reviews/images/content-temp-image/' + username + '/' + response.savedFileName,
+                    'data-image-index': imageIndex
                 });
 
                 // <img> 태그에 속성을 추가하는 다른 방법
                 // 위에서 'data-number': imageNumber' 제거하고 아래 코드를 작성할 수 있다
                 // writer.setAttribute('data-image-number', imageNumber, imageElement);
 
-                console.log('imageElement:', imageElement);
-                console.log('imageElement:', imageElement._attrs);
-                console.log('imageElement:', imageElement.getAttributes());
-
                 this.editor.model.insertContent(imageElement);
             });
-
             if (!response || response.error) {
                 return reject(response && response.error ? response.error.message : genericErrorText);
             }
@@ -134,4 +124,4 @@ class UploadAdapter {
     }
 }
 
-export {reviewEditor};
+export {reviewEditor, tempImageFileNames};

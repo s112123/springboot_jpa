@@ -1,7 +1,8 @@
-import {reviewEditor} from './ckeditor.js';
+import {reviewEditor, tempImageFileNames} from './ckeditor.js';
 
 // 변수 선언
 let accessToken = undefined;
+let username = undefined;
 let btnAdd = document.getElementById('add-review');
 let btnCancel = document.getElementById('cancel-review');
 let title = document.getElementById('title');
@@ -10,11 +11,13 @@ let storeAddress = document.getElementById('storeAddress');
 let star = document.getElementById('star');
 let errors = document.querySelectorAll('.error');
 
-// Access Token 확인
-accessToken = localStorage.getItem('accessToken');
+// Access Token 가져오기
+accessToken = localStorage.getItem('todayReviewsAccessToken');
 if (!accessToken) {
     // Access Token 이 없으면 로그인 페이지로 이동
     location.href = '/login';
+} else {
+    username = getUsernameFromAccessToken(accessToken);
 }
 
 // 리뷰 등록
@@ -67,51 +70,37 @@ btnAdd.addEventListener('click', (e) => {
 //        return false;
 //    }
 
-    // Access Token 에서 username 가져오기 → 글 작성자
-    const writer = getUsernameFromAccessToken(accessToken);
+    // 글에 작성된 <img> 태그
+    const parser = new DOMParser();
+    const reviewEditorHTML = parser.parseFromString(reviewEditor.getData(), 'text/html');
+    let imgTags = reviewEditorHTML.body.querySelectorAll('img');
+    // 저장되어야 하는 이미지 파일의 인덱스 배열 → <img data-image-index='1') 로 지정이 되어 있다
+    let savedImageIndex = [...imgTags].map(imgTag => parseInt(imgTag.getAttribute('data-image-index')));
+
+    // 저장되어야 하는 <img> 태그
+    let savedImgTags = tempImageFileNames.filter((_, index) => savedImageIndex.includes(index));
+    console.log(savedImgTags);
+    // 삭제되어야 하는 <img> 태그
+    let deletedImgTags = tempImageFileNames.filter((_, index) => !savedImageIndex.includes(index));
+    console.log(deletedImgTags);
 
     // 리뷰 입력 정보
     // reviewEditor → ckeditor.js 에 선언되어 있다
     // reviewEditor.getData() → CkEditor 의 내용 추출
     const formData = {
-        'writer': writer,
+        'writer': username,
         'title': title.value.trim(),
         'storeName': storeName.value.trim(),
         'storeAddress': storeAddress.value.trim(),
         'content': reviewEditor.getData(),
-        'star': star.value
+        'star': star.value,
+        'reviewImages': savedImgTags
     };
 
-    // 리뷰 등록 ->
-    const parser = new DOMParser();
-    const reviewEditorHTML = parser.parseFromString(reviewEditor.getData(), 'text/html');
-    //console.log(reviewEditorHTML);
-    let imgTags = reviewEditorHTML.body.querySelectorAll('img');
-    //console.log(imgTags);
-
-    imgTags.forEach((img) => {
-        // 에디터 내부의 <img>의 src 값 가져옴
-        let imgSrc = img.src;
-        console.log(img);
-        console.log(imgSrc);
-        console.log(img.getAttribute('data-image-number'));
-
-
-//        // 에디터에서 보여지는 파일이름 추출
-//        // 20240215_5329008e-acfa-45e0-bb6f-f6bb410882fe.png
-//        let uploadFileName = imgSrc.substring(imgSrc.lastIndexOf('/') + 1);
-//        uploadFileNames.push(uploadFileName);
-//        // 에디터 내부의 <img>의 src 값을 임시 이미지가 아닌 실제 사용될 이미지 경로로 처리
-//        // 변경 전: http://localhost:8080/images/review/20240215_5329008e-acfa-45e0-bb6f-f6bb410882fe.png
-//        // 변경 후: http://localhost:8080/images/review/5329008e-acfa-45e0-bb6f-f6bb410882fe.png
-//        img.src = imgSrc.substring(0, imgSrc.lastIndexOf('/') + 1)
-//        + uploadFileName.substring(uploadFileName.indexOf("_") + 1);
+    // 리뷰 등록
+    addReview(formData, accessToken).then(response => {
+        console.log(response.data);
     });
-
-
-//    addReview(formData, accessToken).then(response => {
-//        console.log(response.data);
-//    });
 });
 
 // 평점 선택
@@ -168,6 +157,7 @@ btnCancel.addEventListener('click', () => {
     }
 });
 
+export {accessToken, username};
 
 /*
 // 변수 선언

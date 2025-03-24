@@ -1,7 +1,6 @@
 package org.demo.server.module.member.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.demo.server.infra.common.exception.NotFoundException;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
 import org.demo.server.module.member.dto.details.MemberDetails;
@@ -52,6 +51,7 @@ public class MemberServiceImpl implements MemberService {
         ProfileImage profileImage = ProfileImage.builder()
                 .originalFileName("default.png")
                 .savedFileName("default.png")
+                .path("/src/main/resources/static/images/profiles")
                 .build();
 
         // 회원 등록
@@ -139,6 +139,7 @@ public class MemberServiceImpl implements MemberService {
                 .profileImageId(findMember.getProfileImage().getProfileImageId())
                 .originalFileName(newOriginalFileName)
                 .savedFileName(newSavedFileName)
+                .path(fileUtils.getUploadDirectory(UploadDirectory.PROFILES))
                 .build();
 
         // 기존 엔티티와 memberId 가 동일한 새로운 엔티티 객체를 만든다
@@ -155,6 +156,26 @@ public class MemberServiceImpl implements MemberService {
         // 변경 감지는 final 이 없고 Setter 와 같이 엔티티의 속성 값을 변경할 수 있어야 한다
         Member updatedMember = memberRepository.save(member);
         return updatedMember.toDetails();
+    }
+
+    /**
+     * 회원의 비밀번호를 임시 비밀번호로 변경
+     *
+     * @param email 회원 이메일
+     * @param tempPassword 임시 비밀번호
+     */
+    @Override
+    public void updateTempPasswordByEmail(String email, String tempPassword) {
+        Member findMember = memberFinder.getMemberByEmail(email);
+        Member updatedMember = Member.builder()
+                .memberId(findMember.getMemberId())
+                .email(findMember.getEmail())
+                .username(findMember.getUsername())
+                .password(passwordEncoder.encode(tempPassword))
+                .role(findMember.getRole())
+                .profileImage(findMember.getProfileImage())
+                .build();
+        memberRepository.save(updatedMember);
     }
 
     /**

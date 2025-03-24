@@ -26,7 +26,7 @@ public class FileProperties {
      * @return 파일이 저장되는 경로
      */
     public String getUploadDirectory(UploadDirectory uploadDirectory) {
-        return root + File.separator + directories.get(uploadDirectory.name().toLowerCase());
+        return (root + File.separator + directories.get(uploadDirectory.name().toLowerCase())).replace("\\", "");
     }
 
     /**

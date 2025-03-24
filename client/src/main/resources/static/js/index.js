@@ -6,7 +6,7 @@ let noData = document.getElementById('no-data');
 // HTML 로드
 document.addEventListener('DOMContentLoaded', () => {
     // 로그인 되어 있는 경우, 리뷰쓰기 버튼 표시
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('todayReviewsAccessToken');
     if (token) {
         btnReview.style.display = 'block';
     } else {
