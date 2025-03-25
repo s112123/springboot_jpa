@@ -1,62 +1,69 @@
 package org.demo.server.infra.common.init;
 
+import org.demo.server.module.follow.entity.Follow;
+import org.demo.server.module.follow.repository.FollowRepository;
+import org.demo.server.module.follow.service.base.FollowService;
 import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.form.MemberSaveForm;
 import org.demo.server.module.member.service.base.MemberService;
-import org.demo.server.module.review.dto.form.ReviewImageForm;
-import org.demo.server.module.review.dto.form.ReviewSaveForm;
-import org.demo.server.module.review.service.base.ReviewService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration
 public class DBInit {
 
     @Bean
-    public CommandLineRunner init(MemberService memberService, ReviewService reviewService) {
+    public CommandLineRunner init(MemberService memberService, FollowRepository followRepository) {
         return args -> {
             // 회원 등록
             MemberSaveForm admin = new MemberSaveForm();
             admin.setEmail("admin@test.com");
             admin.setPassword("a123412341234");
-            MemberDetails savedAdmin = memberService.save(admin);
+            MemberDetails adminDetails = memberService.save(admin);
 
-            MemberSaveForm user = new MemberSaveForm();
-            user.setEmail("user@test.com");
-            user.setPassword("a123412341234");
-            MemberDetails savedUser = memberService.save(user);
+            MemberSaveForm user1 = new MemberSaveForm();
+            user1.setEmail("user1@test.com");
+            user1.setPassword("a123412341234");
+            MemberDetails user1Details = memberService.save(user1);
 
-            // 회원 정보 아이디
-            String adminUsername = memberService.findById(savedAdmin.getMemberId()).getUsername();
-            String userUsername = memberService.findById(savedUser.getMemberId()).getUsername();
+            MemberSaveForm user2 = new MemberSaveForm();
+            user2.setEmail("user2@test.com");
+            user2.setPassword("a123412341234");
+            MemberDetails user2Details = memberService.save(user2);
 
-            // 리뷰 등록
-//            List<ReviewImageForm> reviewImageForms = new ArrayList<>();
-//            ReviewImageForm reviewImageForm1 = ReviewImageForm.builder()
-//                    .originalFileName("lenna1.png")
-//                    .savedFileName("lenna1.png")
-//                    .build();
-//            reviewImageForms.add(reviewImageForm1);
-//
-//            ReviewImageForm reviewImageForm2 = ReviewImageForm.builder()
-//                    .originalFileName("lenna2.png")
-//                    .savedFileName("lenna2.png")
-//                    .build();
-//            reviewImageForms.add(reviewImageForm2);
-//
-//            ReviewSaveForm reviewSaveForm = new ReviewSaveForm();
-//            reviewSaveForm.setWriter(adminUsername);
-//            reviewSaveForm.setTitle("Title1");
-//            reviewSaveForm.setContent("Content1");
-//            reviewSaveForm.setStoreName("Store1");
-//            reviewSaveForm.setStoreAddress("Address1");
-//            reviewSaveForm.setStar(1);
-//            reviewSaveForm.setReviewImageForms(reviewImageForms);
-//            reviewService.save(reviewSaveForm);
+            // admin -> user1, user2
+            Follow adminToUser1 = Follow.builder()
+                    .follower(adminDetails.toMember())
+                    .followed(user1Details.toMember())
+                    .build();
+            followRepository.save(adminToUser1);
+
+            Follow adminToUser2 = Follow.builder()
+                    .follower(adminDetails.toMember())
+                    .followed(user2Details.toMember())
+                    .build();
+            followRepository.save(adminToUser2);
+
+            // user1 -> admin
+            Follow user1ToAdmin = Follow.builder()
+                    .follower(user1Details.toMember())
+                    .followed(adminDetails.toMember())
+                    .build();
+            followRepository.save(user1ToAdmin);
+
+            // user2 -> admin, user1
+            Follow user2ToAdmin = Follow.builder()
+                    .follower(user2Details.toMember())
+                    .followed(adminDetails.toMember())
+                    .build();
+            followRepository.save(user2ToAdmin);
+
+            Follow user2ToUser1 = Follow.builder()
+                    .follower(user2Details.toMember())
+                    .followed(user1Details.toMember())
+                    .build();
+            followRepository.save(user2ToUser1);
         };
     }
 }
