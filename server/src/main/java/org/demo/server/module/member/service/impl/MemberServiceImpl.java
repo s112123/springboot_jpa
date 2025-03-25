@@ -51,7 +51,6 @@ public class MemberServiceImpl implements MemberService {
         ProfileImage profileImage = ProfileImage.builder()
                 .originalFileName("default.png")
                 .savedFileName("default.png")
-                .path("/src/main/resources/static/images/profiles")
                 .build();
 
         // 회원 등록
@@ -139,7 +138,6 @@ public class MemberServiceImpl implements MemberService {
                 .profileImageId(findMember.getProfileImage().getProfileImageId())
                 .originalFileName(newOriginalFileName)
                 .savedFileName(newSavedFileName)
-                .path(fileUtils.getUploadDirectory(UploadDirectory.PROFILES))
                 .build();
 
         // 기존 엔티티와 memberId 가 동일한 새로운 엔티티 객체를 만든다

@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.security.dto.LoginRequest;
 import org.demo.server.infra.security.util.JwtUtils;
+import org.demo.server.module.member.entity.Member;
+import org.demo.server.module.member.service.base.MemberFinder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -24,11 +26,13 @@ import java.util.Map;
 public class LoginFilter extends AbstractAuthenticationProcessingFilter {
 
     private final JwtUtils jwtUtils;
+    private final MemberFinder memberFinder;
 
-    public LoginFilter(String defaultFilterProcessesUrl, JwtUtils jwtUtils) {
+    public LoginFilter(String defaultFilterProcessesUrl, JwtUtils jwtUtils, MemberFinder memberFinder) {
         // 로그인 경로
         super(defaultFilterProcessesUrl);
         this.jwtUtils = jwtUtils;
+        this.memberFinder = memberFinder;
     }
 
     /**
@@ -85,11 +89,13 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         List<String> roles = authentication.getAuthorities().stream()
                 .map(grantedAuthority -> grantedAuthority.getAuthority())
                 .toList();
+        Long memberId = memberFinder.getMemberByUsername(username).getMemberId();
 
         // JWT 페이로드 생성
         Claims claims = Jwts.claims();
         claims.put("username", username);
         claims.put("roles", roles);
+        claims.put("memberId", memberId);
 
         // JWT 생성
         String accessToken = jwtUtils.create(claims, 30000);

@@ -3,6 +3,8 @@ package org.demo.server.module.review.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.demo.server.module.review.dto.details.ReviewDetails;
+import org.demo.server.module.review.dto.details.ReviewImageDetails;
 
 @Entity
 @Table(name = "review_image")
@@ -21,23 +23,34 @@ public class ReviewImage {
     @Column(name = "saved_file_name")
     private final String savedFileName;
 
-    @Column(name = "path")
-    private final String path;
-
     @Column(name = "is_thumbnail")
     private final Boolean isThumbnail;
 
+    // Review (1) - (*) ReviewImage
     @ManyToOne
     @JoinColumn(name = "review_id")
-    private final Review review;
+    private Review review;
 
     private ReviewImage(Builder builder) {
         this.reviewImageId = builder.reviewImageId;
         this.originalFileName = builder.originalFileName;
         this.savedFileName = builder.savedFileName;
-        this.path = builder.path;
         this.isThumbnail = builder.isThumbnail;
         this.review = builder.review;
+    }
+
+    /**
+     * ReviewImage 엔티티를 ReviewImageDetails 로 변환 (Entity → DTO)
+     *
+     * @return ReviewDetails
+     */
+    public ReviewImageDetails toDetails() {
+        return ReviewImageDetails.builder()
+                .reviewImageId(this.reviewImageId)
+                .originalFileName(this.originalFileName)
+                .savedFileName(this.savedFileName)
+                .isThumbnail(this.isThumbnail)
+                .build();
     }
 
     /**
@@ -49,13 +62,16 @@ public class ReviewImage {
         return new Builder();
     }
 
+    public void addReview(Review review) {
+        this.review = review;
+    }
+
     // ReviewImage.builder()
     public static class Builder {
 
         private Long reviewImageId;
         private String originalFileName;
         private String savedFileName;
-        private String path;
         private Boolean isThumbnail;
         private Review review;
 
@@ -71,11 +87,6 @@ public class ReviewImage {
 
         public Builder savedFileName(String savedFileName) {
             this.savedFileName = savedFileName;
-            return this;
-        }
-
-        public Builder path(String path) {
-            this.path = path;
             return this;
         }
 

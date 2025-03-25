@@ -1,3 +1,5 @@
+import { accessTokenUtils } from '/js/common.js';
+
 // 변수 선언
 let btnReview = document.getElementById('btn-review');
 let middle = document.getElementById('reviews-middle');
@@ -6,8 +8,7 @@ let noData = document.getElementById('no-data');
 // HTML 로드
 document.addEventListener('DOMContentLoaded', () => {
     // 로그인 되어 있는 경우, 리뷰쓰기 버튼 표시
-    const token = localStorage.getItem('todayReviewsAccessToken');
-    if (token) {
+    if (accessTokenUtils.getAccessToken()) {
         btnReview.style.display = 'block';
     } else {
         btnReview.style.display = 'none';
@@ -15,18 +16,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 리뷰 목록
     getReviews(1).then(response => {
-        console.log(response.data.data);
-        // 리뷰 목록을 작성한 HTML 반환
-        let reviews = getReviewsHTML(response.data.data);
+        let reviews = response.data.data;
 
+        // DB 에 저장된 <img> 태그의 src 값을 변경한다
+        // 수정 전 → <img src="http://localhost:8081/api/v1/reviews/content-images/temp/{memberId}/{fileName}">
+        // 수정 후 → <img src="http://localhost:8081/api/v1/reviews/content-images/{memberId}/{fileName}?reviewId=1">
+        reviews.forEach((review) => {
+            review.content = review.content.replace(/<img[^>]+src="([^"]+\/temp[^"]+)"/g, (match, p1) => {
+                const updatedSrc = p1.replace('/temp', '') + '?reviewId=' + review.reviewId;
+                return match.replace(p1, updatedSrc);
+            });
+        });
+
+        // 리뷰 목록을 작성한 HTML 반환
+        let reviewsHTML = getReviewsHTML(reviews);
         // 리뷰 목록 렌더링
-        if (reviews.length === 0) {
-            middle.innerHTML = '<div class="no-data" id="no-data">검색된 결과가 없습니다</div>';
+        if (reviewsHTML.length === 0) {
+            middle.innerHTML = '<div class="no-data" id="no-data">조회된 결과가 없습니다</div>';
         } else {
-            middle.innerHTML = reviews;
+            middle.innerHTML = reviewsHTML;
         }
     });
 });
+
+// 리뷰쓰기 페이지로 이동
+if (btnReview !== null) {
+    btnReview.addEventListener('click', () => {
+        location.href = '/review/add';
+    });
+}
 
 // 리뷰 목록
 async function getReviews(page) {
@@ -43,11 +61,22 @@ function getReviewsHTML(reviews) {
     html += `<div class="review-wrap" onclick="viewReview(${review.reviewId})">`;
     html += `  <div class="review-box">`;
     html += `    <div class="review-image">`;
-    html += `      <img src="${review.thumbnailUrl}" />`;
+    // 썸네일
+    let reviewImagesDetailsList = review.reviewImagesDetailsList;
+    for (let reviewImagesDetails of reviewImagesDetailsList) {
+        if (reviewImagesDetails.isThumbnail) {
+            let thumbFileName = reviewImagesDetails.savedFileName;
+            let thumbSrc = 'http://localhost:8081/api/v1/reviews/content-images/';
+            thumbSrc += review.memberId + '/' + thumbFileName + '?reviewId=' + review.reviewId;
+            html += '      <img src="' + thumbSrc + '" />';
+            break;
+        }
+    }
     html += `    </div>`;
     html += `    <div class="review-summary">`;
     html += `      <div class="review-summary-star">`;
     html += `        <ul class="store-star">`;
+    // 평점
     for (let i = 0; i < 5; i++) {
       if (i < review.star) {
         html += `      <li class="star-active"><i class="fa-solid fa-star"></i></li>`;
@@ -57,10 +86,8 @@ function getReviewsHTML(reviews) {
     }
     html += `        </ul>`;
     html += `      </div>`;
-//    html += `      <div class="review-summary-title">${shortTitle(review.title)}</div>`;
-//    html += `      <div class="review-summary-content">${shortContent(removeHTMLTag(review.content))}</div>`;
-    html += `      <div class="review-summary-title">${review.title}</div>`;
-    html += `      <div class="review-summary-content">${review.content}</div>`;
+    html += `      <div class="review-summary-title">${shortTitle(review.title)}</div>`;
+    html += `      <div class="review-summary-content">${shortContent(removeHTMLTag(review.content))}</div>`;
     html += `    </div>`;
     html += `  </div>`;
     html += `</div>`;
@@ -69,17 +96,46 @@ function getReviewsHTML(reviews) {
   return html;
 }
 
-// 리뷰쓰기 페이지로 이동
-if (btnReview !== null) {
-    btnReview.addEventListener('click', () => {
-        location.href = '/review/add';
-    });
+// 타이틀 글자 수 줄임
+function shortTitle(title) {
+    let result = title;
+    if (title.length > 14) {
+        result = title.substring(0, 14) + '...';
+    }
+    return result;
+}
+
+// 글 내용 글자 수 줄임
+function shortContent(content) {
+    let result = content;
+    if (content.length > 32) {
+        result = content.substring(0, 32) + '...';
+    }
+    return result;
+}
+
+// HTML 태그 제거
+function removeHTMLTag(content) {
+    let result = content.replaceAll('</p><p>', ' ');
+    result = result.replace(/(<([^>]+)>)/gi, '');
+    result = result.replace(/\s\s+/ig, '');
+    result = result.replace(/&nbsp;/ig, '');
+    result = result.replace(/ +/ig, ' ');
+    result = result.replaceAll('&gt;', '>');
+    result = result.replaceAll('&lt;', '<');
+    result = result.replaceAll('&lt;', '<');
+    result = result.replaceAll('&quot;', "");
+    result = result.replaceAll('&amp;', '&');
+    return result;
 }
 
 // 조회 페이지 이동
 function viewReview(reviewId) {
     location.href = "/review/view?review_id=" + reviewId;
 }
+// 현재 index.js 는 모듈 상태이므로 전역 스코프에 viewReview 함수를 노출한다
+// 그렇지 않으면 Uncaught ReferenceError: viewReview is not defined 에러가 발생한다
+window.viewReview = viewReview;
 
 
 
@@ -214,39 +270,6 @@ function viewReview(reviewId) {
 //  orderItems.forEach((orderItem) => {
 //    orderItem.classList.add('sort-deactive');
 //  });
-//}
-//
-//// HTML 태그 제거
-//function removeHTMLTag(content) {
-//  let result = content.replaceAll('</p><p>', ' ');
-//  result = result.replace(/(<([^>]+)>)/gi, '');
-//  result = result.replace(/\s\s+/ig, '');
-//  result = result.replace(/&nbsp;/ig, '');
-//  result = result.replace(/ +/ig, ' ');
-//  result = result.replaceAll('&gt;', '>');
-//  result = result.replaceAll('&lt;', '<');
-//  result = result.replaceAll('&lt;', '<');
-//  result = result.replaceAll('&quot;', "");
-//  result = result.replaceAll('&amp;', '&');
-//  return result;
-//}
-//
-//// 타이틀 글자 수 줄임
-//function shortTitle(title) {
-//  let result = title;
-//  if (title.length > 14) {
-//    result = title.substring(0, 14) + '...';
-//  }
-//  return result;
-//}
-//
-//// 글 내용 글자 수 줄임
-//function shortContent(content) {
-//  let result = content;
-//  if (content.length > 32) {
-//    result = content.substring(0, 32) + '...';
-//  }
-//  return result;
 //}
 
 

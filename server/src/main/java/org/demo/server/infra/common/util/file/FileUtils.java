@@ -1,13 +1,17 @@
 package org.demo.server.infra.common.util.file;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FileUtils {
@@ -22,7 +26,7 @@ public class FileUtils {
      * @return 저장된 파일 정보
      */
     public FileDetails saveFile(MultipartFile multipartFile, UploadDirectory uploadDirectory) {
-        return saveFile(multipartFile, uploadDirectory, null);
+        return saveFile(multipartFile, uploadDirectory, "");
     }
 
     /**
@@ -37,10 +41,7 @@ public class FileUtils {
             MultipartFile multipartFile, UploadDirectory uploadDirectory, String... subDirectories
     ) {
         // 저장할 폴더 경로
-        String uploadDirectoryPath = fileProperties.getUploadDirectory(uploadDirectory);
-        if (subDirectories != null) {
-            uploadDirectoryPath = fileProperties.getUploadDirectory(uploadDirectory, subDirectories);
-        }
+        String uploadDirectoryPath = fileProperties.getUploadDirectory(uploadDirectory, subDirectories);
 
         // 파일이 있는지 확인
         if (isAttached(multipartFile))
@@ -49,7 +50,7 @@ public class FileUtils {
         makeIfNotExistsUploadDirectory(uploadDirectoryPath);
 
         // 파일 정보
-        FileDetails fileDetails = new FileDetails(multipartFile, uploadDirectoryPath);
+        FileDetails fileDetails = new FileDetails(multipartFile);
 
         // 파일 저장
         try {
@@ -57,6 +58,34 @@ public class FileUtils {
             return fileDetails;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 파일 이동
+     *
+     * @param fileName 이동할 파일 이름
+     * @param sourceDirectoryPath 원본 폴더 경로
+     * @param targetDirectoryPath 파일을 이동할 폴더 경로
+     */
+    public void moveFile(String fileName, String sourceDirectoryPath, String targetDirectoryPath) {
+        // 원본 파일
+        File sourceFile = new File(sourceDirectoryPath + fileName);
+        if (!sourceFile.exists()) {
+            throw new IllegalArgumentException("원본 파일이 없습니다");
+        }
+
+        // 이동 파일
+        makeIfNotExistsUploadDirectory(targetDirectoryPath);
+        File targetFile = new File(targetDirectoryPath + fileName);
+
+        try {
+            // 파일 이동
+            // 파일을 복사할 때는 move() 대신 copy() 를 동일하게 사용하면 된다
+            Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            log.info("source={} → target={}", sourceFile.getAbsolutePath(), targetFile.getAbsoluteFile());
+        } catch (IOException e) {
+            log.info("FileUtils.moveFile → 원본 파일이 없습니다");
         }
     }
 

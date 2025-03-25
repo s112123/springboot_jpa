@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.demo.server.infra.security.filter.AccessTokenCheckFilter;
 import org.demo.server.infra.security.filter.LoginFilter;
 import org.demo.server.infra.security.util.JwtUtils;
+import org.demo.server.module.member.service.base.MemberFinder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,11 +30,12 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
+    private final MemberFinder memberFinder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 시큐리티 필터
-        LoginFilter loginFilter = new LoginFilter("/api/v1/login", jwtUtils);
+        LoginFilter loginFilter = new LoginFilter("/api/v1/login", jwtUtils, memberFinder);
         loginFilter.setAuthenticationManager(authenticationManager());
         AccessTokenCheckFilter accessTokenCheckFilter = new AccessTokenCheckFilter(jwtUtils);
 
@@ -50,6 +52,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/pages/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/content-images/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/members/profile-images/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/members/send-password").permitAll()

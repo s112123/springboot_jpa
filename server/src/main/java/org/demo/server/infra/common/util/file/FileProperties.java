@@ -25,8 +25,13 @@ public class FileProperties {
      * @param uploadDirectory 저장할 폴더 이름
      * @return 파일이 저장되는 경로
      */
-    public String getUploadDirectory(UploadDirectory uploadDirectory) {
-        return (root + File.separator + directories.get(uploadDirectory.name().toLowerCase())).replace("\\", "");
+    String getUploadDirectory(UploadDirectory uploadDirectory) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(root);
+        sb.append(File.separator);
+        sb.append(directories.get(uploadDirectory.name().toLowerCase()));
+        sb.append(File.separator);
+        return sb.toString();
     }
 
     /**
@@ -36,12 +41,15 @@ public class FileProperties {
      * @param subDirectories uploadDirectory 로 설정된 폴더의 자식 폴더
      * @return 파일이 저장되는 경로
      */
-    public String getUploadDirectory(UploadDirectory uploadDirectory, String... subDirectories) {
+    String getUploadDirectory(UploadDirectory uploadDirectory, String... subDirectories) {
         StringBuilder sb = new StringBuilder();
-        sb.append(root + File.separator);
-        sb.append(uploadDirectory.name().toLowerCase() + File.separator);
+        sb.append(root);
+        sb.append(File.separator);
+        sb.append(directories.get(uploadDirectory.name().toLowerCase()));
+        sb.append(File.separator);
         for (String subDirectory : subDirectories) {
-            sb.append(subDirectory + File.separator);
+            sb.append(subDirectory);
+            sb.append(File.separator);
         }
         return sb.toString();
     }
