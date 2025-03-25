@@ -1,6 +1,7 @@
-import {accessToken, username} from './add.js';
+import { accessTokenUtils } from '/js/common.js';
 
 // CKEditor 연결
+let memberId = accessTokenUtils.getMemberId();
 let reviewEditor;
 let tempImageFileNames = [];
 
@@ -71,9 +72,9 @@ class UploadAdapter {
     _initRequest() {
         const xhr = this.xhr = new XMLHttpRequest();
 
-        // xhr.open('POST', location.protocol + '//' + location.host + 'reviews/images/content-temp-image', true);
-        xhr.open('POST', 'http://localhost:8081/api/v1/reviews/images/content-temp-image/' + username, true);
-        xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+        // xhr.open('POST', location.protocol + '//' + location.host + 'reviews/content-temp-image', true);
+        xhr.open('POST', 'http://localhost:8081/api/v1/reviews/content-images/temp/' + memberId, true);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + accessTokenUtils.getAccessToken);
 
         // 응답 타입
         xhr.responseType = 'json';
@@ -97,7 +98,8 @@ class UploadAdapter {
             this.editor.model.change(writer => {
                 // <img> 태그의 src 속성 변경
                 const imageElement = writer.createElement('imageInline', {
-                    'src': 'http://localhost:8081/api/v1/reviews/images/content-temp-image/' + username + '/' + response.savedFileName,
+                    'src': 'http://localhost:8081/api/v1/reviews/content-images/temp/' +
+                            memberId + '/' + response.savedFileName,
                     'data-image-index': imageIndex
                 });
 
@@ -124,4 +126,4 @@ class UploadAdapter {
     }
 }
 
-export {reviewEditor, tempImageFileNames};
+export { reviewEditor, tempImageFileNames };

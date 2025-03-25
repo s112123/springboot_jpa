@@ -33,11 +33,11 @@ servlet:
 # Upload File Path
 file:
   upload:
-    root: D://uploads/
+    root: D:\\uploads
     directories:
-      profiles: profiles/
-      reviews: reviews/
-      temps: temps/
+      profiles: profiles
+      reviews: reviews
+      temps: temps
 
 # JWT
 jwt:

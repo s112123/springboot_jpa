@@ -1,5 +1,6 @@
 // 우편주소 API
 const target = document.getElementById('storeAddress');
+let title = document.getElementById('title');
 target.addEventListener('click', function () {
     new daum.Postcode({
         oncomplete: function(data) {
@@ -19,6 +20,7 @@ target.addEventListener('click', function () {
             }
 
             target.value = addr;
+            title.focus();
         }
     }).open();
 });

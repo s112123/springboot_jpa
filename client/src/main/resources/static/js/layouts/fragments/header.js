@@ -1,14 +1,21 @@
-// 변수 선언
-const token = localStorage.getItem('todayReviewsAccessToken');
+import { accessTokenUtils } from '/js/common.js';
+
+// Navigation
 const login = document.getElementById('login');
 const notification = document.getElementById('notification');
 const profile = document.getElementById('profile');
 const admin = document.getElementById('admin');
 const logout = document.getElementById('logout');
 
+// HTML 로드
+window.addEventListener('DOMContentLoaded', () => {
+    // Access Token 여부에 따라 로그인 항목 활성화
+    checkLoginStatus(accessTokenUtils.getAccessToken());
+})
+
 // Access Token 여부에 따라 로그인 항목 활성화
 function checkLoginStatus() {
-    if (token) {
+    if (accessTokenUtils.getAccessToken()) {
         login.style.display = 'none';
         notification.style.display = 'block';
         profile.style.display = 'block';
@@ -22,7 +29,6 @@ function checkLoginStatus() {
         logout.style.display = 'none';
     }
 }
-window.addEventListener('DOMContentLoaded', checkLoginStatus);
 
 
 ///////////////////////////////

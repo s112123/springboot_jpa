@@ -1,3 +1,5 @@
+import { accessTokenUtils } from '/js/common.js';
+
 // URL 에서 쿼리 스트링 추출
 const queryString = window.location.search;
 const params = new URLSearchParams(queryString);
@@ -6,14 +8,18 @@ const reviewId = params.get('review_id');
 // 글 조회
 getReview(reviewId).then((response) => {
     console.log(response.data);
+    // 회원의 memberId
+    let memberId = accessTokenUtils.getMemberId();
+    // 조회된 리뷰
+    let review = response.data;
 
     // 장소 이름
     const storeName = document.getElementById('store-name');
-    storeName.textContent = response.data.storeName;
+    storeName.textContent = review.storeName;
 
     // 장소 위치
     const storeAddress = document.getElementById('store-address');
-    storeAddress.textContent = response.data.storeAddress;
+    storeAddress.textContent = review.storeAddress;
 
     // 평점 색상 처리
     // 만약, REST API 가 아니라 Model 로 넘긴 경우, 다음 주석과 같이 처리한다
@@ -21,22 +27,66 @@ getReview(reviewId).then((response) => {
     // 그리고 const reviewerStarScore = reviewerStarList.getAttribute('data-reviewer-star'); 로 값을 받으면 된다
     const reviewerStarList = document.getElementById('reviewer-star');
     const reviewerStarItems = [...reviewerStarList.children];
-    const reviewerStarScore = response.data.star;
+    const reviewerStarScore = review.star;
     reviewerStarItems.forEach((reviewerStarItem, index) => {
         if (index < reviewerStarScore) {
             reviewerStarItem.style.color = 'rgb(249, 199, 53)';
         }
     });
 
+    // 작성자 프로필 이미지
+    const writerProfileImage = document.getElementById('writer-profile-image');
+    const writerProfileImageFileName = review.profileImageDetails.savedFileName;
+    if (writerProfileImageFileName === 'default.png') {
+        writerProfileImage.src = '/images/profiles/default.png';
+    } else {
+        writerProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + writerProfileImageFileName;
+    }
+
+    // 작성자 이름
+    const writer = document.getElementById('writer-name');
+    writer.textContent = review.writer;
+
+    // 구독 버튼 생성
+    const writerAction = document.getElementById('writer-action');
+    if (memberId !== null && review.memberId === memberId) {
+        writerAction.style.display = 'none';
+    } else {
+        writerAction.style.display = 'block';
+    }
+
+    // 구독 여부에 따른 구독 버튼 모양 변경
+    // const btnSubscribe = document.getElementById('btn-subscribe');
+
     // 글 제목
     const reviewTitle = document.getElementById('review-title');
-    reviewTitle.textContent = response.data.title;
+    reviewTitle.textContent = review.title;
 
     // 글 내용
     // 만약, REST API 가 아니라 Model 로 넘긴 경우, 다음 주석과 같이 처리한다
     // <div class="review-content" th:utext="${review.content}"></div>
     const reviewContent = document.getElementById('review-content');
-    reviewContent.textContent = response.data.content;
+    // DB 에 저장된 <img> 태그의 src 값을 변경한다
+    // 수정 전 → <img src="http://localhost:8081/api/v1/reviews/content-images/temp/{memberId}/{fileName}">
+    // 수정 후 → <img src="http://localhost:8081/api/v1/reviews/content-images/{memberId}/{fileName}?reviewId=1">
+    review.content = review.content.replace(/<img[^>]+src="([^"]+\/temp[^"]+)"/g, (match, p1) => {
+        const updatedSrc = p1.replace('/temp', '') + '?reviewId=' + review.reviewId;
+        return match.replace(p1, updatedSrc);
+    });
+    reviewContent.innerHTML = review.content;
+
+    // 편집 버튼
+    const btnUpdate = document.getElementById('update-review');
+    console.log(memberId);
+    if (memberId !== null && review.memberId === memberId) {
+        // 편집 화면으로 이동
+        btnUpdate.style.display = 'block';
+        btnUpdate.addEventListener('click', () => {
+            location.href = '/review/edit?review_id=' + reviewId;
+        });
+    } else {
+        btnUpdate.style.display = 'none';
+    }
 })
 .catch((error) => {
     // 글이 존재하지 않는 경우
@@ -46,19 +96,6 @@ getReview(reviewId).then((response) => {
 async function getReview(reviewId) {
     const response = await axios.get('http://localhost:8081/api/v1/reviews/' + reviewId);
     return response;
-}
-
-// 편집 버튼
-const accessToken = localStorage.getItem('todayReviewsAccessToken');
-const btnUpdate = document.getElementById('update-review');
-if (accessToken) {
-    // 편집 화면으로 이동
-    btnUpdate.style.display = 'block';
-    btnUpdate.addEventListener('click', () => {
-        location.href = '/review/edit?review_id=' + reviewId;
-    });
-} else {
-    btnUpdate.style.display = 'none';
 }
 
 // 홈으로 이동

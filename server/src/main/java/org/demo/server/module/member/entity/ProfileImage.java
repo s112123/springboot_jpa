@@ -22,14 +22,10 @@ public class ProfileImage {
     @Column(name = "saved_file_name", nullable = false)
     private final String savedFileName;
 
-    @Column(name = "path", nullable = false)
-    private final String path;
-
     private ProfileImage(Builder builder) {
         this.profileImageId = builder.profileImageId;
         this.originalFileName = builder.originalFileName;
         this.savedFileName = builder.savedFileName;
-        this.path = builder.path;
     }
 
     /**
@@ -42,7 +38,6 @@ public class ProfileImage {
                 .profileImageId(this.getProfileImageId())
                 .originalFileName(this.getOriginalFileName())
                 .savedFileName(this.getSavedFileName())
-                .path(this.getPath())
                 .build();
     }
 
@@ -61,7 +56,6 @@ public class ProfileImage {
         private Long profileImageId;
         private String originalFileName;
         private String savedFileName;
-        private String path;
 
         public Builder profileImageId(Long profileImageId) {
             this.profileImageId = profileImageId;
@@ -75,11 +69,6 @@ public class ProfileImage {
 
         public Builder savedFileName(String savedFileName) {
             this.savedFileName = savedFileName;
-            return this;
-        }
-
-        public Builder path(String path) {
-            this.path = path;
             return this;
         }
 

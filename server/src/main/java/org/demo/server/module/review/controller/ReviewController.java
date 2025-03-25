@@ -6,7 +6,6 @@ import org.demo.server.infra.common.dto.PagedListResponse;
 import org.demo.server.infra.common.util.file.FileDetails;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
-import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
 import org.demo.server.module.review.dto.details.ReviewDetails;
 import org.demo.server.module.review.dto.form.ReviewSaveForm;
@@ -25,8 +24,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @RestController
@@ -35,7 +32,6 @@ import java.time.format.DateTimeFormatter;
 public class ReviewController {
 
     private final ReviewService reviewService;
-    private final MemberFinder memberFinder;
     private final FileUtils fileUtils;
 
     /**
@@ -48,11 +44,8 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> saveReview(@RequestBody ReviewSaveForm form) {
         log.info("form={}", form);
         // Todo @Valid + BindingResult
-        // Todo Temp 폴더에서 -> 실제 이미지를 reviews > username > 날짜로 옮겨야 한다
-
-
         // 리뷰 등록
-        //ReviewResponse response = reviewService.save(form).toResponse();
+        ReviewResponse response = reviewService.save(form).toResponse();
 
         // HTTP Status 에서 CREATED 는 응답 헤더 중 Location 에서 리소스 위치를 전달할 수 있다
         // Location: http://localhost:8080/api/v1/reviews/{id}
@@ -60,49 +53,52 @@ public class ReviewController {
                 .path("/{id}")
                 .buildAndExpand("1")
                 .toUri();
-        return ResponseEntity.created(location).body(null);
+        return ResponseEntity.created(location).body(response);
     }
 
     // 리뷰를 작성 중에 사용되는 임시 이미지 파일을 서버에 저장
-    @PostMapping("/images/content-temp-image/{username}")
+    @PostMapping("/content-images/temp/{memberId}")
     public ResponseEntity<FileDetails> saveTempImagesForReview(
-            @PathVariable("username") String username,
+            @PathVariable("memberId") String memberId,
             MultipartRequest multipartRequest
     ) {
+        // upload 이름으로 파일이 넘어온다
         MultipartFile tempImageFile = multipartRequest.getFile("upload");
-
         // 파일 저장
         // 임시 파일 저장 경로: temps > memberId
-        String memberId = String.valueOf(memberFinder.getMemberByUsername(username).getMemberId());
         FileDetails fileDetails = fileUtils.saveFile(tempImageFile, UploadDirectory.TEMPS, memberId);
-
         return ResponseEntity.ok().body(fileDetails);
     }
 
-    // 리뷰 임시 이미지 파일 조회
+    // 리뷰의 임시 이미지 파일 조회
     // 기본적으로 서버에 임시 이미지 파일이 저장되면 에디터에서는 Base64 로 인코딩해서 이미지로 보여준다
     // 하지만 현재는 서버에서 직접 조회하여 이미지를 표시하고 불필요한 임시 이미지는 최종 등록시에 삭제해야 한다
-    @GetMapping("/images/content-temp-image/{username}/{tempImageFileName}")
-    public ResponseEntity<?> saveTempImagesForReview(
-            @PathVariable("username") String username,
+    @GetMapping("/content-images/temp/{memberId}/{tempImageFileName}")
+    public ResponseEntity<?> viewTempImagesForReview(
+            @PathVariable("memberId") String memberId,
             @PathVariable("tempImageFileName") String fileName
     ) {
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-//        String formattedDate = LocalDate.now().format(formatter);
-
-        String memberId = String.valueOf(memberFinder.getMemberByUsername(username).getMemberId());
-
+        // 파일 조회
+        // 임시 파일 조회 경로: temps > memberId
         Resource resource = new FileSystemResource(
                 fileUtils.getUploadDirectory(UploadDirectory.TEMPS, memberId) + fileName
         );
-        HttpHeaders headers = new HttpHeaders();
-        try {
-            headers.add("Content-Disposition", "attachment; filename=" + resource.getFile().toPath());
-            headers.add("Content-Type", Files.probeContentType(resource.getFile().toPath()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return ResponseEntity.ok().headers(headers).body(resource);
+        return ResponseEntity.ok().headers(getHttpHeaderForImage(resource)).body(resource);
+    }
+
+    // 리뷰의 이미지 파일 조회
+    @GetMapping("/content-images/{memberId}/{tempImageFileName}")
+    public ResponseEntity<?> saveTempImagesForReview(
+            @PathVariable("memberId") String memberId,
+            @PathVariable("tempImageFileName") String fileName,
+            @RequestParam("reviewId") String reviewId
+    ) {
+        // 파일 조회
+        // 파일 저장 경로: reviews > memberId > reviewId
+        Resource resource = new FileSystemResource(
+                fileUtils.getUploadDirectory(UploadDirectory.REVIEWS, memberId, reviewId) + fileName
+        );
+        return ResponseEntity.ok().headers(getHttpHeaderForImage(resource)).body(resource);
     }
 
     /**
@@ -123,5 +119,23 @@ public class ReviewController {
     public ResponseEntity<?> findReviewById(@PathVariable("reviewId") long reviewId) {
         ReviewDetails reviewDetails = reviewService.findById(reviewId);
         return ResponseEntity.ok().body(reviewDetails.toResponse());
+    }
+
+
+    /**
+     * 이미지 전송을 위한 HTTP 헤더
+     *
+     * @param resource 전송할 이미지 파일
+     * @return HTTP 헤더
+     */
+    private HttpHeaders getHttpHeaderForImage(Resource resource) {
+        HttpHeaders headers = new HttpHeaders();
+        try {
+            headers.add("Content-Disposition", "attachment; filename=" + resource.getFile().toPath());
+            headers.add("Content-Type", Files.probeContentType(resource.getFile().toPath()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return headers;
     }
 }

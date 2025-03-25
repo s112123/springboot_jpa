@@ -6,40 +6,51 @@ import lombok.NoArgsConstructor;
 import org.demo.server.infra.common.entity.BaseEntity;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.review.dto.details.ReviewDetails;
+import org.demo.server.module.review.dto.details.ReviewImageDetails;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "review")
 @Getter
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 public class Review extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_id")
-    private final Long reviewId;
+    private Long reviewId;
 
     @Column(name = "title", nullable = false)
-    private final String title;
+    private String title;
 
-    @Column(name = "content", nullable = false)
-    private final String content;
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    private String content;
 
     @Column(name = "store_name", nullable = false)
-    private final String storeName;
+    private String storeName;
 
     @Column(name = "store_address", nullable = false)
-    private final String storeAddress;
+    private String storeAddress;
 
     @Column(name = "star", nullable = false)
-    private final Integer star;
+    private Integer star;
 
     @Column(name = "hits", columnDefinition = "BIGINT DEFAULT 0")
-    private final Long hits;
+    private Long hits;
 
     // Member (1) - (*) Review
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private final Member member;
+    private Member member;
+
+    // Review (1) - (*) ReviewImage
+    // final 키워드를 사용하면 @NoArgsConstructor(force = true) 에서 null 로 초기화된다
+    // 그래서 이 엔티티에서는 final 키워드를 제외했다
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
+    private List<ReviewImage> reviewImages;
 
     private Review(Builder builder) {
         this.reviewId = builder.reviewId;
@@ -50,6 +61,17 @@ public class Review extends BaseEntity {
         this.star = builder.star;
         this.hits = builder.hits;
         this.member = builder.member;
+        this.reviewImages = (builder.reviewImages != null) ? builder.reviewImages : new ArrayList<>();
+    }
+
+    /**
+     * Review 엔티티에 ReviewImage 엔티티를 추가하는 연관 메서드
+     *
+     * @param reviewImage ReviewImage
+     */
+    public void addReviewImage(ReviewImage reviewImage) {
+        this.reviewImages.add(reviewImage);
+        reviewImage.addReview(this);
     }
 
     /**
@@ -66,7 +88,10 @@ public class Review extends BaseEntity {
                 .storeAddress(this.storeAddress)
                 .star(this.star)
                 .hits(this.hits)
-                .member(this.member)
+                .memberDetails(this.member.toDetails())
+                .reviewImagesDetailsList(this.reviewImages.stream()
+                        .map(reviewImage -> reviewImage.toDetails())
+                        .collect(Collectors.toList()))
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .build();
@@ -92,6 +117,7 @@ public class Review extends BaseEntity {
         private Integer star;
         private Long hits;
         private Member member;
+        private List<ReviewImage> reviewImages = new ArrayList<>();
 
         public Builder reviewId(Long reviewId) {
             this.reviewId = reviewId;
@@ -130,6 +156,11 @@ public class Review extends BaseEntity {
 
         public Builder member(Member member) {
             this.member = member;
+            return this;
+        }
+
+        public Builder reviewImages(List<ReviewImage> reviewImages) {
+            this.reviewImages = reviewImages;
             return this;
         }
 
