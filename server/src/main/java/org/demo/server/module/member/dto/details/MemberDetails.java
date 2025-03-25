@@ -3,6 +3,7 @@ package org.demo.server.module.member.dto.details;
 import lombok.Builder;
 import lombok.Data;
 import org.demo.server.module.member.dto.response.MemberResponse;
+import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.entity.Role;
 
 import java.time.LocalDateTime;
@@ -21,9 +22,9 @@ public class MemberDetails {
     private ProfileImageDetails profileImageDetails;
 
     /**
-     * MemberDetails DTO 를 MemberResponse DTO 를 생성한다 (DTO → DTO)
+     * (DTO → DTO) MemberDetails → MemberResponse
      *
-     * @return MemberResponse DTO 를 반환한다
+     * @return MemberResponse
      */
     public MemberResponse toResponse() {
         return MemberResponse.builder()
@@ -34,6 +35,22 @@ public class MemberDetails {
                 .createdAt(this.getCreatedAt())
                 .updatedAt(this.getUpdatedAt())
                 .profileImage(this.getProfileImageDetails())
+                .build();
+    }
+
+    /**
+     * (DTO → Entity) MemberDetails → Member
+     *
+     * @return Member
+     */
+    public Member toMember() {
+        return Member.builder()
+                .memberId(this.getMemberId())
+                .email(this.email)
+                .password(this.password)
+                .username(this.username)
+                .role(this.role)
+                .profileImage(this.profileImageDetails.toProfileImage())
                 .build();
     }
 }

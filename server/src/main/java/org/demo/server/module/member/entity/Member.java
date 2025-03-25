@@ -4,39 +4,58 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.demo.server.infra.common.entity.BaseEntity;
+import org.demo.server.module.follow.entity.Follow;
 import org.demo.server.module.member.dto.details.MemberDetails;
 
-
-import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "member")
 @Getter
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
-    private final Long memberId;
+    private Long memberId;
 
     @Column(name = "email", nullable = false, unique = true, length = 100)
-    private final String email;
+    private String email;
 
     @Column(name = "password", nullable = false)
-    private final String password;
+    private String password;
 
     @Column(name = "username", nullable = false, unique = true)
-    private final String username;
+    private String username;
 
     @Column(name = "role", nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private final Role role;
+    private Role role;
 
     // Member (1)-(1) ProfileImage
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_image_id")
-    private final ProfileImage profileImage;
+    private ProfileImage profileImage;
+
+    // Member (1)-(*) Follow (*)-(1) Member
+    // 팔로워 (Follower) → A 가 B 를 친구 추가하면 A 는 B 의 팔로워이다
+    // 팔로우 (Follow) → A 가 B 를 친구 추가하면 A 가 B 를 팔로우 했다고 한다
+    // memberId 가 1인 사람이 2, 3을 친구 추가했다고 가정하자
+    // 그러면 Follow 테이블에 follower_id 에는 1, followed_id 에는 2, 3 이 된다
+    // 1이 친구 추가한 (팔로우) 사람을 찾으려면 follower_id 가 1인 사람의 followed_id 를 찾으면 된다
+    // 1을 친구 추가한 (팔로워) 사람을 찾으려면 followed_id 가 1인 사람의 follower_id 를 찾으면 된다
+    // 이 필드는 나를 팔로우 한, 나의 팔로워들의 찾는 것이므로 내가 팔로우 당한 것이다
+    // 즉, 나의 member_id 가 Follow 테이블에서 외래키인 followd_id 에 저장되어야 한다
+    @OneToMany(mappedBy = "followed")
+    private Set<Follow> followers = new HashSet<>();
+
+    // Member (1)-(*) Follow (*)-(1) Member
+    // 이 필드는 내가 팔로우 한 사람들을 찾는 것이므로 내가 팔로워가 되는 것이다
+    // 즉, 나의 member_id 가 Follow 테이블에서 외래키인 follower_id 에 저장되어야 한다
+    @OneToMany(mappedBy = "follower")
+    private Set<Follow> following = new HashSet<>();
 
     private Member(Builder builder) {
         this.memberId = builder.memberId;
@@ -45,7 +64,8 @@ public class Member extends BaseEntity {
         this.username = builder.username;
         this.role = builder.role;
         this.profileImage = builder.profileImage;
-        super.updatedAt = builder.updatedAt;
+        this.followers = builder.followers;
+        this.following = builder.following;
     }
 
     /**
@@ -100,8 +120,9 @@ public class Member extends BaseEntity {
         private String password;
         private String username;
         private Role role;
-        private LocalDateTime updatedAt;
         private ProfileImage profileImage;
+        private Set<Follow> followers = new HashSet<>();
+        private Set<Follow> following = new HashSet<>();
 
         public Builder memberId(Long memberId) {
             this.memberId = memberId;
@@ -128,13 +149,18 @@ public class Member extends BaseEntity {
             return this;
         }
 
-        public Builder updatedAt(LocalDateTime updatedAt) {
-            this.updatedAt = updatedAt;
+        public Builder profileImage(ProfileImage profileImage) {
+            this.profileImage = profileImage;
             return this;
         }
 
-        public Builder profileImage(ProfileImage profileImage) {
-            this.profileImage = profileImage;
+        public Builder followers(Set<Follow> followers) {
+            this.followers = followers;
+            return this;
+        }
+
+        public Builder following(Set<Follow> following) {
+            this.following = following;
             return this;
         }
 

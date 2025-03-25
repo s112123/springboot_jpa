@@ -15,18 +15,18 @@ public class ReviewImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_image_id")
-    private final Long reviewImageId;
+    private Long reviewImageId;
 
     @Column(name = "original_file_name")
-    private final String originalFileName;
+    private String originalFileName;
 
     @Column(name = "saved_file_name")
-    private final String savedFileName;
+    private String savedFileName;
 
     @Column(name = "is_thumbnail")
-    private final Boolean isThumbnail;
+    private Boolean isThumbnail;
 
-    // Review (1) - (*) ReviewImage
+    // Review (1) (*) ReviewImage
     @ManyToOne
     @JoinColumn(name = "review_id")
     private Review review;

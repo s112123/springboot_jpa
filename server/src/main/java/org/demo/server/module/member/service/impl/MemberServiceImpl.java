@@ -59,7 +59,6 @@ public class MemberServiceImpl implements MemberService {
                 .password(passwordEncoder.encode(form.getPassword()))
                 .username("user-" + UUID.randomUUID())
                 .role(Role.USER)
-                .updatedAt(LocalDateTime.now())
                 .profileImage(profileImage)
                 .build();
         Member savedMember = memberRepository.save(member);

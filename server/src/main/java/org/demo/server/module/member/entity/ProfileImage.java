@@ -8,19 +8,19 @@ import org.demo.server.module.member.dto.details.ProfileImageDetails;
 @Entity
 @Table(name = "profile_image")
 @Getter
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 public class ProfileImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "profile_image_id")
-    private final Long profileImageId;
+    private Long profileImageId;
 
     @Column(name = "original_file_name", nullable = false)
-    private final String originalFileName;
+    private String originalFileName;
 
     @Column(name = "saved_file_name", nullable = false)
-    private final String savedFileName;
+    private String savedFileName;
 
     private ProfileImage(Builder builder) {
         this.profileImageId = builder.profileImageId;

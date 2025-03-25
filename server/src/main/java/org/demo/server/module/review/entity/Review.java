@@ -41,16 +41,16 @@ public class Review extends BaseEntity {
     @Column(name = "hits", columnDefinition = "BIGINT DEFAULT 0")
     private Long hits;
 
-    // Member (1) - (*) Review
+    // Member (1)-(*) Review
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
-    // Review (1) - (*) ReviewImage
+    // Review (1)-(*) ReviewImage
     // final 키워드를 사용하면 @NoArgsConstructor(force = true) 에서 null 로 초기화된다
     // 그래서 이 엔티티에서는 final 키워드를 제외했다
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
-    private List<ReviewImage> reviewImages;
+    private List<ReviewImage> reviewImages = new ArrayList<>();
 
     private Review(Builder builder) {
         this.reviewId = builder.reviewId;
@@ -61,7 +61,7 @@ public class Review extends BaseEntity {
         this.star = builder.star;
         this.hits = builder.hits;
         this.member = builder.member;
-        this.reviewImages = (builder.reviewImages != null) ? builder.reviewImages : new ArrayList<>();
+        this.reviewImages = builder.reviewImages;
     }
 
     /**
