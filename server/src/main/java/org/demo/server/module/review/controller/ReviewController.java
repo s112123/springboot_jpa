@@ -2,11 +2,10 @@ package org.demo.server.module.review.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.demo.server.infra.common.dto.PagedListResponse;
+import org.demo.server.infra.common.dto.response.PagedListResponse;
 import org.demo.server.infra.common.util.file.FileDetails;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
-import org.demo.server.module.member.service.base.MemberFinder;
 import org.demo.server.module.review.dto.details.ReviewDetails;
 import org.demo.server.module.review.dto.form.ReviewSaveForm;
 import org.demo.server.module.review.dto.response.ReviewResponse;

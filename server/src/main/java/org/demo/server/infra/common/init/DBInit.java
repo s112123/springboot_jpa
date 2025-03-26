@@ -32,6 +32,13 @@ public class DBInit {
             user2.setPassword("a123412341234");
             MemberDetails user2Details = memberService.save(user2);
 
+//            for (int i = 0; i < 85; i++) {
+//                MemberSaveForm saveForm = new MemberSaveForm();
+//                saveForm.setEmail("email" + i + "@test.com");
+//                saveForm.setPassword("a123412341234");
+//                memberService.save(saveForm);
+//            }
+
             // admin -> user1, user2
             Follow adminToUser1 = Follow.builder()
                     .follower(adminDetails.toMember())

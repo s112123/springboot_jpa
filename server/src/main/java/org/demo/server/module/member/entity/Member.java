@@ -69,6 +69,15 @@ public class Member extends BaseEntity {
     }
 
     /**
+     * 권한 변경
+     *
+     * @param role 변경할 권한
+     */
+    public void updateRole(Role role) {
+        this.role = role;
+    }
+
+    /**
      * Member 엔티티를 MemberDetails 로 변환 (Entity → DTO)
      *
      * @return MemberDetails

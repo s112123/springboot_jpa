@@ -1,0 +1,97 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.admin-members-wrap {
+  width: 100%;  /* 650px */
+  padding: 50px 0px 50px 50px;
+}
+
+.admin-members-wrap p {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.admin-members-box {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.admin-members-box .admin-members-list {
+  margin-bottom: 10px;
+}
+
+/* TABLE */
+.admin-members-box .admin-members-list table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.admin-members-box .admin-members-list table tr {
+	height: 45px;
+	border: 1px solid #ccc;
+}
+
+.admin-members-box .admin-members-list table thead tr {
+	border-top: 3px solid rgb(52, 52, 54);
+}
+
+.admin-members-box .admin-members-list table th {
+	font-weight: bold;
+}
+
+.admin-members-box .admin-members-list table th, table td{
+	padding: 0 10px;
+	font-size: 14px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.admin-members-list td:nth-child(1) {
+	width: 6%;
+}
+
+.admin-members-list td:nth-child(2) {
+	width: 20%;
+	/* text-align: left;*/
+}
+
+/*
+.admin-members-list td:nth-child(2) a {
+  color: rgb(210, 40, 40);
+  font-weight: 600;
+}
+
+.admin-members-list td:nth-child(2) a:hover {
+	color: rgb(210, 40, 40);
+	transition: 0.1s;
+}
+*/
+
+.admin-members-list td:nth-child(3) {
+	width: 30%;
+	text-align: center;
+}
+
+.admin-members-list td:nth-child(4) {
+	width: 10%;
+}
+
+.admin-members-list td:nth-child(5) {
+	width: 17%;
+}
+
+.admin-members-list td:nth-child(6) {
+	width: 6%;
+}
+
+.admin-members-list td:nth-child(6) a {
+	color: rgb(150, 150, 150);
+}
+
+.admin-members-list td:nth-child(6) a:hover {
+	color: rgb(210, 40, 40);
+	transition: 0.1s;
+}

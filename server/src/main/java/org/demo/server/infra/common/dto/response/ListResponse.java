@@ -1,4 +1,4 @@
-package org.demo.server.infra.common.dto;
+package org.demo.server.infra.common.dto.response;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

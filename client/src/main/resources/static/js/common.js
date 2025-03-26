@@ -1,6 +1,16 @@
 // AccessToken 가져오기
+function saveAccessToken(accessToken) {
+    return localStorage.setItem('todayReviewsAccessToken', accessToken);
+}
+
+// AccessToken 가져오기
 function getAccessToken() {
     return localStorage.getItem('todayReviewsAccessToken');
+}
+
+// AccessToken 삭제하기
+function removeAccessToken() {
+    return localStorage.removeItem('todayReviewsAccessToken');
 }
 
 // Access Token 에서 username 추출
@@ -47,7 +57,9 @@ function redirectLoginPage() {
 }
 
 export const accessTokenUtils = {
+    saveAccessToken,
     getAccessToken,
+    removeAccessToken,
     getUsername,
     getMemberId,
     redirectLoginPage
