@@ -5,7 +5,7 @@ import io.jsonwebtoken.Jwts;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.demo.server.infra.common.dto.PagedListResponse;
+import org.demo.server.infra.common.dto.response.PagedListResponse;
 import org.demo.server.infra.common.exception.NotFoundException;
 import org.demo.server.infra.common.util.file.FileDetails;
 import org.demo.server.infra.common.util.file.FileUtils;
@@ -15,6 +15,7 @@ import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.form.MemberSaveForm;
 import org.demo.server.module.member.dto.form.MemberUpdateForm;
 import org.demo.server.module.member.dto.response.MemberResponse;
+import org.demo.server.module.member.entity.Role;
 import org.demo.server.module.member.service.base.MemberService;
 import org.demo.server.module.member.util.send.impl.confirm.base.SendConfirmCode;
 import org.demo.server.module.member.util.send.impl.password.base.SendTempPassword;
@@ -23,7 +24,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -178,6 +178,19 @@ public class MemberController {
     }
 
     /**
+     * 권한 변경
+     *
+     * @param memberId 회원의 식별자
+     * @param role 변경할 권한
+     * @return
+     */
+    @PatchMapping(value = "/{memberId}/roles")
+    public ResponseEntity<Void> updateRole(@PathVariable("memberId") Long memberId, @RequestBody Role role) {
+        memberService.updateRole(memberId, role);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
      * 닉네임 중복 확인
      *
      * @param username 입력받은 닉네임
@@ -204,28 +217,33 @@ public class MemberController {
     /**
      * 프로필 이미지 등록
      *
+     * @param memberId 프로필 이미지를 등록할 회원의 memberId
      * @param multipartFile 등록할 이미지 파일
      * @return 등록된 이미지 파일 정보
      */
     @PostMapping("/profile-images")
     public ResponseEntity<FileDetails> uploadProfileImage(
-            @RequestPart("email") String email,
+            @RequestPart("memberId") String memberId,
             @RequestPart(value = "profile-file", required = false) MultipartFile multipartFile
     ) {
-        FileDetails fileDetails = fileUtils.saveFile(multipartFile, UploadDirectory.PROFILES);
+        FileDetails fileDetails = fileUtils.saveFile(multipartFile, UploadDirectory.PROFILES, memberId);
         return ResponseEntity.ok().body(fileDetails);
     }
 
     /**
      * 프로필 이미지 조회
      *
+     * @param memberId 프로필 이미지를 조회할 회원의 memberId
      * @param fileName 조회할 이미지 파일 이름
      * @return 이미지 리소스
      */
-    @GetMapping("/profile-images/{fileName}")
-    public ResponseEntity<Resource> viewProfileImage(@PathVariable("fileName") String fileName) {
+    @GetMapping("/profile-images/{memberId}/{fileName}")
+    public ResponseEntity<Resource> viewProfileImage(
+            @PathVariable("memberId") String memberId,
+            @PathVariable("fileName") String fileName
+    ) {
         // 파일 경로
-        String filePath = fileUtils.getUploadDirectory(UploadDirectory.PROFILES);
+        String filePath = fileUtils.getUploadDirectory(UploadDirectory.PROFILES, memberId);
 
         // 파일 조회
         Resource resource = new FileSystemResource(filePath + fileName);
@@ -242,12 +260,16 @@ public class MemberController {
     /**
      * 프로필 이미지 파일 삭제
      *
+     * @param memberId 프로필 이미지를 조회할 회원의 memberId
      * @param imageFileNames 삭제할 프로필 이미지 파일 이름 목록
      * @return 삭제에 성공하면 204 응답, 파일이 존재하지 않으면 404 반환
      */
-    @DeleteMapping("/profile-images")
-    public ResponseEntity<Void> deleteProfileImages(@RequestBody List<String> imageFileNames) {
-        fileUtils.deleteFiles(imageFileNames, UploadDirectory.PROFILES);
+    @DeleteMapping("/profile-images/{memberId}")
+    public ResponseEntity<Void> deleteProfileImages(
+            @PathVariable("memberId") String memberId,
+            @RequestBody List<String> imageFileNames
+    ) {
+        fileUtils.deleteFiles(imageFileNames, UploadDirectory.PROFILES, memberId);
         return ResponseEntity.noContent().build();
     }
 }

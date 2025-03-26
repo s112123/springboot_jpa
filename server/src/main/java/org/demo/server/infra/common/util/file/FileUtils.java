@@ -96,8 +96,8 @@ public class FileUtils {
      * @param uploadDirectory 삭제할 파일이 있는 폴더 경로
      * @return 삭제된 경우, true 를 반환하고 그렇지 않으면 false 반환
      */
-    public boolean deleteFile(String fileName, UploadDirectory uploadDirectory) {
-        File deletedFile = new File(getUploadDirectory(uploadDirectory) + fileName);
+    public boolean deleteFile(String fileName, UploadDirectory uploadDirectory, String... subDirectories) {
+        File deletedFile = new File(getUploadDirectory(uploadDirectory, subDirectories) + fileName);
         if (deletedFile.exists()) {
             deletedFile.delete();
             return true;
@@ -111,9 +111,9 @@ public class FileUtils {
      * @param fileNames 삭제할 파일 이름 목록
      * @param uploadDirectory 삭제할 파일이 있는 폴더 경로
      */
-    public void deleteFiles(List<String> fileNames, UploadDirectory uploadDirectory) {
+    public void deleteFiles(List<String> fileNames, UploadDirectory uploadDirectory, String... subDirectories) {
         for (String fileName : fileNames) {
-            deleteFile(fileName, uploadDirectory);
+            deleteFile(fileName, uploadDirectory, subDirectories);
         }
     }
 

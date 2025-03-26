@@ -1,5 +1,6 @@
+import { accessTokenUtils } from '/js/common.js';
+
 // 변수 선언
-let accessToken = undefined;
 let eleEmail = document.getElementById('email');
 let eleUsername = document.getElementById('username');
 let elePassword = document.getElementById('password');
@@ -13,25 +14,17 @@ let btnWithdrawMembership = document.getElementById('withdraw-membership');
 let errors = document.querySelectorAll('.error');
 let errorCapsLock = document.querySelector('.error-capslock');
 let errorPassword = document.querySelector('.error-password');
-let deletedImageFiles = new Set();
+let profileImageHistory = new Set();
 let isDuplicatedUsername = false;
 
 // HTML 로드
 document.addEventListener('DOMContentLoaded', async () => {
     // Access Token 확인
-    accessToken = localStorage.getItem('todayReviewsAccessToken');
-    if (!accessToken) {
-        // Access Token 이 없으면 로그인 페이지로 이동
-        location.href = '/login';
-        return;
-    }
-
-    // Access Token 에서 username 가져오기
-    const username = getUsernameFromAccessToken(accessToken);
+    accessTokenUtils.redirectLoginPage();
 
     // 회원 정보 조회
     try {
-        const response = await findMember(username, accessToken);
+        const response = await findMember(accessTokenUtils.getUsername(), accessTokenUtils.getAccessToken());
         const body = response.data;
 
         // 사용자 정보
@@ -45,7 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             // src > main > resources > static > images > profiles > default.png
             eleProfileImage.src = '/images/profiles/default.png';
         } else {
-            eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + profileImage.savedFileName;
+            // uploads > profiles > memberId
+            eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' +
+                                   accessTokenUtils.getMemberId() + '/' + profileImage.savedFileName;
         }
 
         // URL 에서 쿼리 스트링 추출
@@ -77,42 +72,37 @@ async function findMember(username, accessToken) {
     return response;
 }
 
-// JWT 는 Base64 로 인코딩 되어 있으므로 Access Token 에서 디코딩하여 username 추출
-// JWT 에 한글이 포함되면 한글은 UTF-8 로 인코딩된 후, Base64 로 인코딩된다
-// 그래서 한글이 포함된 경우 atob() 로 Base64 를 디코딩하면 UTF-8 로 인코딩된 한글이 있다
-// 그리고 UTF-8 을 다시 디코딩 해주면 된다
-// 영어는 ASCII 를 사용하므로 상관없다
-function getUsernameFromAccessToken(token) {
-    // 페이로드 추출 → 헤더.페이로드.서명
-    const payload = token.split('.')[1];
-    // atob() → Javascript 에 내장된 Base64 인코딩 데이터를 디코딩하는 함수
-    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-    // 디코딩이 한글인 경우, UTF-8 로 변환
-    const jsonPayload = decodeURIComponent(escape(decoded));
-    return JSON.parse(jsonPayload).username;
-}
-
 // 프로필 이미지 변경
 eleImageFile.addEventListener('change', (e) => {
     // 이미지 변경 시, 현재 이미지 파일 이름을 저장한다
     let imageUrl = eleProfileImage.src;
     let currentImageFileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-    deletedImageFiles.add(currentImageFileName);
+    profileImageHistory.add(currentImageFileName);
 
     // 선택된 이미지 파일 이름
     eleImageFileName.value = eleImageFile.value.replace(/^C:\\fakepath\\/i, '');
 
+    // 선택된 이미지 파일 이름이 'default.png' 이면 가입시 기본 이미지 파일이름이 'default.png' 이므로 금지시킨다
+    if (eleImageFileName.value === 'default.png') {
+        alert('PNG 파일 이름으로 default 는 사용하실 수 없습니다');
+        return;
+    }
+
     // 선택된 이미지 파일
     let formData = new FormData();
-    formData.append('email', eleEmail.value);
+    formData.append('memberId', accessTokenUtils.getMemberId());
     formData.append('profile-file', e.target.files[0]);
 
-    // DB 에 등록하지 않고 서버에만 저장
-    saveSelectedImageFile(formData, accessToken).then(response => {
-        eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + response.data.savedFileName;
+    // DB 에 등록하지 않고 서버에만 임시 파일 저장
+    saveSelectedImageFile(formData, accessTokenUtils.getAccessToken()).then(response => {
+        // 임시 파일을 이미지로 보여준다
+        eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' +
+                               accessTokenUtils.getMemberId() + '/' + response.data.savedFileName;
         imageUrl = eleProfileImage.src;
+
+        // 다른 이미지 변경으로 인해 삭제될 수 있으므로 삭제 파일 목록에 넣는다
         currentImageFileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-        deletedImageFiles.add(currentImageFileName);
+        profileImageHistory.add(currentImageFileName);
     });
 });
 
@@ -144,27 +134,21 @@ btnUpdate.addEventListener('click', () => {
     // 회원 정보 수정
     if (confirm("회원정보를 변경하시겠습니까?")) {
         // 프로필 이미지 변경에 사용된 모든 임시 파일 삭제
-        // deletedImageFiles (Set 객체) 에서 마지막 파일만 놔두고 모두 삭제
+        // profileImageHistory (Set 객체) 에서 마지막 파일만 놔두고 모두 삭제
         let lastChangedImageFileName = undefined;
-        if (deletedImageFiles.size > 0) {
-            let tempArray = [...deletedImageFiles];
-            lastChangedImageFileName = tempArray.pop();
-            deletedImageFiles.clear();
-            tempArray.forEach(fileName => {
-                if (fileName !== 'default.png') {
-                    deletedImageFiles.add(fileName);
-                }
-            });
-            // 변경에 의해 임시로 저장된 모든 이미지 모두 삭제
-            // Set 객체는 배열로 변환해야 한다 → Array.from(deletedImageFiles) 또는 [...deletedImageFiles]
-            deleteImageFiles([...deletedImageFiles], accessToken).then(response => {
+        if (profileImageHistory.size > 0) {
+            let deletedImageFiles = [...profileImageHistory];
+            lastChangedImageFileName = deletedImageFiles.pop();
+            deleteImageFiles(deletedImageFiles, accessTokenUtils.getAccessToken()).then(response => {
                 // Set 객체 비우기
-                deletedImageFiles.clear();
+                profileImageHistory.clear();
+                // 배열 비우기
+                deletedImageFiles.length = 0;
             });
         }
 
         // Access Token 에서 username 가져오기
-        const originalUsername = getUsernameFromAccessToken(accessToken);
+        const originalUsername = accessTokenUtils.getUsername();
 
         // 변경 정보
         const changedUserInfo = {
@@ -175,7 +159,7 @@ btnUpdate.addEventListener('click', () => {
         };
 
         // 회원 정보 수정 처리
-        updateMember(originalUsername, changedUserInfo, accessToken).then(response => {
+        updateMember(originalUsername, changedUserInfo, accessTokenUtils.getAccessToken()).then(response => {
             // 새롭게 발급받은 Access Token 을 갱신
             const newAccessToken = response.data.accessToken;
             localStorage.setItem('todayReviewsAccessToken', newAccessToken);
@@ -200,13 +184,13 @@ eleUsername.addEventListener('keyup', () => {
     });
 
     // Access Token 에서 username 가져오기
-    const username = getUsernameFromAccessToken(accessToken);
+    const username = accessTokenUtils.getUsername();
 
     // 중복 체크
     if (eleUsername.value.trim() !== username) {
-        isDuplicatedEmail = false;
+        isDuplicatedUsername = false;
         if (eleUsername.value.trim().length > 0) {
-            isExistsUsername(eleUsername.value.trim(), accessToken).then(response => {
+            isExistsUsername(eleUsername.value.trim(), accessTokenUtils.getAccessToken()).then(response => {
                 isDuplicatedUsername = response.data;
                 if (isDuplicatedUsername) {
                     eleUsername.nextElementSibling.nextElementSibling.style.display = 'block';
@@ -290,7 +274,8 @@ elePassword.addEventListener('keydown', (e) => {
 
 // 프로필 이미지 삭제 API
 async function deleteImageFiles(imageFileNames, accessToken) {
-    const response = await axios.delete('http://localhost:8081/api/v1/members/profile-images', {
+    let api = 'http://localhost:8081/api/v1/members/profile-images/' + accessTokenUtils.getMemberId();
+    const response = await axios.delete(api, {
         headers: {
             'Authorization': 'Bearer ' + accessToken,
             'Content-Type': 'application/json'
@@ -314,10 +299,9 @@ async function updateMember(username, userInfo, accessToken) {
 // 회원 탈퇴
 btnWithdrawMembership.addEventListener('click', () => {
     if (confirm('회원탈퇴 하시겠습니까? 모든 내역이 삭제됩니다')) {
-        removeMemberShip(eleEmail.value, accessToken).then(response => {
+        removeMemberShip(eleEmail.value, accessTokenUtils.getAccessToken()).then(response => {
             // JWT 삭제
-            localStorage.removeItem('todayReviewsAccessToken');
-
+            accessTokenUtils.removeAccessToken();
             // 탈퇴 완료
             alert('회원 탈퇴가 완료되었습니다');
             location.replace('http://localhost:8080/');
@@ -336,25 +320,28 @@ async function removeMemberShip(email, accessToken) {
 }
 
 // 페이지를 벗어날 때
-window.addEventListener('beforeunload', () => {
+window.addEventListener('beforeunload', (e) => {
     // 이미지 파일을 변경 중이었다면 원래 프로필 이미지는 놔두고 변경으로 인해 서버에 저장되었던 파일 삭제
-    if (deletedImageFiles.size > 0) {
+    if (profileImageHistory.size > 0) {
         // 첫 번째 저장된 이미지 파일 제외한 Set 객체
         let isFirst = true;
-        deletedImageFiles.forEach((fileName) => {
-            if (isFirst) {
-                deletedImageFiles.delete(fileName);
-                isFirst = false;
+        profileImageHistory.forEach((fileName) => {
+            if (fileName !== 'default.png') {
+                profileImageHistory.add(fileName);
             } else {
-                deletedImageFiles.add(fileName);
+                if (isFirst) {
+                    profileImageHistory.delete(fileName);
+                    isFirst = false;
+                } else {
+                    profileImageHistory.add(fileName);
+                }
             }
         });
-
         // 변경에 의해 임시로 저장된 모든 이미지 모두 삭제
-        // Set 객체는 배열로 변환해야 한다 → Array.from(deletedImageFiles) 또는 [...deletedImageFiles]
-        deleteImageFiles([...deletedImageFiles], accessToken).then(response => {
+        // Set 객체는 배열로 변환해야 한다 → Array.from(profileImageHistory) 또는 [...profileImageHistory]
+        deleteImageFiles([...profileImageHistory], accessTokenUtils.getAccessToken()).then(response => {
             // Set 객체 비우기
-            deletedImageFiles.clear();
+            profileImageHistory.clear();
         });
     }
 });

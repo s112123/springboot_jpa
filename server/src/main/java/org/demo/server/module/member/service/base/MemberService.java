@@ -3,6 +3,7 @@ package org.demo.server.module.member.service.base;
 import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.form.MemberSaveForm;
 import org.demo.server.module.member.dto.form.MemberUpdateForm;
+import org.demo.server.module.member.entity.Role;
 import org.springframework.data.domain.Page;
 
 public interface MemberService {
@@ -54,6 +55,14 @@ public interface MemberService {
      * @param tempPassword 임시 비밀번호
      */
     void updateTempPasswordByEmail(String email, String tempPassword);
+
+    /**
+     * 회원의 권한 변경
+     *
+     * @param memberId 회원 식별자
+     * @param role 변경할 권한
+     */
+    void updateRole(Long memberId, Role role);
 
     /**
      * email 로 회원 정보 삭제

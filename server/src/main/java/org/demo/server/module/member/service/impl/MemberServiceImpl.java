@@ -57,7 +57,7 @@ public class MemberServiceImpl implements MemberService {
         Member member = Member.builder()
                 .email(form.getEmail())
                 .password(passwordEncoder.encode(form.getPassword()))
-                .username("user-" + UUID.randomUUID())
+                .username(UUID.randomUUID().toString())
                 .role(Role.USER)
                 .profileImage(profileImage)
                 .build();
@@ -105,7 +105,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         // 회원 목록 조회
-        Pageable pageable = PageRequest.of((page - 1), 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of((page - 1), 10, Sort.by(Sort.Direction.ASC, "email"));
         Page<MemberDetails> findMembers = memberRepository.findAll(pageable)
                 .map(member -> member.toDetailsWithoutProfileImage());
         return findMembers;
@@ -149,8 +149,6 @@ public class MemberServiceImpl implements MemberService {
                 .profileImage(profileImage)
                 .build();
 
-        // @Transactional 안에 있지만 현재 엔티티는 final 로 불변이므로 변경 감지를 활용할 수 없다
-        // 변경 감지는 final 이 없고 Setter 와 같이 엔티티의 속성 값을 변경할 수 있어야 한다
         Member updatedMember = memberRepository.save(member);
         return updatedMember.toDetails();
     }
@@ -173,6 +171,18 @@ public class MemberServiceImpl implements MemberService {
                 .profileImage(findMember.getProfileImage())
                 .build();
         memberRepository.save(updatedMember);
+    }
+
+    /**
+     * 회원의 권한 변경
+     *
+     * @param memberId 회원 식별자
+     * @param role 변경할 권한
+     */
+    @Override
+    public void updateRole(Long memberId, Role role) {
+        Member findMember = memberFinder.getMemberById(memberId);
+        findMember.updateRole(role);
     }
 
     /**
