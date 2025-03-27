@@ -168,6 +168,7 @@ public class MemberController {
 
         // Access Token 재발급
         Claims claims = Jwts.claims();
+        claims.put("memberId", memberDetails.getMemberId());
         claims.put("username", memberDetails.getUsername());
         claims.put("roles", List.of(memberDetails.getRole()));
         String accessToken = jwtUtils.create(claims);

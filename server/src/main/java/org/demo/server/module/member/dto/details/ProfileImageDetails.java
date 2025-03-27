@@ -14,6 +14,8 @@ public class ProfileImageDetails {
     private Long profileImageId;
     private String originalFileName;
     private String savedFileName;
+    @JsonIgnore
+    private Member member;
 
     /**
      * (DTO → Entity) ProfileImageDetails → ProfileImage
@@ -25,6 +27,7 @@ public class ProfileImageDetails {
                 .profileImageId(this.profileImageId)
                 .originalFileName(this.originalFileName)
                 .savedFileName(this.savedFileName)
+                .member(member)
                 .build();
     }
 }

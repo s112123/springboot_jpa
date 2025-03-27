@@ -21,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -47,20 +46,22 @@ public class MemberServiceImpl implements MemberService {
             throw new DuplicatedEmailException("이미 존재하는 이메일입니다");
         }
 
-        // 기본 프로필 이미지 등록
-        ProfileImage profileImage = ProfileImage.builder()
-                .originalFileName("default.png")
-                .savedFileName("default.png")
-                .build();
-
         // 회원 등록
         Member member = Member.builder()
                 .email(form.getEmail())
                 .password(passwordEncoder.encode(form.getPassword()))
                 .username(UUID.randomUUID().toString())
                 .role(Role.USER)
-                .profileImage(profileImage)
                 .build();
+
+        // 기본 프로필 이미지 등록
+        ProfileImage profileImage = ProfileImage.builder()
+                .originalFileName("default.png")
+                .savedFileName("default.png")
+                .member(member)
+                .build();
+
+        member.addProfileImage(profileImage);
         Member savedMember = memberRepository.save(member);
         return savedMember.toDetails();
     }
@@ -121,36 +122,25 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberDetails update(String username, MemberUpdateForm form) {
         // 기존 엔티티를 영속성 컨텍스트에 넣는다
-        Member findMember = memberFinder.getMemberByUsername(username);
+        Member member = memberFinder.getMemberByUsername(username);
+        ProfileImage profileImage = member.getProfileImage();
 
         // 업데이트 정보
         String newUsername = form.getUsername();
         String newPassword = (form.getPassword() != null) ?
-                passwordEncoder.encode(form.getPassword()) : findMember.getPassword();
+                passwordEncoder.encode(form.getPassword()) : member.getPassword();
         String newOriginalFileName = (form.getOriginalFileName() != null) ?
-                form.getOriginalFileName() : findMember.getProfileImage().getOriginalFileName();
+                form.getOriginalFileName() : member.getProfileImage().getOriginalFileName();
         String newSavedFileName = (form.getSavedFileName() != null) ?
-                form.getSavedFileName() : findMember.getProfileImage().getSavedFileName();
+                form.getSavedFileName() : member.getProfileImage().getSavedFileName();
 
-        // ProfileImage 의 변경 정보
-        ProfileImage profileImage = ProfileImage.builder()
-                .profileImageId(findMember.getProfileImage().getProfileImageId())
-                .originalFileName(newOriginalFileName)
-                .savedFileName(newSavedFileName)
-                .build();
+        // 회원 정보 변경
+        member.updateUsername(newUsername);
+        member.updatePassword(newPassword);
+        profileImage.updateOriginalFileName(newOriginalFileName);
+        profileImage.updateSavedFileName(newSavedFileName);
 
-        // 기존 엔티티와 memberId 가 동일한 새로운 엔티티 객체를 만든다
-        Member member = Member.builder()
-                .memberId(findMember.getMemberId())
-                .email(findMember.getEmail())
-                .password(newPassword)
-                .username(newUsername)
-                .role(findMember.getRole())
-                .profileImage(profileImage)
-                .build();
-
-        Member updatedMember = memberRepository.save(member);
-        return updatedMember.toDetails();
+        return member.toDetails();
     }
 
     /**

@@ -5,6 +5,7 @@ import org.demo.server.module.follow.repository.FollowRepository;
 import org.demo.server.module.follow.service.base.FollowService;
 import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.form.MemberSaveForm;
+import org.demo.server.module.member.entity.Role;
 import org.demo.server.module.member.service.base.MemberService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +39,9 @@ public class DBInit {
 //                saveForm.setPassword("a123412341234");
 //                memberService.save(saveForm);
 //            }
+
+            // 권한 변경
+            memberService.updateRole(adminDetails.getMemberId(), Role.ADMIN);
 
             // admin -> user1, user2
             Follow adminToUser1 = Follow.builder()
