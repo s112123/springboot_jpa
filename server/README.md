@@ -1,8 +1,9 @@
-## 회원 관리
+## 회원 관리 & 로그인
 #### 1) 테이블
-&#8209; member (1)-(1) profile_image <br>
+&#8209; `member (1)-(1) profile_image` <br>
 
 #### 2) 회원 등록 → POST /api/v1/members
+&#8209; JWT 인증 필요 없음 <br>
 &#8209; 입력 값 → 이메일, 비밀번호 <br>
 &#8209; 유효성 검사 → 입력 여부, 중복 이메일 <br>
 &#8209; 이메일 인증 → 인증 코드를 메일로 전송하고 Redis 에 저장 후, 비교 <br>
@@ -11,36 +12,86 @@
 &#8209; 반환 값 → 닉네임, 가입일, 정보 수정일, 프로필 이미지 파일 정보 <br>
 
 #### 2) 인증 코드 발송 → POST /api/v1/members/codes
+&#8209; JWT 인증 필요 없음 <br>
 &#8209; 유효성 검사 → Client 에서 이메일 형식 확인 <br>
 &#8209; 인증 코드를 입력된 이메일 주소로 발송하고 Redis 에 3분간 저장 <br>
 &#8209; 인증 코드를 재발송하면 기존의 인증 코드는 Redis 에서 자동으로 덮어쓴다 <br>
 
-#### 3) 인증 코드 확인 → GET /api/v1/members/codes/check/{code}
+#### 3) 인증 코드 확인 → POST /api/v1/members/codes/check
+&#8209; JWT 인증 필요 없음 <br>
 &#8209; 유효성 검사 → 인증 코드 유효 시간, 잘못된 인증 코드 <br>
 &#8209; 인증 링크를 통해 전송된 인증 코드를 Redis 에 저장된 인증 코드와 비교 <br>
 
-#### 4) 회원 조회 → GET /api/v1/members/{memberId}
-&#8209; memberId 로 조회 <br>
+#### 4) 이메일 중복 확인 → POST /api/v1/members/emails/check
+&#8209; JWT 인증 필요 없음 <br>
+&#8209; 회원 등록 중 이메일이 중복 여부 확인 <br>
+
+#### 5) 임시 비밀번호 전송 → POST /api/v1/members/send-password
+&#8209; JWT 인증 필요 없음 <br>
+&#8209; 로그인 페이지에서 비밀번호 찾기 클릭 <br>
+&#8209; 비밀번호를 찾는 대신 임시 비밀번호로 변경하여 로그인하도록 한다 <br>
+&#8209; 임시 비밀번호는 이메일로 전송한다 <br>
+
+#### 6) 회원 조회 → GET /api/v1/members/{username}
+&#8209; JWT 인증 필요 <br>
 &#8209; 유효성 검사 → 회원 존재 여부 <br>
 &#8209; 반환 값 → 닉네임, 가입일, 정보 수정일, 프로필 이미지 파일 정보 <br>
 
-#### 5) 회원 목록 → GET /api/v1/members/pages/{page}
+#### 7) 회원 목록 → GET /api/v1/members/pages/{page}
+&#8209; JWT 인증 필요 <br>
 &#8209; 유효성 검사 → 1보다 작은 페이지 입력 여부 <br>
-&#8209; 정렬 → createdAt 내림차순 <br>
+&#8209; 정렬 → email 로 오름차순 <br>
 &#8209; 페이지네이션 → 1페이지 당 10개 목록 <br>
-&#8209; 검색어 → username, role <br>
 
-#### 6) 회원 수정 → PATCH /api/v1/members/{memberId}
-&#8209; memberId 로 회원 정보 수정 <br>
+#### 8) 권한 변경 → PATCH /api/v1/members/{memberId}/roles
+&#8209; JWT 인증 필요 <br>
+&#8209; ADMIN 권한을 가진 회원이 회원 목록에서 회원 권한을 변경할 수 있다
+&#8209; Access Token 에 권한을 포함하므로 재발급해야 한다 <br>
+
+#### 9) 회원 수정 → PATCH /api/v1/members/{username}
+&#8209; JWT 인증 필요 <br>
 &#8209; 변경 값 → 닉네임, 비밀번호, 프로필 이미지 <br>
 &#8209; 유효성 검사 → 입력 여부, 중복 닉네임 <br>
 &#8209; 비밀번호 → 영어, 숫자가 포함되고 10자리 이상
 &#8209; 반환 값 → 닉네임, 가입일, 정보 수정일, 프로필 이미지 파일 정보 <br>
+&#8209; Access Token 에 닉네임을 포함하므로 재발급해야 한다 <br>
 
-#### 7) 회원 삭제 → DELETE /api/v1/members/{memberId}
-&#8209; memberId 로 회원 삭제 <br>
+#### 10) 닉네임 중복 확인 → PATCH /api/v1/members/{username}
+&#8209; JWT 인증 필요 <br>
+&#8209; 변경 값 → 닉네임, 비밀번호, 프로필 이미지 <br>
+&#8209; 유효성 검사 → 입력 여부, 중복 닉네임 <br>
+&#8209; 비밀번호 → 영어, 숫자가 포함되고 10자리 이상
+&#8209; 반환 값 → 닉네임, 가입일, 정보 수정일, 프로필 이미지 파일 정보 <br>
+&#8209; Access Token 에 닉네임을 포함하므로 재발급해야 한다 <br>
+
+#### 11) 회원 삭제 → DELETE /api/v1/members/{email}
+&#8209; JWT 인증 필요 <br>
+&#8209; 회원의 활동 내역을 모두 삭제하고 복구할 수 없다 <br>
+&#8209; 회원 삭제는 사용자가 회원 정보 화면에서 회원 탈퇴하거나 관리자가 회원 목록 화면에서 삭제 가능 <br>
 &#8209; 유효성 검사 → 회원 존재 여부 <br>
+&#8209; 회원 삭제 시, 서버의 저장소에 저장된 프로필 파일, 리뷰 파일을 모두 삭제해야 한다 <br>
 
-#### 8) 이미지 파일 저장 → POST /api/v1/members/profile-images
+#### 12) 프로필 이미지 파일 저장 → POST /api/v1/members/profile-images
+&#8209; JWT 인증 필요 <br>
+&#8209; 서버 저장 경로 → 서버 저장소의 드라이브 > uploads > profiles > {memberId} <br>
+&#8209; 기본 이미지 파일 → 프로젝트의 src > main > resources > static > images > profiles > default.png <br>
 &#8209; 유효성 검사 → 파일 첨부 여부, 파일 확장자는 png, jpg 만 가능 <br>
 &#8209; 반환 값 → 저장된 이미지 파일 정보 <br>
+&#8209; 회원 가입 시, 기본 이미지로 저장되므로 PNG 파일의 이름이 default 인 파일은 저장할 수 없다 <br>
+&#8209; 프로필 이미지 선택 중 임시 파일이 서버에 저장되고 변경을 하면 임시 파일은 삭제한다 <br>
+
+#### 13) 프로필 이미지 파일 조회 → GET /api/v1/members/profile-images/{memberId}/{fileName}
+&#8209; JWT 인증 필요 없음 <br>
+&#8209; 이미지 파일은 글 화면에서 표시되므로 JWT 인증 없이 누구나 확인할 수 있어야 한다 <br>
+&#8209; 서버 저장 경로 → 서버 저장소의 드라이브 > uploads > profiles > {memberId} <br>
+
+#### 14) 프로필 이미지 파일 삭제 → DELETE /api/v1/members/profile-images/{memberId}
+&#8209; JWT 인증 필요 <br>
+&#8209; 서버 저장 경로 → 서버 저장소의 드라이브 > uploads > profiles > {memberId} <br>
+
+<br>
+<br>
+
+## 리뷰 관리
+#### 1) 테이블
+&#8209; `member (1)-(*) Review (1)-(*) review_image` <br>
