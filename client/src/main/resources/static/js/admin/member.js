@@ -9,6 +9,10 @@ render(1);
 
 // 회원 목록 화면 렌더링
 function render(page) {
+    // Access Token 이 없으면 로그인 화면으로 이동
+    accessTokenUtils.redirectLoginPage()
+
+    // 회원 목록
     getMembers(page).then((response) => {
         let members = response.data;
 

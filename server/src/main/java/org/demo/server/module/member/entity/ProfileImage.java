@@ -22,10 +22,33 @@ public class ProfileImage {
     @Column(name = "saved_file_name", nullable = false)
     private String savedFileName;
 
+    @OneToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     private ProfileImage(Builder builder) {
         this.profileImageId = builder.profileImageId;
         this.originalFileName = builder.originalFileName;
         this.savedFileName = builder.savedFileName;
+        this.member = builder.member;
+    }
+
+    /**
+     * 기존 프로필 이미지 파일 이름 변경
+     *
+     * @param originalFileName 프로필 파일 이름
+     */
+    public void updateOriginalFileName(String originalFileName) {
+        this.originalFileName = originalFileName;
+    }
+
+    /**
+     * 서버에 저장된 프로필 이미지 파일 이름 변경
+     *
+     * @param savedFileName 프로필 파일 이름
+     */
+    public void updateSavedFileName(String savedFileName) {
+        this.savedFileName = savedFileName;
     }
 
     /**
@@ -56,6 +79,7 @@ public class ProfileImage {
         private Long profileImageId;
         private String originalFileName;
         private String savedFileName;
+        private Member member;
 
         public Builder profileImageId(Long profileImageId) {
             this.profileImageId = profileImageId;
@@ -69,6 +93,11 @@ public class ProfileImage {
 
         public Builder savedFileName(String savedFileName) {
             this.savedFileName = savedFileName;
+            return this;
+        }
+
+        public Builder member(Member member) {
+            this.member = member;
             return this;
         }
 

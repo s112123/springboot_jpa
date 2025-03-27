@@ -75,13 +75,15 @@ btnAdd.addEventListener('click', (e) => {
     // 저장되어야 하는 <img> 태그
     let savedImages = tempImageFileNames.filter((_, index) => savedImageIndex.includes(index));
     // 삭제되어야 하는 <img> 태그
+    // 아래 deletedImages 을 서버에 전달하거나 서버에서 temp > memberId 폴더를 삭제할 수 있다
+    // 하지만 @Scheduled 로 삭제해본다
     // let deletedImages = tempImageFileNames.filter((_, index) => !savedImageIndex.includes(index));
 
     // 리뷰 입력 정보
     // reviewEditor → ckeditor.js 에 선언되어 있다
     // reviewEditor.getData() → CkEditor 의 내용 추출
     const formData = {
-        'writer': username,
+        'writer': accessTokenUtils.getUsername(),
         'title': title.value.trim(),
         'storeName': storeName.value.trim(),
         'storeAddress': storeAddress.value.trim(),
@@ -91,7 +93,7 @@ btnAdd.addEventListener('click', (e) => {
     };
 
     // 리뷰 등록
-    addReview(formData, accessTokenUtils.getAccessToken()).then(response => {
+    addReview(formData).then(response => {
         location.replace('/');
     });
 });
@@ -118,11 +120,11 @@ function changeStarColor(stars, score) {
 }
 
 // 리뷰 등록 API
-async function addReview(formData, accessToken) {
+async function addReview(formData) {
     // 리뷰 등록
     const response = await axios.post('http://localhost:8081/api/v1/reviews', formData, {
         headers: {
-            "Authorization": accessToken,
+            "Authorization": accessTokenUtils.getAccessToken(),
             "Content-Type": "application/json"
         }
     });

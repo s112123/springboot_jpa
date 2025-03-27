@@ -74,7 +74,7 @@ class UploadAdapter {
 
         // xhr.open('POST', location.protocol + '//' + location.host + 'reviews/content-temp-image', true);
         xhr.open('POST', 'http://localhost:8081/api/v1/reviews/content-images/temp/' + memberId, true);
-        xhr.setRequestHeader('Authorization', 'Bearer ' + accessTokenUtils.getAccessToken);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + accessTokenUtils.getAccessToken());
 
         // 응답 타입
         xhr.responseType = 'json';

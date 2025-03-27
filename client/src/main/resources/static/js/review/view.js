@@ -8,8 +8,6 @@ const reviewId = params.get('review_id');
 // 글 조회
 getReview(reviewId).then((response) => {
     console.log(response.data);
-    // 회원의 memberId
-    let memberId = accessTokenUtils.getMemberId();
     // 조회된 리뷰
     let review = response.data;
 
@@ -40,7 +38,8 @@ getReview(reviewId).then((response) => {
     if (writerProfileImageFileName === 'default.png') {
         writerProfileImage.src = '/images/profiles/default.png';
     } else {
-        writerProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' + writerProfileImageFileName;
+        writerProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' +
+                                  review.memberId + '/' + writerProfileImageFileName;
     }
 
     // 작성자 이름
@@ -49,7 +48,7 @@ getReview(reviewId).then((response) => {
 
     // 구독 버튼 생성
     const writerAction = document.getElementById('writer-action');
-    if (memberId !== null && review.memberId === memberId) {
+    if (accessTokenUtils.getMemberId() !== null && review.memberId === accessTokenUtils.getMemberId()) {
         writerAction.style.display = 'none';
     } else {
         writerAction.style.display = 'block';
@@ -77,8 +76,7 @@ getReview(reviewId).then((response) => {
 
     // 편집 버튼
     const btnUpdate = document.getElementById('update-review');
-    console.log(memberId);
-    if (memberId !== null && review.memberId === memberId) {
+    if (accessTokenUtils.getMemberId() !== null && review.memberId === accessTokenUtils.getMemberId()) {
         // 편집 화면으로 이동
         btnUpdate.style.display = 'block';
         btnUpdate.addEventListener('click', () => {

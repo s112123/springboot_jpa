@@ -35,8 +35,7 @@ public class Member extends BaseEntity {
     private Role role;
 
     // Member (1)-(1) ProfileImage
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "profile_image_id")
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProfileImage profileImage;
 
     // Member (1)-(*) Follow (*)-(1) Member
@@ -66,6 +65,33 @@ public class Member extends BaseEntity {
         this.profileImage = builder.profileImage;
         this.followers = builder.followers;
         this.following = builder.following;
+    }
+
+    /**
+     * 프로필 이미지 추가
+     *
+     * @param profileImage 회원에 해당하는 프로필 이미지
+     */
+    public void addProfileImage(ProfileImage profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    /**
+     * 닉네임 변경
+     *
+     * @param username 변경할 닉네임
+     */
+    public void updateUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * 비밀번호 변경
+     * 
+     * @param password 변경할 비밀번호
+     */
+    public void updatePassword(String password) {
+        this.password = password;
     }
 
     /**

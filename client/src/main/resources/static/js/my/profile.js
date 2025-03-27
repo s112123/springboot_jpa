@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 회원 정보 조회
     try {
-        const response = await findMember(accessTokenUtils.getUsername(), accessTokenUtils.getAccessToken());
+        const response = await findMember(accessTokenUtils.getUsername());
         const body = response.data;
 
         // 사용자 정보
@@ -63,10 +63,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // 회원 정보 조회 API
-async function findMember(username, accessToken) {
+async function findMember(username) {
     const response = await axios.get('http://localhost:8081/api/v1/members/' + username, {
         headers: {
-            'Authorization': 'Bearer ' + accessToken
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
         }
     });
     return response;
@@ -94,7 +94,7 @@ eleImageFile.addEventListener('change', (e) => {
     formData.append('profile-file', e.target.files[0]);
 
     // DB 에 등록하지 않고 서버에만 임시 파일 저장
-    saveSelectedImageFile(formData, accessTokenUtils.getAccessToken()).then(response => {
+    saveSelectedImageFile(formData).then(response => {
         // 임시 파일을 이미지로 보여준다
         eleProfileImage.src = 'http://localhost:8081/api/v1/members/profile-images/' +
                                accessTokenUtils.getMemberId() + '/' + response.data.savedFileName;
@@ -107,10 +107,10 @@ eleImageFile.addEventListener('change', (e) => {
 });
 
 // 프로필 이미지 변경 API
-async function saveSelectedImageFile(formData, accessToken) {
+async function saveSelectedImageFile(formData) {
     const response = await axios.post('http://localhost:8081/api/v1/members/profile-images', formData, {
         headers: {
-            'Authorization': 'Bearer ' + accessToken,
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
             'Content-Type': 'multipart/form-data'
         }
     });
@@ -159,7 +159,7 @@ btnUpdate.addEventListener('click', () => {
         };
 
         // 회원 정보 수정 처리
-        updateMember(originalUsername, changedUserInfo, accessTokenUtils.getAccessToken()).then(response => {
+        updateMember(originalUsername, changedUserInfo).then(response => {
             // 새롭게 발급받은 Access Token 을 갱신
             const newAccessToken = response.data.accessToken;
             localStorage.setItem('todayReviewsAccessToken', newAccessToken);
@@ -190,7 +190,7 @@ eleUsername.addEventListener('keyup', () => {
     if (eleUsername.value.trim() !== username) {
         isDuplicatedUsername = false;
         if (eleUsername.value.trim().length > 0) {
-            isExistsUsername(eleUsername.value.trim(), accessTokenUtils.getAccessToken()).then(response => {
+            isExistsUsername(eleUsername.value.trim()).then(response => {
                 isDuplicatedUsername = response.data;
                 if (isDuplicatedUsername) {
                     eleUsername.nextElementSibling.nextElementSibling.style.display = 'block';
@@ -204,10 +204,10 @@ eleUsername.addEventListener('keyup', () => {
 });
 
 // 닉네임 중복 검증 API
-async function isExistsUsername(username, accessToken) {
+async function isExistsUsername(username) {
     let response = await axios.post('http://localhost:8081/api/v1/members/username/check', username, {
         headers: {
-            'Authorization': 'Bearer ' + accessToken,
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
             'Content-Type': 'text/plain'
         }
     });
@@ -273,11 +273,11 @@ elePassword.addEventListener('keydown', (e) => {
 });
 
 // 프로필 이미지 삭제 API
-async function deleteImageFiles(imageFileNames, accessToken) {
+async function deleteImageFiles(imageFileNames) {
     let api = 'http://localhost:8081/api/v1/members/profile-images/' + accessTokenUtils.getMemberId();
     const response = await axios.delete(api, {
         headers: {
-            'Authorization': 'Bearer ' + accessToken,
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
             'Content-Type': 'application/json'
         },
         data: imageFileNames
@@ -286,10 +286,10 @@ async function deleteImageFiles(imageFileNames, accessToken) {
 };
 
 // 회원 정보 수정 API
-async function updateMember(username, userInfo, accessToken) {
+async function updateMember(username, userInfo) {
     const response = await axios.patch('http://localhost:8081/api/v1/members/' + username, userInfo, {
         headers: {
-            'Authorization': 'Bearer ' + accessToken,
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
             'Content-Type': 'application/json'
         }
     });
@@ -299,7 +299,7 @@ async function updateMember(username, userInfo, accessToken) {
 // 회원 탈퇴
 btnWithdrawMembership.addEventListener('click', () => {
     if (confirm('회원탈퇴 하시겠습니까? 모든 내역이 삭제됩니다')) {
-        removeMemberShip(eleEmail.value, accessTokenUtils.getAccessToken()).then(response => {
+        removeMemberShip(eleEmail.value).then(response => {
             // JWT 삭제
             accessTokenUtils.removeAccessToken();
             // 탈퇴 완료
@@ -310,10 +310,10 @@ btnWithdrawMembership.addEventListener('click', () => {
 });
 
 // 회원 탈퇴 API
-async function removeMemberShip(email, accessToken) {
+async function removeMemberShip(email) {
     let response = await axios.delete('http://localhost:8081/api/v1/members/' + email, {
         headers: {
-            'Authorization': 'Bearer ' + accessToken
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
         }
     });
     return response;
@@ -339,7 +339,7 @@ window.addEventListener('beforeunload', (e) => {
         });
         // 변경에 의해 임시로 저장된 모든 이미지 모두 삭제
         // Set 객체는 배열로 변환해야 한다 → Array.from(profileImageHistory) 또는 [...profileImageHistory]
-        deleteImageFiles([...profileImageHistory], accessTokenUtils.getAccessToken()).then(response => {
+        deleteImageFiles([...profileImageHistory]).then(response => {
             // Set 객체 비우기
             profileImageHistory.clear();
         });
