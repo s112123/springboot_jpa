@@ -1,3 +1,44 @@
+import { accessTokenUtils } from '/js/common.js';
+
+// 변수 선언
+let btnGood = document.getElementById('good');
+let btnGoodCancel = document.getElementById('good-cancel');
+
+// 좋아요 버튼 클릭 (빈 하트)
+btnGood.addEventListener('click', (e) => {
+    // Access Token 이 없으면 로그인 화면으로 이동
+    if (!accessTokenUtils.getAccessToken()) {
+        // 현재 URL 에서 도메인을 제거한 경로
+        // http://localhost:8080/review/view?review_id=1 → /review/view?review_id=1
+        let redirectUrl = window.location.pathname + window.location.search;
+        location.href = '/login?redirect=' + redirectUrl;
+        return;
+    }
+    console.log('좋아요');
+
+    // 좋아요 버튼 숨기고 좋아요 취소 버튼 활성화
+    btnGood.style.display = 'none';
+    btnGoodCancel.style.display = 'block';
+});
+
+// 좋아요 취소 버튼 클릭 (꽉 채운 하트)
+btnGoodCancel.addEventListener('click', () => {
+    // Access Token 이 없으면 로그인 화면으로 이동
+    if (!accessTokenUtils.getAccessToken()) {
+        let redirectUrl = window.location.pathname + window.location.search;
+        location.href = '/login?redirect=' + redirectUrl;
+        return;
+    }
+    console.log('좋아요 취소');
+
+    // 좋아요 취소 버튼 숨기고 좋아요 버튼 활성화
+    btnGoodCancel.style.display = 'none';
+    btnGood.style.display = 'block';
+});
+
+
+
+/*
 // 변수 선언
 var email = document.getElementById('email');
 var writer = document.getElementById('writer');
@@ -83,3 +124,4 @@ async function sendNotificationGood(writer) {
 }
 
 export {email, writer, memberNickName, writerNickName}
+*/

@@ -15,8 +15,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- javascript -->
     <script defer src="/js/review/view.js" type="module"></script>
-<!--    <script defer src="/js/review/good.js" type="module"></script>-->
-<!--    <script defer src="/js/review/subscribe.js" type="module"></script>-->
+    <script defer src="/js/review/good.js" type="module"></script>
+    <script defer src="/js/review/subscribe.js" type="module"></script>
 </head>
 <body>
     <div layout:fragment="content" class="container">
@@ -38,6 +38,12 @@
                             <li><i class="fa-solid fa-star"></i></li>
                             <li><i class="fa-solid fa-star"></i></li>
                         </ul>
+                    </div>
+                    <div class="store-heart" id="store-heart">
+                        <!-- 좋아요 버튼 (빈 하트 표시) -->
+                        <a href="javascript:;" id="good"><i class="fa-regular fa-heart"></i></a>
+                        <!-- 좋아요 취소 버튼 (꽉 채운 하트) -->
+                        <a href="javascript:;" id="good-cancel"><i class="fa-solid fa-heart"></i></a>
                     </div>
 <!--                    <th:block th:if="${session.email == null} or ${session.email != writer.email}">-->
 <!--                        <div class="store-heart" id="store-heart" th:data-is-good="${isGood}">-->
@@ -83,18 +89,10 @@
         </div>
         <!--
         <div class="review-bottom">
-          <div>
-            댓글 (0)
-          </div>
-          <div>
-            댓글쓰기
-          </div>
-          <div>
-            댓글뷰
-          </div>
-          <div>
-            댓글페이징
-          </div>
+            <div>댓글 (0)</div>
+            <div>댓글쓰기</div>
+            <div>댓글뷰</div>
+            <div>댓글페이징</div>
         </div>
         -->
     </div>

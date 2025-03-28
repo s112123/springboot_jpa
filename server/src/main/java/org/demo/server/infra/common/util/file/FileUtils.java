@@ -8,8 +8,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -72,7 +75,7 @@ public class FileUtils {
         // 원본 파일
         File sourceFile = new File(sourceDirectoryPath + fileName);
         if (!sourceFile.exists()) {
-            throw new IllegalArgumentException("원본 파일이 없습니다");
+            return;
         }
 
         // 이동 파일
@@ -90,23 +93,22 @@ public class FileUtils {
     }
 
     /**
-     * 서버에서 하나의 파일 삭제
+     * 하나의 파일 삭제
      *
      * @param fileName 삭제할 파일 이름
      * @param uploadDirectory 삭제할 파일이 있는 폴더 경로
      * @return 삭제된 경우, true 를 반환하고 그렇지 않으면 false 반환
      */
-    public boolean deleteFile(String fileName, UploadDirectory uploadDirectory, String... subDirectories) {
+    public void deleteFile(String fileName, UploadDirectory uploadDirectory, String... subDirectories) {
         File deletedFile = new File(getUploadDirectory(uploadDirectory, subDirectories) + fileName);
         if (deletedFile.exists()) {
+            // 파일 삭제
             deletedFile.delete();
-            return true;
         }
-        return false;
     }
 
     /**
-     * 서버에서 다량의 파일 삭제
+     * 다량의 파일 삭제
      *
      * @param fileNames 삭제할 파일 이름 목록
      * @param uploadDirectory 삭제할 파일이 있는 폴더 경로
@@ -114,6 +116,30 @@ public class FileUtils {
     public void deleteFiles(List<String> fileNames, UploadDirectory uploadDirectory, String... subDirectories) {
         for (String fileName : fileNames) {
             deleteFile(fileName, uploadDirectory, subDirectories);
+        }
+    }
+
+    /**
+     * 디렉토리 삭제
+     *
+     * @param uploadDirectory 루트 디렉토리
+     * @param subDirectories 하위 디렉토리
+     */
+    public void deleteDirectory(UploadDirectory uploadDirectory, String... subDirectories) {
+        Path deletedDirectory = Path.of(getUploadDirectory(uploadDirectory, subDirectories));
+        if (Files.exists(deletedDirectory)) {
+            try (Stream<Path> walk = Files.walk(deletedDirectory)) {
+                walk.sorted(Comparator.reverseOrder())
+                        .forEach(p -> {
+                            try {
+                                Files.delete(p);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

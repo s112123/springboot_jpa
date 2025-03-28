@@ -11,10 +11,12 @@ ClassicEditor.create(document.querySelector('#content'), {
 })
 .then(editor => {
     reviewEditor = editor;
-    editor.model.schema.extend('imageInline', {allowAttributes: 'data-image-index'});
+    editor.model.schema.extend('imageInline', {
+        allowAttributes: ['data-image-index', 'data-image-name']
+    });
 
     // (데이터 모델 → 뷰) data-image-number 속성이 모델에서 뷰로 변환될 때 유지되도록 설정
-    // downcast: 모델에서 <img> 태그로 변환할 때 data-image-number 속성 유지
+    // downcast: 모델에서 <img> 태그로 변환할 때 data-image-index, data-image-name 속성 유지
     editor.conversion.for('downcast').add(dispatcher => {
         dispatcher.on('attribute:data-image-index:imageInline', (evt, data, conversionApi) => {
             const { writer } = conversionApi;
@@ -28,19 +30,42 @@ ClassicEditor.create(document.querySelector('#content'), {
                 }
             }
         });
+
+        dispatcher.on('attribute:data-image-name:imageInline', (evt, data, conversionApi) => {
+            const { writer } = conversionApi;
+            const viewElement = conversionApi.mapper.toViewElement(data.item);
+
+            if (viewElement) {
+                // <span> 내부의 <img>
+                const imgElement = viewElement.getChild(0);
+                if (imgElement) {
+                    writer.setAttribute('data-image-name', data.attributeNewValue, imgElement);
+                }
+            }
+        });
     });
 
-    // (뷰 → 데이터 모델) data-image-index 속성이 뷰에서 모델로 변환될 때 유지되도록 설정
-    // upcast: <img> 태그에서 data-image-index 속성을 모델로 변환
+    // (뷰 → 데이터 모델) data-image-index, data-image-name 속성이 뷰에서 모델로 변환될 때 유지되도록 설정
+    // upcast: <img> 태그에서 data-image-index, data-image-name 속성을 모델로 변환
     editor.conversion.for('upcast').attributeToAttribute({
         view: 'data-image-index',
         model: 'data-image-index'
     });
 
-    // 뷰의 속성과 모델의 속성에 data-image-index 를 추가
+    editor.conversion.for('upcast').attributeToAttribute({
+        view: 'data-image-name',
+        model: 'data-image-name'
+    });
+
+    // 뷰의 속성과 모델의 속성에 data-image-index, data-image-name 를 추가
     editor.conversion.attributeToAttribute({
         model: 'data-image-index',
         view: 'data-image-index'
+    });
+
+    editor.conversion.attributeToAttribute({
+        model: 'data-image-name',
+        view: 'data-image-name'
     });
 })
 .catch(error => {
@@ -88,19 +113,27 @@ class UploadAdapter {
         xhr.addEventListener('error', () => {reject(genericErrorText)});
         xhr.addEventListener('abort', () => reject());
         xhr.addEventListener('load', () => {
-            // 서버에서 응답 본문 반환
+            // 서버에서 반환한 응답 본문
+            // 본문 형식 → {originalFileName: 'lenna1.png', savedFileName: '8c513a83.png'}
             const response = xhr.response;
-            // 글 작성 중 서버에 저장된 임시 파일의 이름을 리스트에 담는다
+            // 리뷰 작성 중에 사용되는 파일 리스트에 담는다
             tempImageFileNames.push(response);
-            // 이미지 번호
+
+            // 이미지 인덱스
+            // 리뷰 등록할 때 사용되고 있으며 리뷰 수정할 때 JS 코드를 참고하여 이미지 이름으로 처리해도 된다
             const imageIndex = tempImageFileNames.length - 1;
+            // 이미지 이름
+            // 리뷰 수정할 때, imageIndex 로는 배열 개수로 인덱스를 구하여 오동작이 발생하여 이미지의 고유이름으로 처리
+            const imageName = response.savedFileName;
+
             // <img> 태그에 이미지 번호 추가
             this.editor.model.change(writer => {
                 // <img> 태그의 src 속성 변경
                 const imageElement = writer.createElement('imageInline', {
                     'src': 'http://localhost:8081/api/v1/reviews/content-images/temp/' +
                             memberId + '/' + response.savedFileName,
-                    'data-image-index': imageIndex
+                    'data-image-index': imageIndex,
+                    'data-image-name': imageName
                 });
 
                 // <img> 태그에 속성을 추가하는 다른 방법

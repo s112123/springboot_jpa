@@ -13,6 +13,7 @@ let errorCapsLock = document.getElementById('error-capslock');
 const queryString = window.location.search;
 const params = new URLSearchParams(queryString);
 const isRegister = params.get('register');
+const redirectUrl = params.get('redirect');
 
 // 회원가입 시, 메시지 출력
 if (isRegister !== null && isRegister) {
@@ -86,6 +87,10 @@ btnSignIn.addEventListener('click', () => {
         if (isRegister) {
             location.replace('/my/profile?register=true');
             isRegister = false;
+        }
+        if (redirectUrl) {
+            location.replace(redirectUrl);
+            return;
         }
         location.replace('/');
     })

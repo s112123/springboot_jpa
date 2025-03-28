@@ -144,6 +144,19 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
+     * 회원의 권한 변경
+     *
+     * @param memberId 회원 식별자
+     * @param role 변경할 권한
+     */
+    @Override
+    public MemberDetails updateRole(Long memberId, Role role) {
+        Member findMember = memberFinder.getMemberById(memberId);
+        findMember.updateRole(role);
+        return findMember.toDetails();
+    }
+
+    /**
      * 회원의 비밀번호를 임시 비밀번호로 변경
      *
      * @param email 회원 이메일
@@ -161,18 +174,6 @@ public class MemberServiceImpl implements MemberService {
                 .profileImage(findMember.getProfileImage())
                 .build();
         memberRepository.save(updatedMember);
-    }
-
-    /**
-     * 회원의 권한 변경
-     *
-     * @param memberId 회원 식별자
-     * @param role 변경할 권한
-     */
-    @Override
-    public void updateRole(Long memberId, Role role) {
-        Member findMember = memberFinder.getMemberById(memberId);
-        findMember.updateRole(role);
     }
 
     /**

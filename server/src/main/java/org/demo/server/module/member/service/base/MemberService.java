@@ -49,20 +49,20 @@ public interface MemberService {
     MemberDetails update(String username, MemberUpdateForm updateRequest);
 
     /**
+     * 회원의 권한 변경
+     *
+     * @param memberId 회원 식별자
+     * @param role 변경할 권한
+     */
+    MemberDetails updateRole(Long memberId, Role role);
+
+    /**
      * 회원의 비밀번호를 임시 비밀번호로 변경
      *
      * @param email 회원 이메일
      * @param tempPassword 임시 비밀번호
      */
     void updateTempPasswordByEmail(String email, String tempPassword);
-
-    /**
-     * 회원의 권한 변경
-     *
-     * @param memberId 회원 식별자
-     * @param role 변경할 권한
-     */
-    void updateRole(Long memberId, Role role);
 
     /**
      * email 로 회원 정보 삭제

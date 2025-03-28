@@ -4,24 +4,92 @@ import { accessTokenUtils } from '/js/common.js';
 let btnReview = document.getElementById('btn-review');
 let middle = document.getElementById('reviews-middle');
 let noData = document.getElementById('no-data');
+let orderItems = document.querySelectorAll('.order-item');
+let currentPage = 1;
+let currentSort = 0;
+let currentKeyword = '';
+
+// URL 에서 쿼리 스트링 추출
+const queryString = window.location.search;
+const params = new URLSearchParams(queryString);
+const keyword = params.get('searchKeyword');
+
+// 검색 처리
+if (keyword) {
+    currentSort = 1;
+    currentKeyword = keyword;
+    search.value = keyword;
+    search.focus();
+}
 
 // HTML 로드
 document.addEventListener('DOMContentLoaded', () => {
     // 로그인 되어 있는 경우, 리뷰쓰기 버튼 표시
     if (accessTokenUtils.getAccessToken()) {
-        btnReview.style.display = 'block';
+        if (btnReview !== null) {
+            btnReview.style.display = 'block';
+        } else {
+            btnReview.style.display = 'none';
+        }
+    }
+
+    // 글 목록에서 글을 눌러 조회하고 뒤로가기를 누르면 currentPage 와 currentSort 가 초기화된다
+    // 그래서 viewReview() 함수를 누를 때, 상태를 저장해둔다
+    if (!history.state) {
+        // 처음 페이지 로드 시, 1페이지 화면 렌더링
+        render(currentPage, currentSort, currentKeyword);
     } else {
-        btnReview.style.display = 'none';
+        // history 에 상태가 있으면 해당 페이지로 렌더링
+        currentPage = history.state.currentPage;
+        currentSort = history.state.currentSort;
+        currentKeyword = history.state.currentKeyword;
+        render(currentPage, currentSort, currentKeyword);
+    }
+
+    // 리뷰 정렬
+    orderItems.forEach((orderItem, index) => {
+        // 정렬 버튼 클릭시 동작
+        orderItem.addEventListener('click', () => {
+            // 정렬 옵션에 따른 리뷰 목록 반환
+            currentPage = 1;
+            currentSort = index;
+            if (currentSort === 0) {
+                search.value = '';
+            }
+            // 리뷰 검색어
+            currentKeyword = search.value;
+            render(currentPage, currentSort, currentKeyword);
+        });
+    });
+});
+
+// 리뷰 목록 화면 렌더링
+function render(page, sort, searchKeyword) {
+    currentPage = page;
+    currentSort = sort;
+    currentKeyword = searchKeyword;
+
+    // 정렬 항목 색상 처리
+    for (let i = 0; i < orderItems.length; i++) {
+        if (i === sort) {
+            orderItems[i].style.backgroundColor = 'rgba(210, 40, 40, 0.3)';
+            orderItems[i].style.color = '#000';
+        } else {
+            orderItems[i].style.backgroundColor = 'rgb(230, 230, 230)';
+            orderItems[i].style.color = 'rgb(100, 100, 100)';
+        }
     }
 
     // 리뷰 목록
-    getReviews(1).then(response => {
-        let reviews = response.data.data;
+    getReviews(currentPage, currentSort, currentKeyword).then(response => {
+        let reviews = response.data;
+        let reviewContents = reviews.data;
+        console.log(reviews);
 
         // DB 에 저장된 <img> 태그의 src 값을 변경한다
         // 수정 전 → <img src="http://localhost:8081/api/v1/reviews/content-images/temp/{memberId}/{fileName}">
         // 수정 후 → <img src="http://localhost:8081/api/v1/reviews/content-images/{memberId}/{fileName}?reviewId=1">
-        reviews.forEach((review) => {
+        reviewContents.forEach((review) => {
             review.content = review.content.replace(/<img[^>]+src="([^"]+\/temp[^"]+)"/g, (match, p1) => {
                 const updatedSrc = p1.replace('/temp', '') + '?reviewId=' + review.reviewId;
                 return match.replace(p1, updatedSrc);
@@ -29,15 +97,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 리뷰 목록을 작성한 HTML 반환
-        let reviewsHTML = getReviewsHTML(reviews);
+        let reviewsHTML = getReviewsHTML(reviewContents);
+
         // 리뷰 목록 렌더링
         if (reviewsHTML.length === 0) {
             middle.innerHTML = '<div class="no-data" id="no-data">조회된 결과가 없습니다</div>';
         } else {
             middle.innerHTML = reviewsHTML;
         }
+
+        // 페이지네이션 렌더링
+        let pageableElement = document.getElementById('pageable');
+        let paginationHTML = getPaginationHTML(reviews, currentSort);
+        pageableElement.innerHTML = paginationHTML;
     });
-});
+}
 
 // 리뷰쓰기 페이지로 이동
 if (btnReview !== null) {
@@ -47,53 +121,54 @@ if (btnReview !== null) {
 }
 
 // 리뷰 목록
-async function getReviews(page) {
-    const response = await axios.get('http://localhost:8081/api/v1/reviews/pages/' + page);
+async function getReviews(page, sort, searchKeyword) {
+    const api = `http://localhost:8081/api/v1/reviews/pages/${page}?sort=${sort}&searchKeyword=${searchKeyword}`;
+    const response = await axios.get(api);
     return response;
 }
 
 // 리뷰 목록 HTML 반환
 function getReviewsHTML(reviews) {
-  let html = ``;
+    let html = ``;
 
-  // 리뷰 목록
-  for (let review of reviews) {
-    html += `<div class="review-wrap" onclick="viewReview(${review.reviewId})">`;
-    html += `  <div class="review-box">`;
-    html += `    <div class="review-image">`;
-    // 썸네일
-    let reviewImagesDetailsList = review.reviewImagesDetailsList;
-    for (let reviewImagesDetails of reviewImagesDetailsList) {
-        if (reviewImagesDetails.isThumbnail) {
-            let thumbFileName = reviewImagesDetails.savedFileName;
-            let thumbSrc = 'http://localhost:8081/api/v1/reviews/content-images/';
-            thumbSrc += review.memberId + '/' + thumbFileName + '?reviewId=' + review.reviewId;
-            html += '      <img src="' + thumbSrc + '" />';
-            break;
+    // 리뷰 목록
+    for (let review of reviews) {
+        html += `<div class="review-wrap" onclick="viewReview(${review.reviewId})">`;
+        html += `  <div class="review-box">`;
+        html += `    <div class="review-image">`;
+        // 썸네일
+        let reviewImagesDetailsList = review.reviewImagesDetailsList;
+        for (let reviewImagesDetails of reviewImagesDetailsList) {
+            if (reviewImagesDetails.isThumbnail) {
+                let thumbFileName = reviewImagesDetails.savedFileName;
+                let thumbSrc = 'http://localhost:8081/api/v1/reviews/content-images/';
+                thumbSrc += review.memberId + '/' + thumbFileName + '?reviewId=' + review.reviewId;
+                html += '      <img src="' + thumbSrc + '" />';
+                break;
+            }
         }
+        html += `    </div>`;
+        html += `    <div class="review-summary">`;
+        html += `      <div class="review-summary-star">`;
+        html += `        <ul class="store-star">`;
+        // 평점
+        for (let i = 0; i < 5; i++) {
+            if (i < review.star) {
+                html += `      <li class="star-active"><i class="fa-solid fa-star"></i></li>`;
+            } else {
+                html += `      <li><i class="fa-solid fa-star"></i></li>`;
+            }
+        }
+        html += `        </ul>`;
+        html += `      </div>`;
+        html += `      <div class="review-summary-title">${shortTitle(review.title)}</div>`;
+        html += `      <div class="review-summary-content">${shortContent(removeHTMLTag(review.content))}</div>`;
+        html += `    </div>`;
+        html += `  </div>`;
+        html += `</div>`;
     }
-    html += `    </div>`;
-    html += `    <div class="review-summary">`;
-    html += `      <div class="review-summary-star">`;
-    html += `        <ul class="store-star">`;
-    // 평점
-    for (let i = 0; i < 5; i++) {
-      if (i < review.star) {
-        html += `      <li class="star-active"><i class="fa-solid fa-star"></i></li>`;
-      } else {
-        html += `      <li><i class="fa-solid fa-star"></i></li>`;
-      }
-    }
-    html += `        </ul>`;
-    html += `      </div>`;
-    html += `      <div class="review-summary-title">${shortTitle(review.title)}</div>`;
-    html += `      <div class="review-summary-content">${shortContent(removeHTMLTag(review.content))}</div>`;
-    html += `    </div>`;
-    html += `  </div>`;
-    html += `</div>`;
-  }
 
-  return html;
+    return html;
 }
 
 // 타이틀 글자 수 줄임
@@ -129,148 +204,71 @@ function removeHTMLTag(content) {
     return result;
 }
 
+// 페이지 버튼 HTML 생성
+function getPaginationHTML(list, sort, searchKeyword) {
+    let html = '';
+
+    if (list.end > 1) {
+        html += '<ul>';
+        // 이전 버튼
+        if (list.hasPrev) {
+            html += '    <li>';
+            html += `        <a href="javascript:;" onclick="render(${list.start - 1}, ${sort}, ${searchKeyword})">`;
+            html += '            <i class="fa-solid fa-angle-left"></i>';
+            html += '        </a>';
+            html += '    </li>';
+        }
+        // 페이지 번호
+        for (let i = list.start; i <= list.end; i++) {
+            let active = (i == list.currentPage) ? 'active' : '';
+            html += '    <li>';
+            html += `        <a href="javascript:;" class="${active}" onclick="render(${i}, ${sort}, ${searchKeyword})">${i}</a>`;
+            html += '    </li>';
+        }
+        // 다음 버튼
+        if (list.hasNext) {
+            html += '    <li>';
+            html += `        <a href="javascript:;" onclick="render(${list.end + 1}, ${sort}, ${searchKeyword})">`;
+            html += '            <i class="fa-solid fa-angle-right"></i>';
+            html += '        </a>';
+            html += '    </li>';
+        }
+        html += '</ul>';
+    }
+
+    return html;
+}
+
 // 조회 페이지 이동
 function viewReview(reviewId) {
+    // 글 조회 전에 history 에 currentPage, currentSort 값을 저장해둔다
+    // 이 방법 대신 sessionStorage 에 저장해도 된다
+    // sessionStorage.setItem('historyState', JSON.stringify({page:2, sort:'desc'}));
+    // history 객체의 pushState() 에 세 번째 인수는 다시 페이지로 돌아왔을 때, URL 에 쿼리 스트링으로 붙일 수 있다
+    // 예 → history.pushState(state, '', `?page=${currentPage}&sort=${currentSort}`);
+    // 다음은 쿼리 스트링으로 붙이진 않고 상태만 저장한다
+    const state = { currentPage, currentSort, currentKeyword };
+    history.pushState(state, '');
+
+    // 글 조회 페이지로 이동
     location.href = "/review/view?review_id=" + reviewId;
 }
-// 현재 index.js 는 모듈 상태이므로 전역 스코프에 viewReview 함수를 노출한다
-// 그렇지 않으면 Uncaught ReferenceError: viewReview is not defined 에러가 발생한다
+
+/*
+// pushState() 로 저장된 history 의 값을 popstate 이벤트로 꺼내올 수도 있다
+window.addEventListener('popstate', (e) => {
+    if (e.state) {
+        currentPage = e.state.currentPage;
+        currentSort = e.state.currentSort;
+        render(currentPage, currentSort);
+    }
+});
+ */
+
+// 현재 index.js 는 모듈 상태이므로 전역 스코프에 render() 와 viewReview() 를 노출한다
+// 그렇지 않으면 Uncaught ReferenceError: render is not defined 에러가 발생한다
+window.render = render;
 window.viewReview = viewReview;
-
-
-
-
-////////////////////////////////////////////
-// 변수 선언
-//let bottom = document.getElementById('reviews-bottom');
-//let orderItems = document.querySelectorAll('.order-item');
-//let search = document.querySelector('#search');
-//let btnSearch = document.querySelector('#btn-search');
-//let sortOption = 0;
-//let searchKeyword = '';
-//let page = 1;
-//
-//// HTML 로드
-//document.addEventListener('DOMContentLoaded', () => {
-//  // 리뷰 목록 반환: renderReviews(0, '', 1);
-//  //renderReviews(sortOption, searchKeyword, page);
-//});
-//
-//// 리뷰 검색
-//// 검색어 입력 input 에서 Enter 키 처리
-//search.addEventListener('keypress', () => {
-//  if (event.keyCode === 13) {
-//    if (search.value !== '') sortOption = 1;
-//    renderReviews(sortOption, search.value, page);
-//  }
-//});
-//
-//// 검색어 입력 후, 검색 버튼 클릭 처리
-//btnSearch.addEventListener('click', () => {
-//  if (search.value !== '') sortOption = 1;
-//  renderReviews(sortOption, search.value, page);
-//});
-//
-//// 리뷰 정렬
-//orderItems.forEach((orderItem, index) => {
-//  // 정렬 버튼 클릭시 동작
-//  orderItem.addEventListener('click', () => {
-//    // 정렬 옵션에 따른 리뷰 목록 반환
-//    sortOption = index;
-//    if (sortOption === 0) {
-//      search.value = '';
-//    }
-//    searchKeyword = search.value;
-//    renderReviews(sortOption, searchKeyword, page);
-//  });
-//});
-//
-
-//// 리뷰 목록을 화면에 렌더링
-//function renderReviews(sortOption, searchKeyword, page) {
-//  // 정렬 항목 색상 처리
-//  for (let i = 0; i < orderItems.length; i++) {
-//    if (i === sortOption) {
-//        orderItems[i].style.backgroundColor = 'rgba(210, 40, 40, 0.3)';
-//        orderItems[i].style.color = '#000';
-//    } else {
-//        orderItems[i].style.backgroundColor = 'rgb(230, 230, 230)';
-//        orderItems[i].style.color = 'rgb(100, 100, 100)';
-//    }
-//  }
-//
-//  // 화면 렌더링
-//  getReviews(sortOption, searchKeyword, page).then(response => {
-//    // 리뷰 목록 렌더링
-//    let reviews = getReviewsHTML(response.data.reviews);
-//    if (reviews.length === 0) {
-//      middle.innerHTML = '<div class="no-data" id="no-data">검색된 결과가 없습니다</div>';
-//    } else {
-//      middle.innerHTML = reviews;
-//    }
-//
-//    // 페이징 렌더링
-//    let paging = getPagingHTML(response.data);
-//    bottom.innerHTML = paging;
-//  });
-//}
-//
-//// 리뷰 목록 (api)
-//async function getReviews(sortOption, searchKeyword, page) {
-//  //console.log(`/reviews?sort_option=${sortOption}&search=${searchKeyword}&page=${page}`);
-//  let response = await axios.get(`/reviews?sort_option=${sortOption}&search=${searchKeyword}&page=${page}`);
-//  return response;
-//}
-//
-//// 페이지 번호 섹션 HTML 반환
-//function getPagingHTML(reviews) {
-//  let pageable = reviews.pageable;
-//  let sortOption = reviews.sortOption;
-//  let searchKeyword = reviews.search.trim();
-//  let html = ``;
-//
-//  if (pageable.end > 1) {
-//    html += `<div class="pageable">`;
-//    html += `  <ul>`;
-//    // 이전 버튼
-//    if (pageable.prev) {
-//      html += `  <li>`;
-//      html += `    <a href="javascript:;" `;
-//      html += `       onclick="renderReviews(${sortOption}, '${searchKeyword}', ${pageable.start - 1})">`;
-//      html += `      <i class="fa-solid fa-angle-left"></i>`;
-//      html += `    </a>`;
-//      html += `  </li>`;
-//    }
-//    // 번호 목록
-//    for (let i = pageable.start; i <= pageable.end; i++) {
-//      html += `  <li>`;
-//      html += `    <a href="javascript:;"`;
-//      html += `       ${(pageable.page === i) ? 'class="active"' : ' '} `;
-//      html += `       onclick="renderReviews(${sortOption}, '${searchKeyword}', ${i})">${i}</a>`;
-//      html += `  </li>`;
-//    }
-//    // 다음 버튼
-//    if (pageable.next) {
-//      html += `  <li>`;
-//      html += `    <a href="javascript:;" `;
-//      html += `       onclick="renderReviews(${sortOption}, '${searchKeyword}', ${pageable.end + 1})">`;
-//      html += `      <i class="fa-solid fa-angle-right"></i>`;
-//      html += `    </a>`;
-//      html += `  </li>`;
-//      html += `</ul>`;
-//    }
-//    html += `</div>`;
-//  }
-//
-//  return html;
-//}
-//
-//// 정렬 버튼 기본 색상
-//function defaultSortButtonColor() {
-//  orderItems.forEach((orderItem) => {
-//    orderItem.classList.add('sort-deactive');
-//  });
-//}
 
 
 
