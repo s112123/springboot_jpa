@@ -1,7 +1,7 @@
 import { accessTokenUtils } from '/js/common.js';
 
 // 변수 선언
-const memberListElement = document.getElementById('admin-member-list');
+const memberListElement = document.getElementById('admin-members');
 const pageableElement = document.getElementById('pageable');
 
 // 처음 페이지 로드 시, 1페이지 화면 렌더링
@@ -10,7 +10,7 @@ render(1);
 // 회원 목록 화면 렌더링
 function render(page) {
     // Access Token 이 없으면 로그인 화면으로 이동
-    accessTokenUtils.redirectLoginPage()
+    accessTokenUtils.redirectLoginPage();
 
     // 회원 목록
     getMembers(page).then((response) => {
@@ -65,8 +65,11 @@ function getMemberListHTML(members) {
         html += '    <td>' + member.memberId + '</td>';
         html += '    <td>' + member.email + '</td>';
         html += '    <td>' + member.username + '</td>';
+
+        // 로그인 한 회원과 목록의 회원이 일치하면 본인 권한은 변경할 수 없도록 비활성화
+        const isSelf = member.memberId === accessTokenUtils.getMemberId();
         html += '    <td>';
-        html += '        <select class="member-roles" data-member-id=' + member.memberId + '>';
+        html += `        <select class="member-roles" ${isSelf ? 'disabled' : ''} data-member-id="${member.memberId}">`;
         html += '            <option value="USER"' + ((member.role === "USER") ? "selected" : "") + '>USER</option>';
         html += '            <option value="ADMIN"' + ((member.role === "ADMIN") ? "selected" : "") + '>ADMIN</option>';
         html += '        </select>';
@@ -85,35 +88,34 @@ function getMemberListHTML(members) {
 
 // 날짜 형식 변경 (2025-03-26T09:19:57.543247 → 2025-03-26 09:19:57)
 function formatDate(current) {
-    const date = new Date(current);
-    return date.toISOString().split('T').join(' ').split('.')[0];
+    // 문자열로 처리
+    return current.replace('T', ' ').split('.')[0];
 }
 
 // 페이지 버튼 HTML 생성
-function getPaginationHTML(members) {
-    console.log(members);
+function getPaginationHTML(list) {
     let html = '';
 
     html += '<ul>';
     // 이전 버튼
-    if (members.hasPrev) {
+    if (list.hasPrev) {
         html += '    <li>';
-        html += '        <a href="javascript:;" onclick=render(' + (members.start - 1) + ')>';
+        html += '        <a href="javascript:;" onclick=render(' + (list.start - 1) + ')>';
         html += '            <i class="fa-solid fa-angle-left"></i>';
         html += '        </a>';
         html += '    </li>';
     }
     // 페이지 번호
-    for (let i = members.start; i <= members.end; i++) {
-        let active = (i == members.currentPage) ? 'active' : '';
+    for (let i = list.start; i <= list.end; i++) {
+        let active = (i == list.currentPage) ? 'active' : '';
         html += '    <li>';
         html += '        <a href="javascript:;" class="' + active + '" onclick=render(' + i + ')>' + i + '</a>';
         html += '    </li>';
     }
     // 다음 버튼
-    if (members.hasNext) {
+    if (list.hasNext) {
         html += '    <li>';
-        html += '        <a href="javascript:;" onclick=render(' + (members.end + 1) + ')>';
+        html += '        <a href="javascript:;" onclick=render(' + (list.end + 1) + ')>';
         html += '            <i class="fa-solid fa-angle-right"></i>';
         html += '        </a>';
         html += '    </li>';

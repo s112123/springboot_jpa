@@ -3,6 +3,7 @@ package org.demo.server.module.review.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.demo.server.module.review.dto.details.ReviewDetails;
 import org.demo.server.module.review.dto.details.ReviewImageDetails;
 
@@ -10,6 +11,7 @@ import org.demo.server.module.review.dto.details.ReviewImageDetails;
 @Table(name = "review_image")
 @Getter
 @NoArgsConstructor(force = true)
+@ToString(exclude = "review")
 public class ReviewImage {
 
     @Id
@@ -40,6 +42,22 @@ public class ReviewImage {
     }
 
     /**
+     * 리뷰 저장
+     *
+     * @param review 저장할 리뷰 정보
+     */
+    public void addReview(Review review) {
+        this.review = review;
+    }
+
+    /**
+     * 리뷰 삭제
+     */
+    public void deleteReview() {
+        this.review = null;
+    }
+
+    /**
      * ReviewImage 엔티티를 ReviewImageDetails 로 변환 (Entity → DTO)
      *
      * @return ReviewDetails
@@ -60,10 +78,6 @@ public class ReviewImage {
      */
     public static Builder builder() {
         return new Builder();
-    }
-
-    public void addReview(Review review) {
-        this.review = review;
     }
 
     // ReviewImage.builder()

@@ -1,3 +1,40 @@
+import { accessTokenUtils } from '/js/common.js';
+
+// 변수 선언
+let btnSubscribe = document.getElementById('btn-subscribe');
+
+// 구독 여부에 따라 버튼 상태 변경
+
+
+
+// 구독 버튼 클릭
+btnSubscribe.addEventListener('click', (e) => {
+    // Access Token 이 없으면 로그인 화면으로 이동
+    if (!accessTokenUtils.getAccessToken()) {
+        // 현재 URL 에서 도메인을 제거한 경로
+        // http://localhost:8080/review/view?review_id=1 → /review/view?review_id=1
+        let redirectUrl = window.location.pathname + window.location.search;
+        location.href = '/login?redirect=' + redirectUrl;
+        return;
+    }
+
+    // 구독하기
+    if (confirm('작성자님을 구독하시겠습니까?')) {
+        console.log('구독완료!');
+        // 구독하기 버튼을 구독취소 버튼으로 변경
+        toSubscribeCancelButton();
+    }
+});
+
+// 구독하기 버튼을 구독취소 버튼으로 변경
+function toSubscribeCancelButton() {
+    btnSubscribe.classList.remove('not-subscribed');
+    btnSubscribe.classList.add('subscribed');
+    btnSubscribe.textContent = '구독취소';
+}
+
+
+/*
 import {email, writer, memberNickName, writerNickName} from './good.js';
 
 // 변수 선언
@@ -85,3 +122,4 @@ function showSubscribeBtn() {
    btnSubscribe.style.backgroundColor = 'rgb(210, 40, 40)';
    btnSubscribe.style.color = '#fff';
 }
+*/

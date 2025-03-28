@@ -21,46 +21,46 @@
     <div layout:fragment="content" class="container">
         <div class="review-edit-wrap">
             <h3>리뷰 수정</h3>
-<!--            <div class="review-edit-box">-->
+            <div class="review-edit-box">
 <!--                <form th:action="@{/review/edit}" method="post" id="review-edit-form" autocomplete="off">-->
-<!--                    <div class="review-edit-box-item">-->
-<!--                        <input type="text" name="storeName" id="storeName" th:value="${review.storeName}" placeholder="위치이름" />-->
-<!--                        <small class="error">위치이름은 필수입니다</small>-->
-<!--                    </div>-->
-<!--                    <div class="review-edit-box-item">-->
-<!--                        <input type="text" name="storeAddress" id="storeAddress" th:value="${review.storeAddress}" placeHolder="위치주소" />-->
-<!--                        <small class="error">위치주소는 필수입니다</small>-->
-<!--                    </div>-->
-<!--                    <div class="review-edit-box-item">-->
-<!--                        <input type="text" name="title" id="title" th:value="${review.title}" placeholder="제목" />-->
-<!--                        <small class="error">제목은 필수입니다</small>-->
-<!--                    </div>-->
+                    <div class="review-edit-box-item">
+                        <input type="text" id="storeName" placeholder="장소이름" />
+                        <small class="error">장소이름은 필수입니다</small>
+                    </div>
+                    <div class="review-edit-box-item">
+                        <input type="text" id="storeAddress" placeHolder="장소위치" />
+                        <small class="error">장소위치는 필수입니다</small>
+                    </div>
+                    <div class="review-edit-box-item">
+                        <input type="text" id="title" placeholder="제목" />
+                        <small class="error">제목은 필수입니다</small>
+                    </div>
 <!--                    <input type="hidden" name="thumbnailUrl" id="thumbnailUrl" />-->
 <!--                    <input type="hidden" name="thumbnailFileName" id="thumbnailFileName" />-->
-<!--                    <textarea name="content" id="content" th:utext="${review.content}"></textarea>-->
-<!--                    <small class="error" id="editor-error">글 내용은 필수이며, 이미지가 1개 이상 삽입되어야 합니다</small>-->
-<!--                    <div class="store-mark-reviewer">-->
-<!--                        <div class="store-mark-reviewer-star">-->
-<!--                            <input type="hidden" name="star" id="star" th:value="${review.star}" />-->
-<!--                            <p class="reviewer-star">리뷰어 평점</p>-->
-<!--                            <ul id="store-star" th:data-reviewer-star="${review.star}">-->
-<!--                                <li data-star="1"><i class="fa-solid fa-star"></i></li>-->
-<!--                                <li data-star="2"><i class="fa-solid fa-star"></i></li>-->
-<!--                                <li data-star="3"><i class="fa-solid fa-star"></i></li>-->
-<!--                                <li data-star="4"><i class="fa-solid fa-star"></i></li>-->
-<!--                                <li data-star="5"><i class="fa-solid fa-star"></i></li>-->
-<!--                            </ul>-->
-<!--                        </div>-->
-<!--                        <small class="error">평점은 필수입니다</small>-->
-<!--                    </div>-->
-<!--                    <div class="review-edit-btn">-->
+                    <textarea id="content"></textarea>
+                    <small class="error" id="editor-error">글 내용은 필수이며, 이미지가 1개 이상 삽입되어야 합니다</small>
+                    <div class="store-mark-reviewer">
+                        <div class="store-mark-reviewer-star">
+                            <input type="hidden" id="star" />
+                            <p class="reviewer-star">리뷰어 평점</p>
+                            <ul id="store-star">
+                                <li data-star="1"><i class="fa-solid fa-star"></i></li>
+                                <li data-star="2"><i class="fa-solid fa-star"></i></li>
+                                <li data-star="3"><i class="fa-solid fa-star"></i></li>
+                                <li data-star="4"><i class="fa-solid fa-star"></i></li>
+                                <li data-star="5"><i class="fa-solid fa-star"></i></li>
+                            </ul>
+                        </div>
+                        <small class="error">평점은 필수입니다</small>
+                    </div>
+                    <div class="review-edit-btn">
 <!--                        <input type="hidden" name="review_id" id="review_id" th:value="${review.reviewId}"/>-->
-<!--                        <button type="button" id="edit-review">변경</button>-->
-<!--                        <button type="button" id="delete-review">삭제</button>-->
-<!--                        <button type="button" id="cancel-review">취소</button>-->
-<!--                    </div>-->
+                        <button type="button" id="edit-review">변경</button>
+                        <button type="button" id="delete-review">삭제</button>
+                        <button type="button" id="cancel-review">취소</button>
+                    </div>
 <!--                </form>-->
-<!--            </div>-->
+            </div>
         </div>
     </div>
 </body>

@@ -30,6 +30,24 @@ function checkLoginStatus() {
     }
 }
 
+// 검색
+let btnSearch = document.getElementById('btn-search');
+let search = document.getElementById('search');
+let searchKeyword = '';
+
+// 검색어 입력란에서 검색 버튼을 누른 경우
+btnSearch.addEventListener('click', () => {
+    searchKeyword = search.value;
+    location.href = '/?searchKeyword=' + searchKeyword;
+});
+
+// 검색어 입력란에서 Enter 를 누른 경우
+search.addEventListener('keypress', () => {
+    if (event.keyCode === 13) {
+        searchKeyword = search.value;
+        location.href = '/?searchKeyword=' + searchKeyword;
+    }
+});
 
 ///////////////////////////////
 // 변수 선언

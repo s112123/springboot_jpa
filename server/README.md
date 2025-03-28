@@ -45,8 +45,8 @@
 
 #### 8) 권한 변경 → PATCH /api/v1/members/{memberId}/roles
 &#8209; JWT 인증 필요 <br>
-&#8209; ADMIN 권한을 가진 회원이 회원 목록에서 회원 권한을 변경할 수 있다
-&#8209; Access Token 에 권한을 포함하므로 재발급해야 한다 <br>
+&#8209; ADMIN 권한을 가진 회원이 ADMIN 페이지의 회원관리에서 회원 권한을 변경할 수 있다
+&#8209; 사용자 본인이 본인 권한은 변경할 수 없다 <br>
 
 #### 9) 회원 수정 → PATCH /api/v1/members/{username}
 &#8209; JWT 인증 필요 <br>

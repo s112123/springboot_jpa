@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/pages/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/content-images/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/members/profile-images/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/members").permitAll()
@@ -59,7 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/members/emails/check").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/members/send-password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
-                        .anyRequest().permitAll());
+                        .anyRequest().authenticated());
 
         return http.build();
     }

@@ -5,9 +5,8 @@ const queryString = window.location.search;
 const params = new URLSearchParams(queryString);
 const reviewId = params.get('review_id');
 
-// 글 조회
+// 리뷰 조회
 getReview(reviewId).then((response) => {
-    console.log(response.data);
     // 조회된 리뷰
     let review = response.data;
 
@@ -32,6 +31,14 @@ getReview(reviewId).then((response) => {
         }
     });
 
+    // 좋아요 버튼 생성
+    const storeHeart = document.getElementById('store-heart');
+    if (accessTokenUtils.getMemberId() !== null && review.memberId === accessTokenUtils.getMemberId()) {
+        storeHeart.style.display = 'none';
+    } else {
+        storeHeart.style.display = 'block';
+    }
+
     // 작성자 프로필 이미지
     const writerProfileImage = document.getElementById('writer-profile-image');
     const writerProfileImageFileName = review.profileImageDetails.savedFileName;
@@ -54,14 +61,11 @@ getReview(reviewId).then((response) => {
         writerAction.style.display = 'block';
     }
 
-    // 구독 여부에 따른 구독 버튼 모양 변경
-    // const btnSubscribe = document.getElementById('btn-subscribe');
-
-    // 글 제목
+    // 제목
     const reviewTitle = document.getElementById('review-title');
     reviewTitle.textContent = review.title;
 
-    // 글 내용
+    // 리뷰 내용
     // 만약, REST API 가 아니라 Model 로 넘긴 경우, 다음 주석과 같이 처리한다
     // <div class="review-content" th:utext="${review.content}"></div>
     const reviewContent = document.getElementById('review-content');
@@ -87,10 +91,18 @@ getReview(reviewId).then((response) => {
     }
 })
 .catch((error) => {
-    // 글이 존재하지 않는 경우
+    // 리뷰가 존재하지 않는 경우
+    // 스프링부트를 활용하여 error > 4xx.html 또는 5xx.html 을 호출하도록 한다
+    if (error.response && error.response.status === 404) {
+        // 4xx 페이지 반환
+        location.href = '/error/404';
+    } else {
+        // 5xx 페이지 반환
+        location.href = '/error/500';
+    }
 });
 
-// 글 조회 API
+// 리뷰 조회 API
 async function getReview(reviewId) {
     const response = await axios.get('http://localhost:8081/api/v1/reviews/' + reviewId);
     return response;

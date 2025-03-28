@@ -13,6 +13,10 @@ let errors = document.querySelectorAll('.error');
 // Access Token 이 없으면 로그인 페이지로 이동
 accessTokenUtils.redirectLoginPage();
 
+// CK Editor 에서 이미지를 등록할 때, multiple 기능 해제
+const fileInput = document.querySelector('input[type="file"]');
+fileInput.removeAttribute('multiple');
+
 // 리뷰 등록
 btnAdd.addEventListener('click', (e) => {
     // 에러 표시 모두 닫기
@@ -22,7 +26,6 @@ btnAdd.addEventListener('click', (e) => {
 
     // 유효성 검사 → AccessToken 여부
     accessTokenUtils.redirectLoginPage();
-
     // 유효성 검사 → 위치이름 입력 여부
     if (storeName.value.trim().length === 0) {
         storeName.nextElementSibling.style.display = 'block';
@@ -75,8 +78,8 @@ btnAdd.addEventListener('click', (e) => {
     // 저장되어야 하는 <img> 태그
     let savedImages = tempImageFileNames.filter((_, index) => savedImageIndex.includes(index));
     // 삭제되어야 하는 <img> 태그
-    // 아래 deletedImages 을 서버에 전달하거나 서버에서 temp > memberId 폴더를 삭제할 수 있다
-    // 하지만 @Scheduled 로 삭제해본다
+    // 아래 deletedImages 을 서버에 전달하거나 서버에서 temps > memberId 폴더를 삭제할 수 있다
+    // 현재는 리뷰를 등록하면 temps 폴더에서 reviews 폴더로 이동하며 @Scheduled 로 한번씩 temps 를 삭제한다
     // let deletedImages = tempImageFileNames.filter((_, index) => !savedImageIndex.includes(index));
 
     // 리뷰 입력 정보
@@ -124,7 +127,7 @@ async function addReview(formData) {
     // 리뷰 등록
     const response = await axios.post('http://localhost:8081/api/v1/reviews', formData, {
         headers: {
-            "Authorization": accessTokenUtils.getAccessToken(),
+            "Authorization": 'Bearer ' + accessTokenUtils.getAccessToken(),
             "Content-Type": "application/json"
         }
     });

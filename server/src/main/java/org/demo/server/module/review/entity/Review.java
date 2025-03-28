@@ -3,10 +3,12 @@ package org.demo.server.module.review.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.demo.server.infra.common.entity.BaseEntity;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.review.dto.details.ReviewDetails;
 import org.demo.server.module.review.dto.details.ReviewImageDetails;
+import org.demo.server.module.review.dto.form.ReviewUpdateForm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 @Table(name = "review")
 @Getter
 @NoArgsConstructor
+@ToString
 public class Review extends BaseEntity {
 
     @Id
@@ -49,7 +52,7 @@ public class Review extends BaseEntity {
     // Review (1)-(*) ReviewImage
     // final 키워드를 사용하면 @NoArgsConstructor(force = true) 에서 null 로 초기화된다
     // 그래서 이 엔티티에서는 final 키워드를 제외했다
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> reviewImages = new ArrayList<>();
 
     private Review(Builder builder) {
@@ -65,6 +68,27 @@ public class Review extends BaseEntity {
     }
 
     /**
+     * 조회 수 증가
+     */
+    public void updateHits() {
+        this.hits = this.hits + 1;
+    }
+
+    /**
+     * 리뷰 정보 수정
+     *
+     * @param form 수정할 리뷰 정보
+     */
+    public void updateReview(ReviewUpdateForm form) {
+        this.title = form.getTitle();
+        this.content = form.getContent();
+        this.storeName = form.getStoreName();
+        this.storeAddress = form.getStoreAddress();
+        this.star = form.getStar();
+        deleteReviewImages();
+    }
+
+    /**
      * Review 엔티티에 ReviewImage 엔티티를 추가하는 연관 메서드
      *
      * @param reviewImage ReviewImage
@@ -72,6 +96,14 @@ public class Review extends BaseEntity {
     public void addReviewImage(ReviewImage reviewImage) {
         this.reviewImages.add(reviewImage);
         reviewImage.addReview(this);
+    }
+
+    /**
+     * ReviewImages 제거
+     */
+    private void deleteReviewImages() {
+        this.reviewImages.forEach(reviewImage -> reviewImage.deleteReview());
+        this.reviewImages.clear();
     }
 
     /**
