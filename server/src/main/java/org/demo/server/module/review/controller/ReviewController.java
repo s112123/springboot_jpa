@@ -1,7 +1,6 @@
 package org.demo.server.module.review.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.common.dto.response.PagedListResponse;
 import org.demo.server.infra.common.util.file.FileDetails;
 import org.demo.server.infra.common.util.file.FileUtils;
@@ -26,7 +25,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/reviews")
 @RequiredArgsConstructor
@@ -135,8 +133,6 @@ public class ReviewController {
             @RequestParam(name = "sort", required = false, defaultValue = "0") int sort,
             @RequestParam(name = "searchKeyword", required = false, defaultValue = "") String searchKeyword
     ) {
-        log.info("sort={}", sort);
-        log.info("searchKeyword={}", searchKeyword);
         Page<ReviewResponse> findReviews = reviewService.findAll(page, sort, searchKeyword)
                 .map(reviewDetails -> reviewDetails.toResponse());
         return ResponseEntity.ok().body(new PagedListResponse<>(findReviews));

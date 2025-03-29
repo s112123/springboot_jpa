@@ -1,4 +1,5 @@
 import { accessTokenUtils } from '/js/common.js';
+import { isGood } from '/js/review/good.js';
 
 // URL 에서 쿼리 스트링 추출
 const queryString = window.location.search;
@@ -36,7 +37,21 @@ getReview(reviewId).then((response) => {
     if (accessTokenUtils.getMemberId() !== null && review.memberId === accessTokenUtils.getMemberId()) {
         storeHeart.style.display = 'none';
     } else {
-        storeHeart.style.display = 'block';
+        let btnGood = document.getElementById('good');
+        let btnGoodCancel = document.getElementById('good-cancel');
+
+        // 좋아요 여부
+        isGood(reviewId, accessTokenUtils.getMemberId()).then((response) => {
+            if (response.data) {
+                // 좋아요 버튼 숨기고 좋아요 취소 버튼 활성화
+                btnGood.style.display = 'none';
+                btnGoodCancel.style.display = 'block';
+            } else {
+                // 좋아요 취소 버튼 숨기고 좋아요 버튼 활성화
+                btnGoodCancel.style.display = 'none';
+                btnGood.style.display = 'block';
+            }
+        });
     }
 
     // 작성자 프로필 이미지

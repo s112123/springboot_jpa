@@ -5,9 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.demo.server.infra.common.entity.BaseEntity;
 import org.demo.server.module.follow.entity.Follow;
+import org.demo.server.module.good.entity.Good;
 import org.demo.server.module.member.dto.details.MemberDetails;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -38,6 +41,10 @@ public class Member extends BaseEntity {
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProfileImage profileImage;
 
+    // Member (1)-(*) Good (*)-(1) Review
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Good> goods = new ArrayList<>();
+
     // Member (1)-(*) Follow (*)-(1) Member
     // 팔로워 (Follower) → A 가 B 를 친구 추가하면 A 는 B 의 팔로워이다
     // 팔로우 (Follow) → A 가 B 를 친구 추가하면 A 가 B 를 팔로우 했다고 한다
@@ -63,6 +70,7 @@ public class Member extends BaseEntity {
         this.username = builder.username;
         this.role = builder.role;
         this.profileImage = builder.profileImage;
+        this.goods = builder.goods;
         this.followers = builder.followers;
         this.following = builder.following;
     }
@@ -156,6 +164,7 @@ public class Member extends BaseEntity {
         private String username;
         private Role role;
         private ProfileImage profileImage;
+        private List<Good> goods = new ArrayList<>();
         private Set<Follow> followers = new HashSet<>();
         private Set<Follow> following = new HashSet<>();
 
@@ -186,6 +195,11 @@ public class Member extends BaseEntity {
 
         public Builder profileImage(ProfileImage profileImage) {
             this.profileImage = profileImage;
+            return this;
+        }
+
+        public Builder goods(List<Good> goods) {
+            this.goods = goods;
             return this;
         }
 

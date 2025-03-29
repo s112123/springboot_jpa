@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.demo.server.infra.common.entity.BaseEntity;
+import org.demo.server.module.good.entity.Good;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.review.dto.details.ReviewDetails;
 import org.demo.server.module.review.dto.details.ReviewImageDetails;
@@ -55,6 +56,10 @@ public class Review extends BaseEntity {
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> reviewImages = new ArrayList<>();
 
+    // Member (1)-(*) Good (*)-(1) Review
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Good> goods = new ArrayList<>();
+
     private Review(Builder builder) {
         this.reviewId = builder.reviewId;
         this.title = builder.title;
@@ -65,6 +70,7 @@ public class Review extends BaseEntity {
         this.hits = builder.hits;
         this.member = builder.member;
         this.reviewImages = builder.reviewImages;
+        this.goods = builder.goods;
     }
 
     /**
@@ -150,6 +156,7 @@ public class Review extends BaseEntity {
         private Long hits;
         private Member member;
         private List<ReviewImage> reviewImages = new ArrayList<>();
+        private List<Good> goods = new ArrayList<>();
 
         public Builder reviewId(Long reviewId) {
             this.reviewId = reviewId;
@@ -193,6 +200,11 @@ public class Review extends BaseEntity {
 
         public Builder reviewImages(List<ReviewImage> reviewImages) {
             this.reviewImages = reviewImages;
+            return this;
+        }
+
+        public Builder goods(List<Good> goods) {
+            this.goods = goods;
             return this;
         }
 

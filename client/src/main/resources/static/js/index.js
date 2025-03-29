@@ -26,11 +26,9 @@ if (keyword) {
 document.addEventListener('DOMContentLoaded', () => {
     // 로그인 되어 있는 경우, 리뷰쓰기 버튼 표시
     if (accessTokenUtils.getAccessToken()) {
-        if (btnReview !== null) {
-            btnReview.style.display = 'block';
-        } else {
-            btnReview.style.display = 'none';
-        }
+        btnReview.style.display = 'block';
+    } else {
+        btnReview.style.display = 'none';
     }
 
     // 글 목록에서 글을 눌러 조회하고 뒤로가기를 누르면 currentPage 와 currentSort 가 초기화된다
@@ -84,7 +82,6 @@ function render(page, sort, searchKeyword) {
     getReviews(currentPage, currentSort, currentKeyword).then(response => {
         let reviews = response.data;
         let reviewContents = reviews.data;
-        console.log(reviews);
 
         // DB 에 저장된 <img> 태그의 src 값을 변경한다
         // 수정 전 → <img src="http://localhost:8081/api/v1/reviews/content-images/temp/{memberId}/{fileName}">
