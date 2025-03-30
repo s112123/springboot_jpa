@@ -32,7 +32,6 @@ function render(page) {
     getReviewsByMemberId(page).then((response) => {
         let reviews = response.data;
         currentPage = page;
-        console.log(reviews);
 
         // 페이지 수가 1을 초과하고 현재 페이지에 대한 리뷰 목록이 없으면 이전 페이지로 렌더링
         if (reviews.data.length === 0) {
@@ -63,10 +62,8 @@ function render(page) {
         items.forEach((item) => {
             item.addEventListener('change', (e) => {
                 if (e.target.checked) {
-                    console.log('체크');
                     deletedReviewIds[deletedReviewIds.length] = e.target.value;
                 } else {
-                    console.log('체크 해제');
                     deletedReviewIds = deletedReviewIds.filter(reviewId => reviewId != e.target.value);
                 }
             });
@@ -96,11 +93,10 @@ function getReviewListHTML(reviews, page) {
         html += `        <a href="/review/view?review_id=${review.reviewId}">${review.title}</a>`;
         html += '    </td>';
         html += '    <td>' + review.storeName + '</td>';
-        html += '    <td>' + 'good' + '</td>';
+        html += '    <td>' + review.goodCount + '</td>';
         html += '    <td>' + review.hits + '</td>';
         html += '    <td>' + formatDate(review.createdAt) + '</td>';
         html += '    <td>';
-        html += '        <a href="javascript:;" onclick="removeReview(' + review.reviewId + ')">';
         html += `        <a href="javascript:;" onclick="removeReview(${review.reviewId}, ${page})">`;
         html += '            <i class="fa-solid fa-trash-can"></i>';
         html += '        </a>';
@@ -187,7 +183,6 @@ btnRemoveAll.addEventListener('click', () => {
 
     // 리뷰 삭제
     if (confirm('선택된 리뷰를 모두 삭제하시겠습니까?')) {
-        console.log(deletedReviewIds);
         deleteSelectedReviews(deletedReviewIds).then(() => {
             alert('선택된 리뷰가 모두 삭제되었습니다');
             deletedReviewIds.length = 0;

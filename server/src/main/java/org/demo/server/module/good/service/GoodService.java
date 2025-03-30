@@ -3,12 +3,20 @@ package org.demo.server.module.good.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.server.module.good.dto.request.GoodRequest;
+import org.demo.server.module.good.dto.response.GoodResponse;
 import org.demo.server.module.good.entity.Good;
 import org.demo.server.module.good.repository.GoodRepository;
+import org.demo.server.module.member.dto.response.MemberResponse;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
+import org.demo.server.module.review.dto.details.ReviewDetails;
+import org.demo.server.module.review.dto.response.ReviewResponse;
 import org.demo.server.module.review.entity.Review;
 import org.demo.server.module.review.service.base.ReviewFinder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +38,7 @@ public class GoodService {
     public void save(GoodRequest request) {
         Member member = memberFinder.getMemberById(request.getMemberId());
         Review review = reviewFinder.getReviewById(request.getReviewId());
+        review.plusGoodCount();
 
         Good good = Good.builder()
                 .member(member)
@@ -37,6 +46,20 @@ public class GoodService {
                 .build();
 
         goodRepository.save(good);
+    }
+
+    /**
+     * 회원이 좋아요를 누른 리뷰 목록
+     *
+     * @param memberId 회원의 식별자
+     * @return 좋아요를 누른 리뷰 목록
+     */
+    public Page<ReviewResponse> findByMemberId(Long memberId, int page) {
+        Pageable pageable = PageRequest.of((page - 1), 10, Sort.by(Sort.Direction.DESC, "goodId"));
+        Page<ReviewResponse> reviews = goodRepository.findByMember_MemberId(memberId, pageable)
+                .map(good -> good.getReview().toDetails())
+                .map(review -> review.toResponse());
+        return reviews;
     }
 
     /**
@@ -57,6 +80,11 @@ public class GoodService {
      * @param memberId 회원의 식별자
      */
     public void delete(Long reviewId, Long memberId) {
+        // 좋아요 수 감수
+        Review review = reviewFinder.getReviewById(reviewId);
+        review.minusGoodCount();
+
+        // 좋아요 취소
         goodRepository.deleteByReview_ReviewIdAndMember_MemberId(reviewId, memberId);
     }
 }

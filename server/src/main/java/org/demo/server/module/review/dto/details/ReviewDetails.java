@@ -21,6 +21,7 @@ public class ReviewDetails {
     private String storeAddress;
     private Integer star;
     private Long hits;
+    private Long goodCount;
     private MemberDetails memberDetails;
     private List<ReviewImageDetails> reviewImagesDetailsList;
     private LocalDateTime createdAt;
@@ -42,6 +43,7 @@ public class ReviewDetails {
                 .storeAddress(this.storeAddress)
                 .star(this.star)
                 .hits(this.hits)
+                .goodCount(this.goodCount)
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .profileImageDetails(this.memberDetails.getProfileImageDetails())

@@ -13,15 +13,16 @@ import java.util.List;
 @Builder
 public class ReviewResponse {
 
-    private long reviewId;
-    private long memberId;
+    private Long reviewId;
+    private Long memberId;
     private String writer;
     private String title;
     private String content;
     private String storeName;
     private String storeAddress;
-    private int star;
-    private long hits;
+    private Integer star;
+    private Long hits;
+    private Long goodCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private ProfileImageDetails profileImageDetails;

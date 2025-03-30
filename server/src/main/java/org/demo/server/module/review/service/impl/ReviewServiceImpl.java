@@ -54,6 +54,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .storeAddress(form.getStoreAddress())
                 .star(form.getStar())
                 .hits(0L)
+                .goodCount(0L)
                 .member(findMember)
                 .build();
 
