@@ -63,7 +63,7 @@ async function getGoodReviews(memberId, page) {
     return response
 }
 
-// 리뷰 목록 HTML 생성
+// 좋아요 누른 리뷰 목록 HTML 생성
 function getReviewListHTML(reviews, page) {
     let html = '';
 
@@ -122,3 +122,7 @@ function getPaginationHTML(list) {
 
     return html;
 }
+
+// 현재 good.js 는 모듈 상태이므로 전역 스코프에 render() 를 노출한다
+// 그렇지 않으면 Uncaught ReferenceError: render is not defined 에러가 발생한다
+window.render = render;

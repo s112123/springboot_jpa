@@ -3,15 +3,12 @@ package org.demo.server.module.review.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.demo.server.module.review.dto.details.ReviewDetails;
 import org.demo.server.module.review.dto.details.ReviewImageDetails;
 
 @Entity
 @Table(name = "review_image")
 @Getter
 @NoArgsConstructor(force = true)
-@ToString(exclude = "review")
 public class ReviewImage {
 
     @Id

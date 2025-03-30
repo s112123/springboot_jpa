@@ -67,7 +67,15 @@ btnSignIn.addEventListener('click', () => {
         email.focus();
         return false;
     }
-    // 유효성 검사 → 비밀번호
+    // 유효성 검사 → 이메일 형식 여부
+    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (email.value.trim().includes(' ') || !emailRegex.test(email.value.trim())) {
+        errorEmail.innerText = '이메일 형식이 아닙니다';
+        errorEmail.style.display = 'block';
+        email.focus();
+        return false;
+    }
+    // 유효성 검사 → 비밀번호 입력 여부
     if (password.value.trim().length === 0) {
         errorPassword.innerText = '비밀번호를 입력하세요';
         errorPassword.style.display = 'block';
@@ -124,7 +132,7 @@ btnFindPassword.addEventListener('click', () => {
     }
     // 유효성 검사 → 이메일 형식 여부
     let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email.value.trim())) {
+    if (email.value.trim().includes(' ') || !emailRegex.test(email.value.trim())) {
         alert('이메일 주소 형식이 아닙니다');
         email.focus();
         return false;

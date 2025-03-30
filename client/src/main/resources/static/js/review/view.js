@@ -1,5 +1,6 @@
 import { accessTokenUtils } from '/js/common.js';
 import { isGood } from '/js/review/good.js';
+import { isFollower, toSubscribeCancelButton, toSubscribeButton } from '/js/review/subscribe.js';
 
 // URL 에서 쿼리 스트링 추출
 const queryString = window.location.search;
@@ -34,24 +35,26 @@ getReview(reviewId).then((response) => {
 
     // 좋아요 버튼 생성
     const storeHeart = document.getElementById('store-heart');
-    if (accessTokenUtils.getMemberId() !== null && review.memberId === accessTokenUtils.getMemberId()) {
-        storeHeart.style.display = 'none';
-    } else {
-        let btnGood = document.getElementById('good');
-        let btnGoodCancel = document.getElementById('good-cancel');
+    if (accessTokenUtils.getMemberId() !== null) {
+        if (review.memberId === accessTokenUtils.getMemberId()) {
+            storeHeart.style.display = 'none';
+        } else {
+            let btnGood = document.getElementById('good');
+            let btnGoodCancel = document.getElementById('good-cancel');
 
-        // 좋아요 여부
-        isGood(reviewId, accessTokenUtils.getMemberId()).then((response) => {
-            if (response.data) {
-                // 좋아요 버튼 숨기고 좋아요 취소 버튼 활성화
-                btnGood.style.display = 'none';
-                btnGoodCancel.style.display = 'block';
-            } else {
-                // 좋아요 취소 버튼 숨기고 좋아요 버튼 활성화
-                btnGoodCancel.style.display = 'none';
-                btnGood.style.display = 'block';
-            }
-        });
+            // 좋아요 여부
+            isGood(reviewId, accessTokenUtils.getMemberId()).then((response) => {
+                if (response.data) {
+                    // 좋아요 버튼 숨기고 좋아요 취소 버튼 활성화
+                    btnGood.style.display = 'none';
+                    btnGoodCancel.style.display = 'block';
+                } else {
+                    // 좋아요 취소 버튼 숨기고 좋아요 버튼 활성화
+                    btnGoodCancel.style.display = 'none';
+                    btnGood.style.display = 'block';
+                }
+            });
+        }
     }
 
     // 작성자 프로필 이미지
@@ -70,10 +73,22 @@ getReview(reviewId).then((response) => {
 
     // 구독 버튼 생성
     const writerAction = document.getElementById('writer-action');
-    if (accessTokenUtils.getMemberId() !== null && review.memberId === accessTokenUtils.getMemberId()) {
-        writerAction.style.display = 'none';
-    } else {
-        writerAction.style.display = 'block';
+    if (accessTokenUtils.getMemberId() !== null) {
+        if (review.memberId === accessTokenUtils.getMemberId()) {
+            writerAction.style.display = 'none';
+        } else {
+            // 구독 여부로 버튼 모양 변경
+            isFollower(accessTokenUtils.getMemberId(), review.writer).then((response) => {
+                // 구독했으면 true, 구독하지 않았으면 false
+                if (response.data) {
+                    // 구독취소 버튼
+                    toSubscribeCancelButton();
+                } else {
+                    // 구독하기 버튼
+                    toSubscribeButton();
+                }
+            });
+        }
     }
 
     // 제목

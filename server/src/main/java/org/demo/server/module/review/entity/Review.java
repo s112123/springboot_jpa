@@ -3,12 +3,10 @@ package org.demo.server.module.review.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.demo.server.infra.common.entity.BaseEntity;
 import org.demo.server.module.good.entity.Good;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.review.dto.details.ReviewDetails;
-import org.demo.server.module.review.dto.details.ReviewImageDetails;
 import org.demo.server.module.review.dto.form.ReviewUpdateForm;
 
 import java.util.ArrayList;
@@ -19,7 +17,6 @@ import java.util.stream.Collectors;
 @Table(name = "review")
 @Getter
 @NoArgsConstructor
-@ToString
 public class Review extends BaseEntity {
 
     @Id
