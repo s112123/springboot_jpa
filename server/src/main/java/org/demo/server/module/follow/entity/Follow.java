@@ -10,7 +10,7 @@ import org.demo.server.module.member.entity.Member;
 @Table(name = "follow")
 @Getter
 @NoArgsConstructor
-public class Follow extends BaseEntity {
+public class Follow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -40,6 +40,7 @@
                             <p><label for="username">닉네임</label></p>
                             <input type="text" id="username" placeholder="username" />
                             <small class="error">닉네임은 1글자 이상, 10글자 이하입니다</small>
+                            <small class="error">공백 또는 특수문자는 입력하실 수 없습니다</small>
                             <small class="error">이미 존재하는 닉네임입니다</small>
                         </div>
                         <div class="profile-information-item">
@@ -57,37 +58,13 @@
                         </div>
                     </div>
                 </div>
-<!--                <div class="profile-box-bottom">-->
-<!--                    <div class="subscribe-list">-->
-<!--                        <p>내가 구독한 사람</p>-->
-<!--                        <ul>-->
-<!--                            <li class="subscribe-item" th:each="publisher : ${publishers}">-->
-<!--                                <div class="subscribe-info">-->
-<!--                                    <img th:src="${publisher.publisher_image_url}" />-->
-<!--                                    <span th:text="${publisher.publisher_nick_name}"></span>-->
-<!--                                </div>-->
-<!--                                <div class="subscribe-btn">-->
-<!--                                    <input type="hidden" th:value="${publisher.publisher_email}" />-->
-<!--                                    <button type="button" class="btn-subscribe-cancel">구독취소</button>-->
-<!--                                </div>-->
-<!--                            </li>-->
-<!--                        </ul>-->
-<!--                    </div>-->
-<!--                    <div class="subscribe-list">-->
-<!--                        <p>나를 구독한 사람</p>-->
-<!--                        <ul>-->
-<!--                            <li class="subscribe-item" th:each="subscriber : ${subscribers}">-->
-<!--                                <div class="subscribe-info">-->
-<!--                                    <img th:src="${subscriber.image_url}" />-->
-<!--                                    <span th:text="${subscriber.nick_name}"></span>-->
-<!--                                </div>-->
-<!--                                <div class="subscribe-btn">-->
-<!--                                    <input type="hidden" th:value="${subscriber.subscriber_email}" />-->
-<!--                                    <button type="button" class="btn-subscribe">구독하기</button>-->
-<!--                                </div>-->
-<!--                            </li>-->
-<!--                        </ul>-->
-<!--                    </div>-->
+                <div class="profile-box-bottom">
+                    <div class="subscribe-list">
+                        <p id="my-follows">내가 구독한 사람</p>
+                    </div>
+                    <div class="subscribe-list">
+                        <p id="my-followers">나를 구독한 사람</p>
+                    </div>
                 </div>
             </div>
         </div>

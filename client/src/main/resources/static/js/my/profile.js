@@ -54,6 +54,57 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert('프로필 이미지, 닉네임 등 회원 정보를 변경하세요');
              }, 100);
         }
+
+        // 내가 구독한 사람 목록
+        findFollows(accessTokenUtils.getMemberId()).then(response => {
+            let follows = response.data;
+
+            // 목록 렌더링
+            let followListElement = document.getElementById('my-follows');
+            followListElement.insertAdjacentHTML('afterend', getFollowListHTML(follows.data));
+
+            // 구독취소 버튼 클릭
+            let btnSubscribeCancels = document.querySelectorAll('.btn-subscribe-cancel');
+            btnSubscribeCancels.forEach((btnSubscribeCancel) => {
+                btnSubscribeCancel.addEventListener('click', (e) => {
+                    let followName = e.target.getAttribute('data-username');
+                    if (confirm(followName + '님을 구독 취소하시겠습니까?')) {
+                        // 구독 취소 요청
+                        unFollow(accessTokenUtils.getMemberId(), followName).then(() => {
+                            location.replace('/my/profile');
+                        });
+                    }
+                });
+            });
+        });
+
+        // 나를 구독한 사람 목록
+        findFollowers(accessTokenUtils.getMemberId()).then(response => {
+            let followers = response.data;
+
+            // 목록 렌더링
+            let followerListElement = document.getElementById('my-followers');
+            followerListElement.insertAdjacentHTML('afterend', getFollowerListHTML(followers.data));
+
+            // 구독하기 버튼 클릭
+            let btnSubscribes = document.querySelectorAll('.btn-subscribe');
+            btnSubscribes.forEach((btnSubscribe) => {
+                btnSubscribe.addEventListener('click', (e) => {
+                    let followerName = e.target.getAttribute('data-username');
+                    if (confirm(followerName + '님을 구독하시겠습니까?')) {
+                        // 구독 요청
+                        const formData = {
+                            'followerId': accessTokenUtils.getMemberId(),
+                            'username': followerName
+                        }
+
+                        followMember(formData).then(() => {
+                            location.replace('/my/profile');
+                        });
+                    }
+                });
+            });
+        });
     } catch (error) {
         // 회원을 찾을 수 없으면 로그인 페이지로 이동하여 Access Token 을 재발급 받아야 한다
         if (error.response && error.response.data.status === 404) {
@@ -64,6 +115,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 회원 정보 조회 API
 async function findMember(username) {
+    // URL 경로에 공백, 특수문자가 있으면 요청에 실패할 수 있으므로 인코딩한다
+    // const encodedUsername = encodeURIComponent(username);
     const response = await axios.get('http://localhost:8081/api/v1/members/' + username, {
         headers: {
             'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
@@ -130,6 +183,13 @@ btnUpdate.addEventListener('click', () => {
         eleUsername.focus();
         return false;
     }
+    // 유효성 검사 → 닉네임 형식 여부
+    let usernameRegex = /^[a-zA-Z0-9가-힣]+$/;
+    if (eleUsername.value.trim().includes(' ') || !usernameRegex.test(eleUsername.value.trim())) {
+        eleUsername.nextElementSibling.nextElementSibling.style.display = 'block';
+        eleUsername.focus();
+        return false;
+    }
 
     // 회원 정보 수정
     if (confirm("회원정보를 변경하시겠습니까?")) {
@@ -152,7 +212,8 @@ btnUpdate.addEventListener('click', () => {
 
         // 변경 정보
         const changedUserInfo = {
-            'username': eleUsername.value.trim(),
+            // 닉네임에 공백이 있으면 %20 때문에 조회 시 오류가 발생할 수 있다
+            'username': eleUsername.value.trim().replace(/\s+/g, ''),
             'password': (elePassword.value.trim().length === 0) ? undefined : elePassword.value.trim(),
             'originalFileName': eleImageFileName.value.length === 0 ? undefined: eleImageFileName.value,
             'savedFileName': lastChangedImageFileName
@@ -193,10 +254,10 @@ eleUsername.addEventListener('keyup', () => {
             isExistsUsername(eleUsername.value.trim()).then(response => {
                 isDuplicatedUsername = response.data;
                 if (isDuplicatedUsername) {
-                    eleUsername.nextElementSibling.nextElementSibling.style.display = 'block';
+                    eleUsername.nextElementSibling.nextElementSibling.nextElementSibling.style.display = 'block';
                     eleUsername.focus();
                 } else {
-                    eleUsername.nextElementSibling.nextElementSibling.style.display = 'none';
+                    eleUsername.nextElementSibling.nextElementSibling.nextElementSibling.style.display = 'none';
                 }
             });
         }
@@ -346,62 +407,118 @@ window.addEventListener('beforeunload', (e) => {
     }
 });
 
+// 내가 구독한 사람 목록 API
+async function findFollows(memberId) {
+    const api = 'http://localhost:8081/api/v1/follows/' + memberId + '/follow';
+    const response = await axios.get(api, {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
+        }
+    });
+    return response;
+}
 
-/////////////////////////////////////////
-//// 변수 선언
-//let btnSubscribeCancels = document.querySelectorAll('.btn-subscribe-cancel');
-//let btnSubscribes = document.querySelectorAll('.btn-subscribe');
-//let imageUrl = document.getElementById('image-url');
-//let isChangePassword = false;
-//let isValid = true;
+// 내가 구독한 사람 목록 HTML 생성
+function getFollowListHTML(follows) {
+    let html = '';
 
-//// 내가 구독한 사람에서 구독취소 버튼 클릭
-//btnSubscribeCancels.forEach((btnSubscribeCancel) => {
-//  btnSubscribeCancel.addEventListener('click', () => {
-//    let publisherEmail = btnSubscribeCancel.previousElementSibling;
-//
-//    // 구독자 - 발행자
-//    let subscribe = {
-//      'subscriberEmail': email.value,
-//      'publisherEmail': publisherEmail.value
-//    }
-//
-//    // 구독취소
-//    if (confirm('구독을 취소하시겠습니까?')) {
-//      cancelFollow(subscribe).then(response => {
-//        location.replace('/my/profile');
-//      });
-//    }
-//  });
-//});
-//
-//// 구독취소
-//async function cancelFollow(subscribe) {
-//  let response = await axios.post(`/subscribes/cancel`, subscribe);
-//  return response;
-//}
-//
-//// 나를 구독한 사람에서 구독하기 버튼 클릭
-//btnSubscribes.forEach((btnSubscribe) => {
-//  btnSubscribe.addEventListener('click', () => {
-//    let publisherEmail = btnSubscribe.previousElementSibling;
-//
-//    // 구독자 - 발행자
-//    let subscribe = {
-//      'subscriberEmail': email.value,
-//      'publisherEmail': publisherEmail.value
-//    }
-//
-//    // 구독하기
-//    follow(subscribe).then(response => {
-//      location.replace('/my/profile');
-//    });
-//  });
-//});
-//
-//// 구독하기
-//async function follow(subscribe) {
-//  let response = await axios.post(`/subscribes`, subscribe);
-//  return response;
-//}
+    html += '<ul>';
+    for (let follow of follows) {
+        // 프로필 이미지 경로 추출
+        let profileImage = follow.profileImage;
+        let profileImageFileName = profileImage.savedFileName;
+        let imgSrc = undefined;
+        if (profileImageFileName === 'default.png') {
+            // src > main > resources > static > images > profiles > default.png
+            imgSrc = '/images/profiles/default.png';
+        } else {
+            // uploads > profiles > memberId
+            imgSrc = 'http://localhost:8081/api/v1/members/profile-images/' +
+                      accessTokenUtils.getMemberId() + '/' + profileImage.savedFileName;
+        }
 
+        // HTML 생성
+        html += '    <li class="subscribe-item">';
+        html += '        <div class="subscribe-info">';
+        html += '            <img src="' + imgSrc + '">';
+        html += '            <span>' + follow.username.substring(0, 9) + '</span>';
+        html += '        </div>';
+        html += '        <div class="subscribe-btn">';
+        html += `            <button type="button" class="btn-subscribe-cancel"
+                                     data-username="${follow.username}">구독취소</button>`;
+        html += '        </div>';
+        html += '    </li>';
+    }
+    html += '</ul>'
+
+    return html;
+}
+
+// 나를 구독한 사람 목록 API
+async function findFollowers(memberId) {
+    const api = 'http://localhost:8081/api/v1/follows/' + memberId + '/follower';
+    const response = await axios.get(api, {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
+        }
+    });
+    return response;
+}
+
+// 나를 구독한 사람 목록 HTML 생성
+function getFollowerListHTML(followers) {
+    let html = '';
+
+    html += '<ul>';
+    for (let follower of followers) {
+        // 프로필 이미지 경로 추출
+        let profileImage = follower.profileImage;
+        let profileImageFileName = profileImage.savedFileName;
+        let imgSrc = undefined;
+        if (profileImageFileName === 'default.png') {
+            // src > main > resources > static > images > profiles > default.png
+            imgSrc = '/images/profiles/default.png';
+        } else {
+            // uploads > profiles > memberId
+            imgSrc = 'http://localhost:8081/api/v1/members/profile-images/' +
+                      accessTokenUtils.getMemberId() + '/' + profileImage.savedFileName;
+        }
+
+        // HTML 생성
+        html += '    <li class="subscribe-item">';
+        html += '        <div class="subscribe-info">';
+        html += '            <img src="' + imgSrc + '">';
+        html += '            <span>' + follower.username.substring(0, 9) + '</span>';
+        html += '        </div>';
+        html += '        <div class="subscribe-btn">';
+        html += `            <button type="button" class="btn-subscribe"
+                                     data-username="${follower.username}">구독하기</button>`;
+        html += '        </div>';
+        html += '    </li>';
+    }
+    html += '</ul>'
+
+    return html;
+}
+
+// 구독하기 API
+async function followMember(formData) {
+    const api = 'http://localhost:8081/api/v1/follows';
+    const response = await axios.post(api, formData, {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
+            'Content-Type': 'application/json'
+        }
+    });
+}
+
+// 구독 취소 API
+async function unFollow(followerId, followedUsername) {
+    const api = 'http://localhost:8081/api/v1/follows/' + followerId + '/' + followedUsername;
+    const response = await axios.delete(api, {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
+        }
+    });
+    return response;
+}

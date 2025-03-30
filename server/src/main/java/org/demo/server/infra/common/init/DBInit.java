@@ -2,7 +2,6 @@ package org.demo.server.infra.common.init;
 
 import org.demo.server.module.follow.entity.Follow;
 import org.demo.server.module.follow.repository.FollowRepository;
-import org.demo.server.module.follow.service.base.FollowService;
 import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.form.MemberSaveForm;
 import org.demo.server.module.member.entity.Role;
@@ -42,39 +41,6 @@ public class DBInit {
 
             // 권한 변경
             memberService.updateRole(adminDetails.getMemberId(), Role.ADMIN);
-
-            // admin -> user1, user2
-            Follow adminToUser1 = Follow.builder()
-                    .follower(adminDetails.toMember())
-                    .followed(user1Details.toMember())
-                    .build();
-            followRepository.save(adminToUser1);
-
-            Follow adminToUser2 = Follow.builder()
-                    .follower(adminDetails.toMember())
-                    .followed(user2Details.toMember())
-                    .build();
-            followRepository.save(adminToUser2);
-
-            // user1 -> admin
-            Follow user1ToAdmin = Follow.builder()
-                    .follower(user1Details.toMember())
-                    .followed(adminDetails.toMember())
-                    .build();
-            followRepository.save(user1ToAdmin);
-
-            // user2 -> admin, user1
-            Follow user2ToAdmin = Follow.builder()
-                    .follower(user2Details.toMember())
-                    .followed(adminDetails.toMember())
-                    .build();
-            followRepository.save(user2ToAdmin);
-
-            Follow user2ToUser1 = Follow.builder()
-                    .follower(user2Details.toMember())
-                    .followed(user1Details.toMember())
-                    .build();
-            followRepository.save(user2ToUser1);
         };
     }
 }

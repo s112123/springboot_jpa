@@ -20,9 +20,6 @@
 </head>
 <body>
     <div layout:fragment="content" class="container">
-<!--        <input type="hidden" id="email" th:value="${session.email}" />-->
-<!--        <input type="hidden" id="writer" th:value="${writer.email}" />-->
-<!--        <input type="hidden" id="member-nickname" th:if="${session.email != null}" th:value="${member.nickName}" />-->
         <div class="review-top">
             <div class="review-map" id="map"></div>
             <div id="review-store">
@@ -45,16 +42,6 @@
                         <!-- 좋아요 취소 버튼 (꽉 채운 하트) -->
                         <a href="javascript:;" id="good-cancel"><i class="fa-solid fa-heart"></i></a>
                     </div>
-<!--                    <th:block th:if="${session.email == null} or ${session.email != writer.email}">-->
-<!--                        <div class="store-heart" id="store-heart" th:data-is-good="${isGood}">-->
-<!--                            <a href="javascript:;" id="good" th:data-review-id="${review.reviewId}">-->
-<!--                                <i class="fa-solid fa-heart"></i>-->
-<!--                            </a>-->
-<!--                            <a href="javascript:;" id="not-good" th:data-review-id="${review.reviewId}">-->
-<!--                                <i class="fa-regular fa-heart"></i>-->
-<!--                            </a>-->
-<!--                        </div>-->
-<!--                    </th:block>-->
                 </div>
             </div>
             <div id="review-writer">

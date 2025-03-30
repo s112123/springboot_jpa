@@ -54,13 +54,13 @@ public class Member extends BaseEntity {
     // 1을 친구 추가한 (팔로워) 사람을 찾으려면 followed_id 가 1인 사람의 follower_id 를 찾으면 된다
     // 이 필드는 나를 팔로우 한, 나의 팔로워들의 찾는 것이므로 내가 팔로우 당한 것이다
     // 즉, 나의 member_id 가 Follow 테이블에서 외래키인 followd_id 에 저장되어야 한다
-    @OneToMany(mappedBy = "followed")
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Follow> followers = new HashSet<>();
 
     // Member (1)-(*) Follow (*)-(1) Member
     // 이 필드는 내가 팔로우 한 사람들을 찾는 것이므로 내가 팔로워가 되는 것이다
     // 즉, 나의 member_id 가 Follow 테이블에서 외래키인 follower_id 에 저장되어야 한다
-    @OneToMany(mappedBy = "follower")
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Follow> following = new HashSet<>();
 
     private Member(Builder builder) {

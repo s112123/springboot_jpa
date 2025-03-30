@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public abstract class ListResponse<T> {
+public class ListResponse<T> {
 
     private int size;
     private List<T> data;

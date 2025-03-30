@@ -12,7 +12,6 @@ import org.demo.server.module.review.entity.Review;
 @Table(name = "good")
 @Getter
 @NoArgsConstructor
-@ToString
 public class Good {
 
     @Id

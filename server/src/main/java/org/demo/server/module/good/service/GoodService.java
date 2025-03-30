@@ -36,16 +36,18 @@ public class GoodService {
      * @param request 요청 데이터
      */
     public void save(GoodRequest request) {
-        Member member = memberFinder.getMemberById(request.getMemberId());
-        Review review = reviewFinder.getReviewById(request.getReviewId());
-        review.plusGoodCount();
+        if (!existsGood(request.getReviewId(), request.getMemberId())) {
+            Member member = memberFinder.getMemberById(request.getMemberId());
+            Review review = reviewFinder.getReviewById(request.getReviewId());
+            review.plusGoodCount();
 
-        Good good = Good.builder()
-                .member(member)
-                .review(review)
-                .build();
+            Good good = Good.builder()
+                    .member(member)
+                    .review(review)
+                    .build();
 
-        goodRepository.save(good);
+            goodRepository.save(good);
+        }
     }
 
     /**
@@ -80,11 +82,13 @@ public class GoodService {
      * @param memberId 회원의 식별자
      */
     public void delete(Long reviewId, Long memberId) {
-        // 좋아요 수 감수
-        Review review = reviewFinder.getReviewById(reviewId);
-        review.minusGoodCount();
+        if (existsGood(reviewId, memberId)) {
+            // 좋아요 수 감소
+            Review review = reviewFinder.getReviewById(reviewId);
+            review.minusGoodCount();
 
-        // 좋아요 취소
-        goodRepository.deleteByReview_ReviewIdAndMember_MemberId(reviewId, memberId);
+            // 좋아요 취소
+            goodRepository.deleteByReview_ReviewIdAndMember_MemberId(reviewId, memberId);
+        }
     }
 }
