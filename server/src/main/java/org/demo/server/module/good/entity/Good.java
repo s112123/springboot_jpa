@@ -3,6 +3,7 @@ package org.demo.server.module.good.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.demo.server.module.good.dto.response.GoodResponse;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.review.entity.Review;
@@ -11,6 +12,7 @@ import org.demo.server.module.review.entity.Review;
 @Table(name = "good")
 @Getter
 @NoArgsConstructor
+@ToString
 public class Good {
 
     @Id

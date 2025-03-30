@@ -45,6 +45,9 @@ public class Review extends BaseEntity {
     @Column(name = "hits", columnDefinition = "BIGINT DEFAULT 0")
     private Long hits;
 
+    @Column(name = "good_count", columnDefinition = "BIGINT DEFAULT 0")
+    private Long goodCount;
+
     // Member (1)-(*) Review
     @ManyToOne
     @JoinColumn(name = "member_id")
@@ -68,6 +71,7 @@ public class Review extends BaseEntity {
         this.storeAddress = builder.storeAddress;
         this.star = builder.star;
         this.hits = builder.hits;
+        this.goodCount = builder.goodCount;
         this.member = builder.member;
         this.reviewImages = builder.reviewImages;
         this.goods = builder.goods;
@@ -78,6 +82,22 @@ public class Review extends BaseEntity {
      */
     public void updateHits() {
         this.hits = this.hits + 1;
+    }
+
+    /**
+     * 좋아요 수 증가
+     */
+    public void plusGoodCount() {
+        this.goodCount = this.goodCount + 1;
+    }
+
+    /**
+     * 좋아요 수 감소
+     */
+    public void minusGoodCount() {
+        if (this.goodCount > 0) {
+            this.goodCount = this.goodCount - 1;
+        }
     }
 
     /**
@@ -126,6 +146,7 @@ public class Review extends BaseEntity {
                 .storeAddress(this.storeAddress)
                 .star(this.star)
                 .hits(this.hits)
+                .goodCount(this.goodCount)
                 .memberDetails(this.member.toDetails())
                 .reviewImagesDetailsList(this.reviewImages.stream()
                         .map(reviewImage -> reviewImage.toDetails())
@@ -154,6 +175,7 @@ public class Review extends BaseEntity {
         private String storeAddress;
         private Integer star;
         private Long hits;
+        private Long goodCount;
         private Member member;
         private List<ReviewImage> reviewImages = new ArrayList<>();
         private List<Good> goods = new ArrayList<>();
@@ -190,6 +212,11 @@ public class Review extends BaseEntity {
 
         public Builder hits(Long hits) {
             this.hits = hits;
+            return this;
+        }
+
+        public Builder goodCount(Long goodCount) {
+            this.goodCount = goodCount;
             return this;
         }
 
