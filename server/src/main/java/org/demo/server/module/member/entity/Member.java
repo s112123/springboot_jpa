@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.demo.server.infra.common.entity.BaseEntity;
+import org.demo.server.module.chat.entity.ChatMessage;
+import org.demo.server.module.chat.entity.ChatParticipant;
 import org.demo.server.module.follow.entity.Follow;
 import org.demo.server.module.good.entity.Good;
 import org.demo.server.module.member.dto.details.MemberDetails;
@@ -62,6 +64,14 @@ public class Member extends BaseEntity {
     // 즉, 나의 member_id 가 Follow 테이블에서 외래키인 follower_id 에 저장되어야 한다
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Follow> following = new HashSet<>();
+
+    // Member (1)-(*) ChatParticipant
+    @OneToMany(mappedBy = "member")
+    private Set<ChatParticipant> chatParticipants = new HashSet<>();
+
+    // Member (1)-(*) ChatMessage
+    @OneToMany(mappedBy = "member")
+    private Set<ChatMessage> chatMessages = new HashSet<>();
 
     private Member(Builder builder) {
         this.memberId = builder.memberId;
