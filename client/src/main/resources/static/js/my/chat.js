@@ -1,17 +1,46 @@
 import { accessTokenUtils } from '/js/common.js';
 
-
 // Access Token 확인
 accessTokenUtils.redirectLoginPage();
+
+// 웹 소켓 연결
+const socket = new SockJS('http://localhost:8081/ws');
+const stompClient = Stomp.over(socket);
+
+// 메세지 수신
+stompClient.connect({
+    Authorization: `Bearer ${accessTokenUtils.getAccessToken()}`
+}, () => {
+    stompClient.subscribe(`/user/${accessTokenUtils.getMemberId()}/chat/subscribe`, (response) => {
+        console.log(response.body);
+    });
+}, (error) => {
+    console.error('WebSocket Connect Failed: ', error);
+});
 
 // 채팅 대상 목록
 findFollows(accessTokenUtils.getMemberId()).then((response) => {
     let follows = response.data;
     console.log(follows);
+    if (follows) {
+        // 목록 렌더링
+        let followListElement = document.getElementById('chat-list');
+        followListElement.innerHTML = getFollowListHTML(follows.data);
 
-    // 목록 렌더링
-    let followListElement = document.getElementById('chat-list');
-    followListElement.innerHTML = getFollowListHTML(follows.data);
+        // 채팅 대상자에게 클릭 이벤트 적용
+        const receivers = document.querySelectorAll('.chat-item');
+        receivers.forEach((receiver, index) => {
+            receiver.addEventListener('click', () => {
+                console.log('click!!');
+                // 채팅 대상 목록에서 선택한 대상자 색상 변경
+                chatActive(receivers, index);
+
+                // 메세지 목록 가져오기
+                let conversationView = document.querySelector('#conversation-view');
+                conversationView.innerHTML = '';
+            });
+        });
+    }
 });
 
 // 내가 구독한 사람 목록 (채팅 대상 목록) API
@@ -45,7 +74,7 @@ function getFollowListHTML(follows) {
         }
 
         // HTML 생성
-        html += '    <li class="chat-item">';
+        html += `    <li class="chat-item" data-member-id="${follow.memberId}">`;
         html += '        <img src="' + imgSrc + '">';
         html += '        <span>' + follow.username.substring(0, 9) + '</span>';
 //        html += '        <i class="fa-solid fa-circle fa-2xs"></i>';
@@ -54,6 +83,14 @@ function getFollowListHTML(follows) {
     html += '</ul>'
 
     return html;
+}
+
+// 채팅 대상자 색상 변경
+function chatActive(receivers, index) {
+    receivers.forEach((receiver) => {
+        receiver.classList.remove('chat-active');
+    });
+    receivers[index].classList.add('chat-active');
 }
 
 

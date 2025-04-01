@@ -1,4 +1,4 @@
-package org.demo.server.infra.common.schedule;
+package org.demo.server.infra.common.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +24,9 @@ public class DeleteFileScheduler {
     private final FileUtils fileUtils;
 
     /**
-     * temp 폴더 내 폴더가 2일 전이면 삭제
+     * temp 폴더 내 폴더가 1일 전이면 삭제
      */
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 24)
     public void deleteTempDirectories() {
         // temps 폴더
         Path tempDirectory = Path.of(fileUtils.getUploadDirectory(UploadDirectory.TEMPS));

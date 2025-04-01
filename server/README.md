@@ -95,3 +95,80 @@
 ## 리뷰 관리
 #### 1) 테이블
 &#8209; `member (1)-(*) Review (1)-(*) review_image` <br>
+
+#### 2) 리뷰 등록 → POST /api/v1/reviews
+&#8209; JWT 인증 필요 <br>
+&#8209; 유효성 검사 → 장소이름, 장소위치, 제목, 내용 (글자 + 이미지 1개), 평점 <br>
+&#8209; 서버 저장 경로 → 서버 저장소의 드라이브 > uploads > reviews > {memberId} > {reviewId} <br>
+&#8209; 리뷰 내용의 이미지는 글을 작성 중일 때, uploads > temps > {memberId} 에 저장된다 <br>
+&#8209; 리뷰를 등록하면 필요한 이미지는 reviews 폴더로 옮겨지고 필요없는 temps 폴더는 스케쥴러로 삭제 <br>
+&#8209; 스케쥴러는 24시간에 1번씩 동작 → DeleteFileScheduler <br>
+&#8209; 메인 페이지의 리뷰 목록에서는 썸네일이 보여야하므로 글에는 이미지가 반드시 1개 필요 <br>
+&#8209; 리뷰 조회 페이지에서 KaKao Map API 표시를 위하여 KaKao 주소 API 로 장소 위치 입력<br>
+
+#### 3) 임시 이미지 저장 → POST /api/v1/reviews/content-images/temp/{memberId}
+&#8209; JWT 인증 필요 <br>
+&#8209; 서버 저장 경로 → 서버 저장소의 드라이브 > uploads > temps > {memberId} <br>
+&#8209; 글 작성 중일 때, 표시를 하기 위해 필요한 API 이다 <br>
+
+#### 4) 임시 이미지 조회 → GET /api/v1/reviews/content-images/temp/{memberId}/{tempImageFileName}
+&#8209; JWT 인증 필요 없음 <br>
+&#8209; 서버 저장 경로 → 서버 저장소의 드라이브 > uploads > temps > {memberId} <br>
+&#8209; 글 작성 중일 때, 표시를 하기 위해 필요한 API 이다 <br>
+
+#### 5) 리뷰 이미지 조회 → GET /api/v1/reviews/content-images/temp/{memberId}/{tempImageFileName}
+&#8209; JWT 인증 필요 없음 <br>
+&#8209; 서버 저장 경로 → 서버 저장소의 드라이브 > uploads > reviews > {memberId} > {reviewId} <br>
+&#8209; 작성이 완료된 리뷰를 조회할 때, 필요한 API 이다 <br>
+
+#### 6) 리뷰 목록 → GET /api/v1/reviews/pages/{page}
+&#8209; JWT 인증 필요 없음 <br>
+&#8209; 메인 페이지에서 보여지는 리뷰 목록으로 로그인 사용자 및 비로그인 사용자가 모두 볼 수 있다 <br>
+&#8209; 정렬 옵션 → 전체, 최신순, 평점순 <br>
+&#8209; 검색했을 경우, 최신순으로 정렬하여 반환 <br>
+
+#### 7) 로그인 후, 내 정보 페이지에서 리뷰 목록 → GET /api/v1/reviews/my/{memberId}/pages/{page}
+&#8209; JWT 인증 필요 <br>
+&#8209; 로그인 후, 사용자가 작성한 리뷰 목록 <br>
+&#8209; 등록일, 좋아요 수, 조회 수 등을 확인할 수 있다 <br>
+&#8209; 리뷰 목록에서 개별 삭제, 일괄 삭제를 할 수 있다 <br>
+
+#### 8) 리뷰 조회 → GET /api/v1/reviews/{memberId}
+&#8209; JWT 인증 필요 없음 <br>
+&#8209; 리뷰 목록에서 리뷰 내용을 확인 <br>
+&#8209; 장소이름, 장소위치, 평점, 작성자 이미지, 작성자 닉네임, 리뷰 제목, 리뷰 내용 표시 <br>
+&#8209; 장소위치에 해당하는 곳을 KaKao Map API 를 사용하여 표시 <br>
+&#8209; 좋아요, 구독하기 기능이 있으며 로그인이 필요하다 <br>
+&#8209; 로그인한 사용자는 본인 리뷰에 좋아요, 구독하기 버튼이 없으며 편집 버튼이 활성화된다 <br>
+
+#### 9) 리뷰 수정 → PATCH /api/v1/reviews/{memberId}
+&#8209; JWT 인증 필요 <br>
+&#8209; 로그인 한 사용자가 본인 글을 수정 <br>
+&#8209; 유효성 검사 및 수정 로직은 리뷰 등록과 동일 <br>
+
+#### 10) 리뷰 개별 삭제 → DELETE /api/v1/reviews/{memberId}
+&#8209; JWT 인증 필요 <br>
+&#8209; 하나의 리뷰를 삭제 <br>
+&#8209; 로그인 한 사용자가 리뷰 수정 페이지 또는 내 정보의 내가 쓴 리뷰 목록에서 삭제 <br>
+
+#### 11) 리뷰 일괄 삭제 → DELETE /api/v1/reviews
+&#8209; JWT 인증 필요 <br>
+&#8209; 로그인 한 사용자가 내 정보의 내가 쓴 리뷰 목록에서 선택한 리뷰를 일괄삭제 <br>
+
+<br>
+<br>
+
+## 좋아요 관리
+#### 1) 테이블
+
+<br>
+<br>
+
+## 구독 관리
+#### 1) 테이블
+
+<br>
+<br>
+
+## 채팅 관리
+#### 1) 테이블
