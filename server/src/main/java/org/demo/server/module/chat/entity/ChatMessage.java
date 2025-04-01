@@ -1,5 +1,6 @@
 package org.demo.server.module.chat.entity;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
