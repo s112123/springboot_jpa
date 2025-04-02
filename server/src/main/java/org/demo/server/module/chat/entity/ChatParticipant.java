@@ -1,14 +1,17 @@
 package org.demo.server.module.chat.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.demo.server.module.member.entity.Member;
 
 @Entity
 @Table(name = "chat_Participant")
 @Getter
-@NoArgsConstructor
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@ToString(exclude = "chatRoom")
 public class ChatParticipant {
 
     @Id
@@ -25,4 +28,9 @@ public class ChatParticipant {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    // 채팅방 등록
+    public void addChatRoom(ChatRoom chatRoom) {
+        this.chatRoom = chatRoom;
+    }
 }

@@ -26,7 +26,7 @@ public class ChatMessage {
     private Member member;
 
     // ChatRoom (1)-(*) ChatMessage
-    @ManyToOne
-    @JoinColumn(name = "chat_room_id")
-    private ChatRoom chatRoom;
+//    @ManyToOne
+//    @JoinColumn(name = "chat_room_id")
+//    private ChatRoom chatRoom;
 }

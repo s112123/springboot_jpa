@@ -20,7 +20,8 @@ public class AccessTokenCheckFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private List<String> whiteList = List.of(
             "/api/v1/login",
-            "/api/v1/members/send-password"
+            "/api/v1/members/send-password",
+            "/ws/info"
     );
 
     public AccessTokenCheckFilter(JwtUtils jwtUtils) {
