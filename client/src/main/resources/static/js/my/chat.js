@@ -1,5 +1,11 @@
 import { accessTokenUtils } from '/js/common.js';
 
+// 변수 선언
+let message = document.getElementById('message');
+const btnSendMessage = document.getElementById('send-message');
+let receiverId = undefined;
+let isSelected = false;
+
 // Access Token 확인
 accessTokenUtils.redirectLoginPage();
 
@@ -8,39 +14,52 @@ const socket = new SockJS('http://localhost:8081/ws');
 const stompClient = Stomp.over(socket);
 
 // 메세지 수신
-stompClient.connect({
-    Authorization: `Bearer ${accessTokenUtils.getAccessToken()}`
-}, () => {
+stompClient.connect({ 'Authorization': accessTokenUtils.getAccessToken() }, () => {
     stompClient.subscribe(`/user/${accessTokenUtils.getMemberId()}/chat/subscribe`, (response) => {
         console.log(response.body);
     });
+
+    // 채팅 대상 목록
+    findFollows(accessTokenUtils.getMemberId()).then((response) => {
+        let follows = response.data;
+        console.log(follows);
+        if (follows) {
+            // 목록 렌더링
+            let followListElement = document.getElementById('chat-list');
+            followListElement.innerHTML = getFollowListHTML(follows.data);
+
+            // 채팅 대상자에게 클릭 이벤트 적용
+            const receivers = document.querySelectorAll('.chat-item');
+            receivers.forEach((receiver, index) => {
+                receiver.addEventListener('click', () => {
+                    isSelected = true;
+                    receiverId = receiver.getAttribute('data-member-id');
+
+                    // 채팅 대상 목록에서 선택한 대상자 색상 변경
+                    chatActive(receivers, index);
+
+                    // 채팅방 생성
+                    const jsonData = {
+                        to: receiverId,
+                        from: accessTokenUtils.getMemberId()
+                    };
+                    createChatRoom(jsonData).then((response) => {
+                        // 메세지 목록 가져오기
+                        let conversationView = document.querySelector('#conversation-view');
+                        conversationView.innerHTML = '';
+
+                        // 메세지 입력 요소 초기화
+                        message.value = '';
+                        message.focus();
+                    });
+                });
+            });
+        }
+    });
 }, (error) => {
     console.error('WebSocket Connect Failed: ', error);
-});
-
-// 채팅 대상 목록
-findFollows(accessTokenUtils.getMemberId()).then((response) => {
-    let follows = response.data;
-    console.log(follows);
-    if (follows) {
-        // 목록 렌더링
-        let followListElement = document.getElementById('chat-list');
-        followListElement.innerHTML = getFollowListHTML(follows.data);
-
-        // 채팅 대상자에게 클릭 이벤트 적용
-        const receivers = document.querySelectorAll('.chat-item');
-        receivers.forEach((receiver, index) => {
-            receiver.addEventListener('click', () => {
-                console.log('click!!');
-                // 채팅 대상 목록에서 선택한 대상자 색상 변경
-                chatActive(receivers, index);
-
-                // 메세지 목록 가져오기
-                let conversationView = document.querySelector('#conversation-view');
-                conversationView.innerHTML = '';
-            });
-        });
-    }
+    alert('Disconnected');
+    location.replace('/login?redirect=/my/chat');
 });
 
 // 내가 구독한 사람 목록 (채팅 대상 목록) API
@@ -93,6 +112,65 @@ function chatActive(receivers, index) {
     receivers[index].classList.add('chat-active');
 }
 
+// 채팅방 만들기 API
+async function createChatRoom(jsonData) {
+    const api = `http://localhost:8081/api/v1/chats/rooms`;
+    return await axios.post(api, jsonData, {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
+            'Content-Type': 'application/json'
+        }
+    });
+}
+
+// 메세지 발송 → 보내기 버튼을 누른 경우
+btnSendMessage.addEventListener('click', () => {
+    sendMessage();
+});
+
+// 메세지 발송 → 메세지를 입력하고 Enter 를 누른 경우
+message.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+
+// 메세지 전송
+function sendMessage() {
+    // 유효성 검사 → 채팅 상대 선택 여부
+    if (!isSelected) {
+        alert("메세지를 보낼 대상을 선택하세요");
+        return;
+    }
+    // 유효성 검사 → 메세지 입력 여부
+    if (message.value.trim().length === 0) {
+        alert("메세지를 입력하세요");
+        message.focus();
+        return;
+    }
+
+    // 메세지 전송
+    if (receiverId !== undefined) {
+        // 헤더
+        const headers = {
+            'Authorization': accessTokenUtils.getAccessToken()
+        };
+
+        // 페이로드
+        const payload = {
+            to: receiverId,
+            from: accessTokenUtils.getMemberId(),
+            message: message.value
+        }
+
+        // 메세지 발송
+        stompClient.send(`/pub/chat/message/${accessTokenUtils.getMemberId()}`, headers, JSON.stringify(payload));
+
+        // 메세지 입력 요소 초기화
+        message.value = '';
+        message.focus();
+    }
+}
 
 
 // 변수 선언
