@@ -1,17 +1,12 @@
 package org.demo.server.module.chat.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
 import org.demo.server.module.member.entity.Member;
 
 @Entity
 @Table(name = "chat_Participant")
 @Getter
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@ToString(exclude = "chatRoom")
 public class ChatParticipant {
 
     @Id
@@ -29,8 +24,23 @@ public class ChatParticipant {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    // 채팅방 등록
+    /**
+     * chat_room_id 외래키 지정
+     *
+     * @param chatRoom 채팅방
+     */
     public void addChatRoom(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;
+        chatRoom.getChatParticipants().add(this);
+    }
+
+    /**
+     * member_id 외래키 지정
+     *
+     * @param member 채팅 참여자
+     */
+    public void addMember(Member member) {
+        this.member = member;
+        member.getChatParticipants().add(this);
     }
 }

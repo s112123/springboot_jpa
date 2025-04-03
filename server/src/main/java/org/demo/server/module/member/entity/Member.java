@@ -1,6 +1,7 @@
 package org.demo.server.module.member.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.demo.server.infra.common.entity.BaseEntity;
@@ -18,7 +19,7 @@ import java.util.Set;
 @Entity
 @Table(name = "member")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity {
 
     @Id
@@ -53,7 +54,6 @@ public class Member extends BaseEntity {
     // memberId 가 1인 사람이 2, 3을 친구 추가했다고 가정하자
     // 그러면 Follow 테이블에 follower_id 에는 1, followed_id 에는 2, 3 이 된다
     // 1이 친구 추가한 (팔로우) 사람을 찾으려면 follower_id 가 1인 사람의 followed_id 를 찾으면 된다
-    // 1을 친구 추가한 (팔로워) 사람을 찾으려면 followed_id 가 1인 사람의 follower_id 를 찾으면 된다
     // 이 필드는 나를 팔로우 한, 나의 팔로워들의 찾는 것이므로 내가 팔로우 당한 것이다
     // 즉, 나의 member_id 가 Follow 테이블에서 외래키인 followd_id 에 저장되어야 한다
     @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -66,11 +66,11 @@ public class Member extends BaseEntity {
     private Set<Follow> following = new HashSet<>();
 
     // Member (1)-(*) ChatParticipant
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ChatParticipant> chatParticipants = new HashSet<>();
 
     // Member (1)-(*) ChatMessage
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ChatMessage> chatMessages = new HashSet<>();
 
     private Member(Builder builder) {

@@ -10,9 +10,8 @@ import java.util.Set;
 @Table(name = "chat_room")
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@ToString
 public class ChatRoom {
 
     @Id
@@ -20,17 +19,16 @@ public class ChatRoom {
     @Column(name = "chat_room_id")
     private Long chatRoomId;
 
+    @Column(name = "chat_room_name")
+    private String chatRoomName;
+
     // ChatRoom (1)-(*) ChatParticipant
-    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<ChatParticipant> chatParticipants = new HashSet<>();
 
     // ChatRoom (1)-(*) ChatMessage
-//    @OneToMany(mappedBy = "chatRoom")
-//    private Set<ChatMessage> chatMessages = new HashSet<>();
-
-    // 채팅 참여자 등록
-    public void addChatParticipant(ChatParticipant chatParticipant) {
-        this.chatParticipants.add(chatParticipant);
-        chatParticipant.addChatRoom(this);
-    }
+    @OneToMany(mappedBy = "chatRoom")
+    @Builder.Default
+    private Set<ChatMessage> chatMessages = new HashSet<>();
 }
