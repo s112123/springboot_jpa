@@ -164,7 +164,7 @@ function sendMessage() {
         }
 
         // 메세지 발송
-        stompClient.send(`/pub/chat/message/${accessTokenUtils.getMemberId()}`, headers, JSON.stringify(payload));
+        stompClient.send(`/pub/chat/message/send`, headers, JSON.stringify(payload));
 
         // 메세지 입력 요소 초기화
         message.value = '';

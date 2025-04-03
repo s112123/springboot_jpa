@@ -20,12 +20,11 @@ public class SocketController {
      *
      * @param message 전송할 메세지 정보
      */
-    // 클라이언트에서 서버로 메세지를 전송하는 엔드 포인트 → @MessageMapping
-    @MessageMapping("/chat/message/{from}")
+    @MessageMapping("/chat/message/send")
     public void publishMessage(
             @Payload Message message
     ) {
         // 채팅 대상자에게 메세지를 전송
-         chatService.sendMessage(message);
+        chatService.sendMessage(message);
     }
 }

@@ -3,13 +3,11 @@ package org.demo.server.module.chat.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.demo.server.module.member.entity.Member;
 
 @Entity
 @Table(name = "chat_message")
 @Getter
-@NoArgsConstructor
 public class ChatMessage {
 
     @Id
@@ -26,7 +24,36 @@ public class ChatMessage {
     private Member member;
 
     // ChatRoom (1)-(*) ChatMessage
-//    @ManyToOne
-//    @JoinColumn(name = "chat_room_id")
-//    private ChatRoom chatRoom;
+    @ManyToOne
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
+
+    /**
+     * 메세지 저장
+     *
+     * @param message 메세지
+     */
+    public void addMessage(String message) {
+        this.message = message;
+    }
+
+    /**
+     * 회원 외래키 (member_id) 설정
+     *
+     * @param member 메세지를 전송한 회원 식별자
+     */
+    public void addMember(Member member) {
+        this.member = member;
+        member.getChatMessages().add(this);
+    }
+
+    /**
+     * 채팅방 외래키 (chat_room_id) 설정
+     *
+     * @param chatRoom 메세지를 전송한 채팅방 식별자
+     */
+    public void addChatRoom(ChatRoom chatRoom) {
+        this.chatRoom = chatRoom;
+        chatRoom.getChatMessages().add(this);
+    }
 }
