@@ -6,6 +6,7 @@ import org.demo.server.module.chat.dto.resquest.ChatRoomRequest;
 import org.demo.server.module.chat.entity.ChatMessage;
 import org.demo.server.module.chat.entity.ChatParticipant;
 import org.demo.server.module.chat.entity.ChatRoom;
+import org.demo.server.module.chat.repository.ChatMessageRepository;
 import org.demo.server.module.chat.repository.ChatParticipantRepository;
 import org.demo.server.module.chat.repository.ChatRoomRepository;
 import org.demo.server.module.member.entity.Member;
@@ -14,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
@@ -26,21 +28,25 @@ public class ChatService {
     private final MemberFinder memberFinder;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     /**
-     * 채팅방 참여하기
+     * 채팅방 참여하고 채팅방 메세지 목록 가져오기
      *
      * @param request 채팅방 참여자의 식별자
+     * @Return 채팅 메시지 목록
      */
     @Transactional
-    public void joinChatRoom(ChatRoomRequest request) {
+    public List<ChatMessage> joinChatRoom(ChatRoomRequest request) {
         // 회원 엔티티
         Member from = memberFinder.getMemberById(request.getFrom());
         Member to = memberFinder.getMemberById(request.getTo());
         // 채팅방 생성
         ChatRoom chatRoom = createAndJoinChatRoom(from, to);
         // TODO:채팅방 목록 가져오기
+        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoom_ChatRoomId(chatRoom.getChatRoomId());
+        return chatMessages;
     }
 
     /**
