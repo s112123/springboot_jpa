@@ -38,12 +38,14 @@ stompClient.connect({ 'Authorization': accessTokenUtils.getAccessToken() }, () =
                     // 채팅 대상 목록에서 선택한 대상자 색상 변경
                     chatActive(receivers, index);
 
-                    // 채팅방 생성
+                    // 채팅방 참여
                     const jsonData = {
                         to: receiverId,
                         from: accessTokenUtils.getMemberId()
                     };
-                    createChatRoom(jsonData).then((response) => {
+                    joinChatRoom(jsonData).then((response) => {
+                        console.log(response.data);
+
                         // 메세지 목록 가져오기
                         let conversationView = document.querySelector('#conversation-view');
                         conversationView.innerHTML = '';
@@ -112,8 +114,8 @@ function chatActive(receivers, index) {
     receivers[index].classList.add('chat-active');
 }
 
-// 채팅방 만들기 API
-async function createChatRoom(jsonData) {
+// 채팅방 참여 및 채팅방 메세지 목록 API
+async function joinChatRoom(jsonData) {
     const api = `http://localhost:8081/api/v1/chats/rooms`;
     return await axios.post(api, jsonData, {
         headers: {
