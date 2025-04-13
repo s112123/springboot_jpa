@@ -2,14 +2,12 @@ package org.demo.server.module.good.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.demo.server.infra.mq.service.publisher.MessagePublisher;
 import org.demo.server.module.good.dto.request.GoodRequest;
-import org.demo.server.module.good.dto.response.GoodResponse;
 import org.demo.server.module.good.entity.Good;
 import org.demo.server.module.good.repository.GoodRepository;
-import org.demo.server.module.member.dto.response.MemberResponse;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
-import org.demo.server.module.review.dto.details.ReviewDetails;
 import org.demo.server.module.review.dto.response.ReviewResponse;
 import org.demo.server.module.review.entity.Review;
 import org.demo.server.module.review.service.base.ReviewFinder;
@@ -29,6 +27,7 @@ public class GoodService {
     private final MemberFinder memberFinder;
     private final ReviewFinder reviewFinder;
     private final GoodRepository goodRepository;
+    private final MessagePublisher messagePublisher;
 
     /**
      * 좋아요 등록
@@ -39,14 +38,19 @@ public class GoodService {
         if (!existsGood(request.getReviewId(), request.getMemberId())) {
             Member member = memberFinder.getMemberById(request.getMemberId());
             Review review = reviewFinder.getReviewById(request.getReviewId());
+
+            // 리뷰의 좋아요 개수 +1
             review.plusGoodCount();
 
+            // 좋아요 등록
             Good good = Good.builder()
                     .member(member)
                     .review(review)
                     .build();
-
             goodRepository.save(good);
+
+            // 좋아요 알림
+            messagePublisher.publishLike(member.getMemberId(), review.getReviewId());
         }
     }
 

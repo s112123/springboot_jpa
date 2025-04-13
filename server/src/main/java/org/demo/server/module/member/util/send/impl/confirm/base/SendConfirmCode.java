@@ -2,6 +2,7 @@ package org.demo.server.module.member.util.send.impl.confirm.base;
 
 import org.demo.server.module.member.exception.InvalidVerificationCodeException;
 import org.demo.server.module.member.util.send.base.SendUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -9,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class SendConfirmCode implements SendUtils {
 
+    @Qualifier("redisTemplate00")
     protected final RedisTemplate<String, String> redisTemplate;
 
     public SendConfirmCode(RedisTemplate<String, String> redisTemplate) {
