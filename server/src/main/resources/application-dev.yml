@@ -10,10 +10,6 @@ spring:
     url: jdbc:mysql://localhost:3306/review
     username: root
     password: '0000'
-  # Redis
-  redis:
-    host: localhost
-    port: 6379
   # JPA
   jpa:
     hibernate:
@@ -23,6 +19,10 @@ spring:
         show_sql: true
         format_sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
+  # Redis
+  redis:
+    host: localhost
+    port: 6380
 
 # File
 servlet:

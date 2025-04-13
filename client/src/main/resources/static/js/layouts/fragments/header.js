@@ -11,6 +11,55 @@ const logout = document.getElementById('logout');
 window.addEventListener('DOMContentLoaded', () => {
     // Access Token 여부에 따라 로그인 항목 활성화
     checkLoginStatus(accessTokenUtils.getAccessToken());
+
+    // 로그인 시, 알림 구독
+    if (accessTokenUtils.getAccessToken()) {
+        // 알림 구독
+        const apiSubscribe = 'http://localhost:8081/api/v1/sse/subscribe?memberId=' + accessTokenUtils.getMemberId();
+        const eventSource = new EventSource(apiSubscribe);
+        eventSource.addEventListener('notification', (e) => {
+            if (e.data !== 'ping') {
+                // 알림 메세지 내용
+                alert(e.data);
+
+                // 헤더의 알림 아이콘 모양 변경
+                let bell = document.getElementById('bell');
+                bell.classList.add('fa-shake');
+                bell.style.color = 'rgb(210, 40, 40)';
+            }
+        });
+
+        // 연결 오류
+        eventSource.onerror = (err) => {
+            console.error('SSE 연결 오류', err);
+            eventSource.close();
+        };
+
+        // 읽지 않은 알림 확인
+        existsNotReadNotification(accessTokenUtils.getMemberId()).then((response) => {
+            // 헤더의 알림 아이콘 모양 변경
+            let bell = document.getElementById('bell');
+            if (response.data) {
+                // 읽지 않은 알림이 있는 경우
+                bell.classList.add('fa-shake');
+                bell.style.color = 'rgb(210, 40, 40)';
+            } else {
+                // 읽지 않은 알림이 없는 경우
+                bell.classList.remove('fa-shake');
+                bell.style.color = 'rgb(120, 120, 120)';
+            }
+        });
+    }
+
+    // 로그아웃
+    logout.addEventListener('click', () => {
+        // 로그아웃 처리
+        logoutProcess(accessTokenUtils.getMemberId()).then(() => {
+            // Access Token 삭제
+            accessTokenUtils.removeAccessToken();
+            location.replace('/');
+        });
+    });
 })
 
 // Access Token 여부에 따라 로그인 항목 활성화
@@ -49,19 +98,25 @@ search.addEventListener('keypress', () => {
     }
 });
 
-///////////////////////////////
-// 변수 선언
-//var bell = document.getElementById('bell');
-//var email = document.getElementById('email');
-//
-//if (email !== null) {
-//  if (email.value !== undefined && email.value !== '') {
-//    var eventSource = new EventSource(`/notifications/subscribe/${email.value}`);
-//    eventSource.addEventListener('sse', (event) => {
-//      if (event.data !== 'subscribe') {
-//        bell.classList.add('fa-shake');
-//        bell.style.color = 'rgb(210, 40, 40)';
-//      }
-//    });
-//  }
-//}
+// 읽지 않은 알림 확인 API
+async function existsNotReadNotification(memberId) {
+    const api = 'http://localhost:8081/api/v1/notifications?memberId=' + memberId;
+    const response = await axios.get(api, {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
+        }
+    });
+    return response;
+}
+
+// 로그아웃 API
+async function logoutProcess(memberId) {
+    const api = 'http://localhost:8081/api/v1/logout';
+    const response = await axios.post(api, JSON.stringify(memberId), {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
+            'Content-Type': 'application/json'
+        }
+    });
+    return response;
+}
