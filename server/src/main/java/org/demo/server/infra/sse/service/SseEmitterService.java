@@ -9,6 +9,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -25,15 +28,31 @@ public class SseEmitterService {
      * @return SseEmitter
      */
     public SseEmitter subscribe(Long memberId) {
+        log.info("[1] emitters.size={}", emitters.size());
+
+        // 기존 emitter 가 있으면 종료 후, 제거
+        if (emitters.containsKey(memberId)) {
+            emitters.get(memberId).complete();
+        }
+
         // Timeout 10분
-        SseEmitter emitter = new SseEmitter(1000L * 60 * 10);
+        SseEmitter emitter = new SseEmitter(1000L * 10);
         emitters.put(memberId, emitter);
+        log.info("[2] emitters.size={}", emitters.size());
 
         // 더미 데이터 전송
         sendEventToSubscriber(memberId, "ping");
 
-        emitter.onTimeout(() -> emitters.remove(memberId));
-        emitter.onCompletion(() -> emitters.remove(memberId));
+        emitter.onTimeout(() -> {
+            log.info("[onTimeout: delete before] emitters.size={}", emitters.size());
+            emitters.remove(memberId);
+            log.info("[onTimeout: delete after] emitters.size={}", emitters.size());
+        });
+        emitter.onCompletion(() -> {
+            log.info("[onCompletion: delete before] emitters.size={}", emitters.size());
+            emitters.remove(memberId);
+            log.info("[onCompletion: delete after] emitters.size={}", emitters.size());
+        });
         emitter.onError((e) -> emitters.remove(memberId));
 
         return emitter;
@@ -75,6 +94,9 @@ public class SseEmitterService {
      * @param memberId SseEmitter 를 삭제할 회원 ID
      */
     public void removeEmitter(Long memberId) {
-        emitters.remove(memberId);
+        SseEmitter emitter = emitters.remove(memberId);
+        if (emitter != null) {
+            emitter.complete();
+        }
     }
 }

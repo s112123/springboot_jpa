@@ -1,6 +1,7 @@
 package org.demo.server.module.follow.service;
 
 import lombok.RequiredArgsConstructor;
+import org.demo.server.infra.mq.service.publisher.MessagePublisher;
 import org.demo.server.module.follow.dto.request.FollowRequest;
 import org.demo.server.module.follow.entity.Follow;
 import org.demo.server.module.follow.repository.FollowRepository;
@@ -20,6 +21,7 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final MemberFinder memberFinder;
+    private final MessagePublisher messagePublisher;
 
     /**
      * 구독하기
@@ -31,12 +33,15 @@ public class FollowService {
             Member follower = memberFinder.getMemberById(request.getFollowerId());
             Member followed = memberFinder.getMemberByUsername(request.getUsername());
 
+            // 구독 등록
             Follow follow = Follow.builder()
                     .follower(follower)
                     .followed(followed)
                     .build();
-
             followRepository.save(follow);
+
+            // 구독 알림
+            messagePublisher.publishFollow(follower.getMemberId(), followed.getMemberId());
         }
     }
 
@@ -80,6 +85,20 @@ public class FollowService {
         return findFollows.stream()
                 .map(follow -> follow.getFollowed())
                 .map(followed -> followed.toDetails())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 나를 구독한 사람 목록 반환
+     *
+     * @param followedId 회원 식별자
+     * @return 나를 구독한 사람 목록 반환
+     */
+    public List<MemberDetails> findFollowers(Long followedId) {
+        List<Follow> findFollows = followRepository.findByFollowed_MemberId(followedId);
+        return findFollows.stream()
+                .map(follow -> follow.getFollower())
+                .map(follower -> follower.toDetails())
                 .collect(Collectors.toList());
     }
 
