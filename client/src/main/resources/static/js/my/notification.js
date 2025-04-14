@@ -15,7 +15,7 @@ noReadContents.forEach((noReadContent) => {
   noReadContent.addEventListener('click', () => {
     var notificationId = noReadContent.getAttribute('data-notification-id');
 
-    // DB에서 읽음 처리
+    // DB 에서 읽음 처리
     readNotification(notificationId).then(response => {
       location.href = noReadContent.getAttribute('data-notification-url');
     });

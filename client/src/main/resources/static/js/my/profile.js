@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 나를 구독한 사람 목록
         findFollowers(accessTokenUtils.getMemberId()).then(response => {
             let followers = response.data;
+            console.log(followers);
 
             // 목록 렌더링
             let followerListElement = document.getElementById('my-followers');

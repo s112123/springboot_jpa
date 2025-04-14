@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MessageService {
 
-    private final MessageRepository messageRepository;
-    private final MemberFinder memberFinder;
     @Qualifier("redisTemplate01")
     private final RedisTemplate<String, Object> redisTemplate;
+    private final MessageRepository messageRepository;
+    private final MemberFinder memberFinder;
     // 스프링이 관리하는 ObjectMapper 에는 JavaTimeModule 이 등록되어 있다
     private final ObjectMapper objectMapper;
 
@@ -35,7 +35,7 @@ public class MessageService {
      * @return 저장된 메세지
      */
     @Transactional
-    public MessageDetails save(Long consumerId, java.lang.String message) {
+    public MessageDetails save(Long consumerId, String message) {
         // 메세지 받는 사람 조회
         Member consumer = memberFinder.getMemberById(consumerId);
 

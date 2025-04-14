@@ -8,6 +8,7 @@ const admin = document.getElementById('admin');
 const logout = document.getElementById('logout');
 
 // HTML 로드
+let eventSource = null;
 window.addEventListener('DOMContentLoaded', () => {
     // Access Token 여부에 따라 로그인 항목 활성화
     checkLoginStatus(accessTokenUtils.getAccessToken());
@@ -15,25 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // 로그인 시, 알림 구독
     if (accessTokenUtils.getAccessToken()) {
         // 알림 구독
-        const apiSubscribe = 'http://localhost:8081/api/v1/sse/subscribe?memberId=' + accessTokenUtils.getMemberId();
-        const eventSource = new EventSource(apiSubscribe);
-        eventSource.addEventListener('notification', (e) => {
-            if (e.data !== 'ping') {
-                // 알림 메세지 내용
-                alert(e.data);
-
-                // 헤더의 알림 아이콘 모양 변경
-                let bell = document.getElementById('bell');
-                bell.classList.add('fa-shake');
-                bell.style.color = 'rgb(210, 40, 40)';
-            }
-        });
-
-        // 연결 오류
-        eventSource.onerror = (err) => {
-            console.error('SSE 연결 오류', err);
-            eventSource.close();
-        };
+        connectSSE()
 
         // 읽지 않은 알림 확인
         existsNotReadNotification(accessTokenUtils.getMemberId()).then((response) => {
@@ -61,6 +44,45 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 })
+
+// 페이지 전환
+window.addEventListener('beforeunload', () => {
+    if (eventSource) {
+        // SSE 연결 닫기
+        // eventSource.close();
+    }
+});
+
+// SSE 연결
+function connectSSE() {
+    const apiSubscribe = 'http://localhost:8081/api/v1/sse/subscribe?memberId=' + accessTokenUtils.getMemberId();
+    eventSource = new EventSource(apiSubscribe);
+    eventSource.addEventListener('notification', (e) => {
+        if (e.data !== 'ping') {
+            // 알림 메세지 내용
+            alert(e.data);
+
+            // 헤더의 알림 아이콘 모양 변경
+            let bell = document.getElementById('bell');
+            bell.classList.add('fa-shake');
+            bell.style.color = 'rgb(210, 40, 40)';
+        }
+    });
+
+    // 연결 오류
+    eventSource.onerror = (err) => {
+        //console.error('SSE 연결 오류', err);
+        eventSource.close();
+
+        if (eventSource.readyState === EventSource.CLOSED) {
+            // 1초마다 재연결
+            setTimeout(() => {
+                console.log('SSE 재연결');
+                connectSSE();
+            }, 1000);
+        }
+    };
+}
 
 // Access Token 여부에 따라 로그인 항목 활성화
 function checkLoginStatus() {

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
+import org.demo.server.infra.mq.service.publisher.MessagePublisher;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
 import org.demo.server.module.review.dto.details.ReviewDetails;
@@ -34,6 +35,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final FileUtils fileUtils;
     private final MemberFinder memberFinder;
     private final ReviewFinder reviewFinder;
+    private final MessagePublisher messagePublisher;
 
     /**
      * 리뷰 등록
@@ -79,6 +81,8 @@ public class ReviewServiceImpl implements ReviewService {
             moveTempReviewImageFile(savedReview, savedReviewImage);
         }
 
+        // 새글 알림 발송
+        messagePublisher.publishPost(findMember.getMemberId(), savedReview.getReviewId());
         return savedReview.toDetails();
     }
 
