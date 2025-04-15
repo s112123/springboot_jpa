@@ -11,14 +11,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MQConfig {
 
-    // chat, notice
+    // chat
     public static final String EXCHANGE_TOPIC = "ntf.exchange.topic";
     public static final String QUEUE_LIKE = "ntf.queue.like";
     public static final String QUEUE_FOLLOW = "ntf.queue.follow";
     public static final String QUEUE_POST = "ntf.queue.post";
+    public static final String QUEUE_NOTICE = "ntf.queue.notice";
     public static final String ROUTING_LIKE = "ntf.like";
     public static final String ROUTING_FOLLOW = "ntf.follow";
     public static final String ROUTING_POST = "ntf.post";
+    public static final String ROUTING_NOTICE = "ntf.notice";
 
     // MessageConverter
     @Bean
@@ -88,5 +90,22 @@ public class MQConfig {
                 .bind(postQueue())
                 .to(topicExchange())
                 .with(ROUTING_POST);
+    }
+
+    // Notice Queue
+    @Bean
+    public Queue noticeQueue() {
+        return QueueBuilder
+                .durable(QUEUE_NOTICE)
+                .build();
+    }
+
+    // Notice Binding
+    @Bean
+    public Binding noticeBinding() {
+        return BindingBuilder
+                .bind(noticeQueue())
+                .to(topicExchange())
+                .with(ROUTING_NOTICE);
     }
 }

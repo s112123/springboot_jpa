@@ -28,31 +28,20 @@ public class SseEmitterService {
      * @return SseEmitter
      */
     public SseEmitter subscribe(Long memberId) {
-        log.info("[1] emitters.size={}", emitters.size());
-
         // 기존 emitter 가 있으면 종료 후, 제거
         if (emitters.containsKey(memberId)) {
-            emitters.get(memberId).complete();
+            emitters.remove(memberId).complete();
         }
 
         // Timeout 10분
         SseEmitter emitter = new SseEmitter(1000L * 10);
         emitters.put(memberId, emitter);
-        log.info("[2] emitters.size={}", emitters.size());
 
         // 더미 데이터 전송
         sendEventToSubscriber(memberId, "ping");
 
-        emitter.onTimeout(() -> {
-            log.info("[onTimeout: delete before] emitters.size={}", emitters.size());
-            emitters.remove(memberId);
-            log.info("[onTimeout: delete after] emitters.size={}", emitters.size());
-        });
-        emitter.onCompletion(() -> {
-            log.info("[onCompletion: delete before] emitters.size={}", emitters.size());
-            emitters.remove(memberId);
-            log.info("[onCompletion: delete after] emitters.size={}", emitters.size());
-        });
+        emitter.onTimeout(() -> emitters.remove(memberId));
+        emitter.onCompletion(() -> emitters.remove(memberId));
         emitter.onError((e) -> emitters.remove(memberId));
 
         return emitter;

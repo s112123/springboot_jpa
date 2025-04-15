@@ -1,0 +1,117 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.admin-notices-wrap {
+  width: 100%;  /* 650px */
+  padding: 50px 0px 50px 50px;
+}
+
+.admin-notices-wrap p {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* TOP */
+.admin-notices-top-box {
+  margin-top: 20px;
+  margin-bottom: 70px;
+  padding: 30px 0px;
+  border-top: 1px solid rgb(200, 200, 200);
+  /* border-bottom: 1px solid rgb(200, 200, 200); */
+}
+
+.admin-notices-top-box .notice-send {
+  display: flex;
+}
+
+.admin-notices-top-box .notice-send input {
+  width: 300px;
+  margin-right: 8px;
+  padding: 5px 8px;
+  border: 1px solid rgb(180, 180, 180);
+  border-radius: 5px;
+}
+
+.admin-notices-top-box .notice-send input::placeholder {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgb(160, 160, 160);
+}
+
+.admin-notices-top-box .notice-send button {
+  width: 93px;
+  padding: 5px;
+  border: 1px solid rgb(210, 40, 40);
+  background-color: rgb(210, 40, 40);
+  border-radius: 5px;
+  color: #fff;
+}
+
+/* BOTTOM */
+.admin-notices-bottom-box {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.admin-notices-bottom-box .admin-notices-list {
+  margin-bottom: 10px;
+}
+
+/* TABLE */
+.admin-notices-bottom-box .admin-notices-list table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.admin-notices-bottom-box .admin-notices-list table tr {
+	height: 45px;
+	border: 1px solid #ccc;
+}
+
+.admin-notices-bottom-box .admin-notices-list table thead tr {
+	border-top: 3px solid rgb(52, 52, 54);
+}
+
+.admin-notices-bottom-box .admin-notices-list table th {
+	font-weight: bold;
+}
+
+.admin-notices-bottom-box .admin-notices-list table th, table td {
+	padding: 0 10px;
+	font-size: 14px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.admin-notices-list td:nth-child(1) {
+	width: 6%;
+}
+
+.admin-notices-list td:nth-child(2) {
+	width: 50%;
+	/* text-align: left;*/
+}
+
+/*
+.admin-notices-list td:nth-child(2) a {
+  color: rgb(210, 40, 40);
+  font-weight: 600;
+}
+
+.admin-notices-list td:nth-child(2) a:hover {
+	color: rgb(210, 40, 40);
+	transition: 0.1s;
+}
+*/
+
+.admin-notices-list td:nth-child(3) {
+	width: 20%;
+	text-align: center;
+}
+
+.admin-notices-list td:nth-child(4) {
+	width: 17%;
+}

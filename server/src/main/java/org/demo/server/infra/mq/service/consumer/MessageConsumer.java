@@ -55,10 +55,28 @@ public class MessageConsumer {
         }
     }
 
-    // 새 글 알림
+    /**
+     * 새 글 알림
+     *
+     * @param messageDetails 메세지 내용
+     */
     @RabbitListener(queues = MQConfig.QUEUE_POST)
     public void consumePost(MessageDetails messageDetails) {
         log.info("[POST]: {}", messageDetails);
+
+        // 메세지 저장 → Redis (Set)
+        redisTemplate.opsForSet().add("notification:consumer:" + messageDetails.getConsumerId(), messageDetails);
+
+        // 메세지를 받을 회원이 온라인 상태이면 SSE 로 실시간 알림 전송
+        if (sseEmitterService.hasConnection(messageDetails.getConsumerId())) {
+            sseEmitterService.sendEventToSubscriber(messageDetails.getConsumerId(), messageDetails.getMessage());
+        }
+    }
+
+    // 공지하기
+    @RabbitListener(queues = MQConfig.QUEUE_NOTICE)
+    public void consumeNotice(MessageDetails messageDetails) {
+        log.info("[NOTICE]: {}", messageDetails);
 
         // 메세지 저장 → Redis (Set)
         redisTemplate.opsForSet().add("notification:consumer:" + messageDetails.getConsumerId(), messageDetails);
