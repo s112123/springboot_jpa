@@ -65,7 +65,12 @@ public class MessagePublisher {
         rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_FOLLOW, savedMessage);
     }
 
-    // 새 글
+    /**
+     * 새 글 알림
+     *
+     * @param publisherId 메세지를 발송하는 회원 ID (= 글 작성자)
+     * @param reviewId 등록된 새 글 ID
+     */
     @Transactional(readOnly = true)
     public void publishPost(Long publisherId, Long reviewId) {
         // 새 글을 등록한 회원 조회
@@ -85,6 +90,13 @@ public class MessagePublisher {
     }
 
     // 공지사항
+    public void publishNotice(Long publisherId, Long consumerId) {
+        // 메세지
+        String message = "새 공지가 있습니다";
+        MessageDetails savedMessage = messageService.save(consumerId, message);
+        // 메세지 전송
+        rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_NOTICE, savedMessage);
+    }
 
     // 채팅
 }

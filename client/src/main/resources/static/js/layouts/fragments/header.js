@@ -45,14 +45,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 })
 
-// 페이지 전환
-window.addEventListener('beforeunload', () => {
-    if (eventSource) {
-        // SSE 연결 닫기
-        // eventSource.close();
-    }
-});
-
 // SSE 연결
 function connectSSE() {
     const apiSubscribe = 'http://localhost:8081/api/v1/sse/subscribe?memberId=' + accessTokenUtils.getMemberId();
@@ -74,13 +66,11 @@ function connectSSE() {
         //console.error('SSE 연결 오류', err);
         eventSource.close();
 
-        if (eventSource.readyState === EventSource.CLOSED) {
-            // 1초마다 재연결
-            setTimeout(() => {
-                console.log('SSE 재연결');
-                connectSSE();
-            }, 1000);
-        }
+        // 1초마다 재연결
+        setTimeout(() => {
+            console.log('SSE 재연결');
+            connectSSE();
+        }, 1000);
     };
 }
 
