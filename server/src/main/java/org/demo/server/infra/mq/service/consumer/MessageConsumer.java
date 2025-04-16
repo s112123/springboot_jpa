@@ -12,12 +12,18 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class MessageConsumer {
 
-    @Qualifier("redisTemplate01")
-    private final RedisTemplate<java.lang.String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final SseEmitterService sseEmitterService;
+
+    public MessageConsumer(
+            @Qualifier("redisTemplate02") RedisTemplate<String, Object> redisTemplate,
+            SseEmitterService sseEmitterService
+    ) {
+        this.redisTemplate = redisTemplate;
+        this.sseEmitterService = sseEmitterService;
+    }
 
     /**
      * 좋아요 클릭 시, 발생한 알림 메세지 수신
@@ -73,13 +79,35 @@ public class MessageConsumer {
         }
     }
 
-    // 공지하기
+    /**
+     * 공지 알림
+     *
+     * @param messageDetails 메세지 내용
+     */
     @RabbitListener(queues = MQConfig.QUEUE_NOTICE)
     public void consumeNotice(MessageDetails messageDetails) {
         log.info("[NOTICE]: {}", messageDetails);
 
         // 메세지 저장 → Redis (Set)
         redisTemplate.opsForSet().add("notification:consumer:" + messageDetails.getConsumerId(), messageDetails);
+
+        // 메세지를 받을 회원이 온라인 상태이면 SSE 로 실시간 알림 전송
+        if (sseEmitterService.hasConnection(messageDetails.getConsumerId())) {
+            sseEmitterService.sendEventToSubscriber(messageDetails.getConsumerId(), messageDetails.getMessage());
+        }
+    }
+
+    /**
+     * 채팅 알림
+     *
+     * @param messageDetails 메세지 내용
+     */
+    @RabbitListener(queues = MQConfig.QUEUE_CHAT)
+    public void consumeChat(MessageDetails messageDetails) {
+        log.info("[CHAT]: {}", messageDetails);
+
+        // 메세지 저장 → Redis (Set)
+        redisTemplate.opsForSet().add("chat:consumer:" + messageDetails.getConsumerId(), messageDetails);
 
         // 메세지를 받을 회원이 온라인 상태이면 SSE 로 실시간 알림 전송
         if (sseEmitterService.hasConnection(messageDetails.getConsumerId())) {

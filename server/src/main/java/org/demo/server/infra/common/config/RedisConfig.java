@@ -25,7 +25,7 @@ public class RedisConfig {
 
     /**
      * Redis DB 0번 연결을 위한 ConnectionFactory 빈 생성
-     * Refresh Token 저장
+     * 가입 인증 코드
      *
      * @return LettuceConnectionFactory
      */
@@ -40,23 +40,8 @@ public class RedisConfig {
     }
 
     /**
-     * Redis DB 1번 연결을 위한 ConnectionFactory 빈 생성
-     * 알림 메세지 저장
-     *
-     * @return LettuceConnectionFactory
-     */
-    @Bean(name = "redisConnectionFactory01")
-    public LettuceConnectionFactory connectionFactory01() {
-        RedisStandaloneConfiguration factory = new RedisStandaloneConfiguration();
-        factory.setHostName(host);
-        factory.setPort(port);
-        factory.setDatabase(1);
-        return new LettuceConnectionFactory(factory);
-    }
-
-    /**
      * Redis DB 0번을 사용하는 RedisTemplate 빈 등록
-     * Refresh Token 저장
+     * 가입 인증 코드, 임시 비밀번호
      *
      * @param connectionFactory RedisTemplate 에서 사용한 ConnectionFactory
      * @return RedisTemplate
@@ -73,15 +58,62 @@ public class RedisConfig {
     }
 
     /**
+     * Redis DB 1번 연결을 위한 ConnectionFactory 빈 생성
+     * Refresh Token 저장
+     *
+     * @return LettuceConnectionFactory
+     */
+    @Bean(name = "redisConnectionFactory01")
+    public LettuceConnectionFactory connectionFactory01() {
+        RedisStandaloneConfiguration factory = new RedisStandaloneConfiguration();
+        factory.setHostName(host);
+        factory.setPort(port);
+        factory.setDatabase(1);
+        return new LettuceConnectionFactory(factory);
+    }
+
+    /**
      * Redis DB 1번을 사용하는 RedisTemplate 빈 등록
-     * 알림 메세지 저장
+     * Refresh Token 저장
      *
      * @param connectionFactory RedisTemplate 에서 사용한 ConnectionFactory
      * @return RedisTemplate
      */
     @Bean(name = "redisTemplate01")
-    public RedisTemplate<String, Object> redisTemplate01(
+    public RedisTemplate<String, String> redisTemplate01(
             @Qualifier("redisConnectionFactory01") RedisConnectionFactory connectionFactory
+    ) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setDefaultSerializer(StringRedisSerializer.UTF_8);
+        return template;
+    }
+
+    /**
+     * Redis DB 2번 연결을 위한 ConnectionFactory 빈 생성
+     * 알림 메세지 저장
+     *
+     * @return LettuceConnectionFactory
+     */
+    @Bean(name = "redisConnectionFactory02")
+    public LettuceConnectionFactory connectionFactory02() {
+        RedisStandaloneConfiguration factory = new RedisStandaloneConfiguration();
+        factory.setHostName(host);
+        factory.setPort(port);
+        factory.setDatabase(2);
+        return new LettuceConnectionFactory(factory);
+    }
+
+    /**
+     * Redis DB 2번을 사용하는 RedisTemplate 빈 등록
+     * 알림 메세지 저장
+     *
+     * @param connectionFactory RedisTemplate 에서 사용한 ConnectionFactory
+     * @return RedisTemplate
+     */
+    @Bean(name = "redisTemplate02")
+    public RedisTemplate<String, Object> redisTemplate02(
+            @Qualifier("redisConnectionFactory02") RedisConnectionFactory connectionFactory
     ) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
@@ -99,6 +131,38 @@ public class RedisConfig {
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
         template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
 
+        return template;
+    }
+
+    /**
+     * Redis DB 3번 연결을 위한 ConnectionFactory 빈 생성
+     * 채팅 참여 방 번호 저장
+     *
+     * @return LettuceConnectionFactory
+     */
+    @Bean(name = "redisConnectionFactory03")
+    public LettuceConnectionFactory connectionFactory03() {
+        RedisStandaloneConfiguration factory = new RedisStandaloneConfiguration();
+        factory.setHostName(host);
+        factory.setPort(port);
+        factory.setDatabase(3);
+        return new LettuceConnectionFactory(factory);
+    }
+
+    /**
+     * Redis DB 3번을 사용하는 RedisTemplate 빈 등록
+     * 채팅 참여 방 번호 저장
+     *
+     * @param connectionFactory RedisTemplate 에서 사용한 ConnectionFactory
+     * @return RedisTemplate
+     */
+    @Bean(name = "redisTemplate03")
+    public RedisTemplate<String, String> redisTemplate03(
+            @Qualifier("redisConnectionFactory03") RedisConnectionFactory connectionFactory
+    ) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setDefaultSerializer(StringRedisSerializer.UTF_8);
         return template;
     }
 }

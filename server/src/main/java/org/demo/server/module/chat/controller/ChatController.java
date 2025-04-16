@@ -6,10 +6,7 @@ import org.demo.server.module.chat.dto.resquest.ChatRoomRequest;
 import org.demo.server.module.chat.entity.ChatMessage;
 import org.demo.server.module.chat.service.ChatService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,5 +27,19 @@ public class ChatController {
     public ResponseEntity<List<ChatMessageDetails>> joinChatRoom(@RequestBody ChatRoomRequest chatRoomRequest) {
         List<ChatMessageDetails> chatMessages = chatService.joinChatRoom(chatRoomRequest);
         return ResponseEntity.ok().body(chatMessages);
+    }
+
+    /**
+     * 채팅방 나가기
+     *
+     * @param memberId 채팅방에서 나가는 회원 ID
+     * @return Void
+     */
+    @DeleteMapping("/unjoin")
+    public ResponseEntity<Void> exitChatRoom(
+            @RequestParam("memberId") Long memberId
+    ) {
+        chatService.exitChatRoom(memberId);
+        return ResponseEntity.ok().build();
     }
 }

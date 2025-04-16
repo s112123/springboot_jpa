@@ -17,10 +17,12 @@ public class MQConfig {
     public static final String QUEUE_FOLLOW = "ntf.queue.follow";
     public static final String QUEUE_POST = "ntf.queue.post";
     public static final String QUEUE_NOTICE = "ntf.queue.notice";
+    public static final String QUEUE_CHAT = "ntf.queue.chat";
     public static final String ROUTING_LIKE = "ntf.like";
     public static final String ROUTING_FOLLOW = "ntf.follow";
     public static final String ROUTING_POST = "ntf.post";
     public static final String ROUTING_NOTICE = "ntf.notice";
+    public static final String ROUTING_CHAT = "ntf.chat";
 
     // MessageConverter
     @Bean
@@ -107,5 +109,22 @@ public class MQConfig {
                 .bind(noticeQueue())
                 .to(topicExchange())
                 .with(ROUTING_NOTICE);
+    }
+
+    // Chat Queue
+    @Bean
+    public Queue chatQueue() {
+        return QueueBuilder
+                .durable(QUEUE_CHAT)
+                .build();
+    }
+
+    // Chat Binding
+    @Bean
+    public Binding chatBinding() {
+        return BindingBuilder
+                .bind(noticeQueue())
+                .to(topicExchange())
+                .with(ROUTING_CHAT);
     }
 }

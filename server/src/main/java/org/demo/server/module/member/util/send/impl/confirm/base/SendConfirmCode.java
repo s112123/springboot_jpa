@@ -10,10 +10,11 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class SendConfirmCode implements SendUtils {
 
-    @Qualifier("redisTemplate00")
     protected final RedisTemplate<String, String> redisTemplate;
 
-    public SendConfirmCode(RedisTemplate<String, String> redisTemplate) {
+    public SendConfirmCode(
+            @Qualifier("redisTemplate00") RedisTemplate<String, String> redisTemplate
+    ) {
         this.redisTemplate = redisTemplate;
     }
 

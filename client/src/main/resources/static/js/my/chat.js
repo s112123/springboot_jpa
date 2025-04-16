@@ -26,6 +26,7 @@ findFollows(accessTokenUtils.getMemberId()).then((response) => {
         // 채팅 대상자에게 클릭 이벤트 적용
         const receivers = document.querySelectorAll('.chat-item');
         receivers.forEach((receiver, index) => {
+            // 채팅방 참여
             receiver.addEventListener('click', () => {
                 // 기존에 연결된 WebSocket 연결 끊기
                 if (stompClient !== null) {
@@ -150,7 +151,6 @@ function getChatMessagesHTML(chatMessages) {
             html += `</div>`;
         }
     }
-
     return html;
 }
 
@@ -220,4 +220,21 @@ function sendMessage() {
         message.value = '';
         message.focus();
     }
+}
+
+// 페이지 전환할 때 Redis 에서 채팅방 참여 캐시 삭제
+// 페이지를 전환할 때 기존 SSE 연결 닫기
+window.addEventListener('beforeunload', () => {
+    exitChatRoom(accessTokenUtils.getMemberId())
+});
+
+// 채팅방 참여 캐시 삭제 API
+async function exitChatRoom(memberId) {
+    const api = 'http://localhost:8081/api/v1/chats/unjoin?memberId=' + memberId;
+    const response = await axios.delete(api, {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
+        }
+    });
+    return response;
 }
