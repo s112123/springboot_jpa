@@ -1,0 +1,28 @@
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    /* background-color: #333; */
+    /* color: #fff; */
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #333;
+    text-align: center;
+    border: 1px solid rgba(204, 204, 204, 0.8);
+    border-top: 3px solid rgb(210, 40, 40);
+    border-radius: 5px;
+    padding: 12px 20px;
+    position: fixed;
+    z-index: 1000;
+    right: 30px;
+    bottom: 30px;
+    font-size: 16px;
+
+    /* fade-in & fade-out animation */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, bottom 0.5s ease-in-out;
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+}

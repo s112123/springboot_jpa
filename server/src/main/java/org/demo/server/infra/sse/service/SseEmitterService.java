@@ -1,17 +1,14 @@
 package org.demo.server.infra.sse.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.demo.server.infra.mq.dto.details.MessageDetails;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -28,22 +25,29 @@ public class SseEmitterService {
      * @return SseEmitter
      */
     public SseEmitter subscribe(Long memberId) {
+        log.info("[1] 현재 접속 중인 SSE 사용자 수: {}", emitters.size());
+
         // 기존 emitter 가 있으면 종료 후, 제거
         if (emitters.containsKey(memberId)) {
             emitters.remove(memberId).complete();
         }
 
         // Timeout 10분
-        SseEmitter emitter = new SseEmitter(1000L * 10);
+        SseEmitter emitter = new SseEmitter(1000L * 30);
         emitters.put(memberId, emitter);
 
         // 더미 데이터 전송
         sendEventToSubscriber(memberId, "ping");
 
         emitter.onTimeout(() -> emitters.remove(memberId));
-        emitter.onCompletion(() -> emitters.remove(memberId));
+        emitter.onCompletion(() -> emitters.keySet().forEach(id -> log.info("[onCompletion] 현재 접속자: {}", id)));
         emitter.onError((e) -> emitters.remove(memberId));
 
+        log.info("[2] 현재 접속 중인 SSE 사용자 수: {}", emitters.size());
+        Set<Map.Entry<Long, SseEmitter>> entries = emitters.entrySet();
+        for (Map.Entry<Long, SseEmitter> entry : entries) {
+            log.info("[2] 현재 접속자: {}, {}", entry.getKey(), entry.getValue());
+        }
         return emitter;
     }
 

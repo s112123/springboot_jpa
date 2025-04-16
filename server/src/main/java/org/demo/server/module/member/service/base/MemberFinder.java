@@ -6,6 +6,8 @@ import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.repository.MemberRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class MemberFinder {
@@ -43,5 +45,14 @@ public class MemberFinder {
     public Member getMemberByEmail(String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다"));
+    }
+
+    /**
+     * 전체 회원 목록
+     *
+     * @return 회원 목록
+     */
+    public List<Member> getAllMembers() {
+        return memberRepository.findAll();
     }
 }

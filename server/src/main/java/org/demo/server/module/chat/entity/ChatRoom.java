@@ -23,7 +23,7 @@ public class ChatRoom {
     private String chatRoomName;
 
     // ChatRoom (1)-(*) ChatParticipant
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chatRoom")
     @Builder.Default
     private Set<ChatParticipant> chatParticipants = new HashSet<>();
 

@@ -3,12 +3,13 @@ package org.demo.server.module.chat.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.demo.server.infra.common.entity.BaseEntity;
 import org.demo.server.module.member.entity.Member;
 
 @Entity
 @Table(name = "chat_message")
 @Getter
-public class ChatMessage {
+public class ChatMessage extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +20,7 @@ public class ChatMessage {
     private String message;
 
     // Member (1)-(*) ChatMessage
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
