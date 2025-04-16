@@ -1,6 +1,7 @@
 package org.demo.server.module.chat.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.demo.server.infra.mq.service.publisher.MessagePublisher;
 import org.demo.server.module.chat.dto.Message;
 import org.demo.server.module.chat.dto.details.ChatMessageDetails;
 import org.demo.server.module.chat.dto.resquest.ChatRoomRequest;
@@ -12,6 +13,8 @@ import org.demo.server.module.chat.repository.ChatParticipantRepository;
 import org.demo.server.module.chat.repository.ChatRoomRepository;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +25,34 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
-@RequiredArgsConstructor
 public class ChatService {
 
+    private final RedisTemplate<String, String> redisTemplate;
     private final MemberFinder memberFinder;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final MessagePublisher messagePublisher;
+
+    public ChatService(
+            @Qualifier("redisTemplate03") RedisTemplate<String, String> redisTemplate,
+            MemberFinder memberFinder,
+            ChatRoomRepository chatRoomRepository,
+            ChatParticipantRepository chatParticipantRepository,
+            ChatMessageRepository chatMessageRepository,
+            SimpMessagingTemplate messagingTemplate, MessagePublisher messagePublisher
+    ) {
+        this.redisTemplate = redisTemplate;
+        this.memberFinder = memberFinder;
+        this.chatRoomRepository = chatRoomRepository;
+        this.chatParticipantRepository = chatParticipantRepository;
+        this.chatMessageRepository = chatMessageRepository;
+        this.messagingTemplate = messagingTemplate;
+        this.messagePublisher = messagePublisher;
+    }
 
     /**
      * 채팅방 참여하고 채팅방 메세지 목록 가져오기
@@ -45,6 +67,11 @@ public class ChatService {
         Member to = memberFinder.getMemberById(request.getTo());
         // 채팅방 생성
         ChatRoom chatRoom = createAndJoinChatRoom(from, to);
+
+        // 채팅방 참여 정보 저장
+        String redisKey = "chat:member:" + from.getMemberId();
+        redisTemplate.opsForValue().set(redisKey, String.valueOf(chatRoom.getChatRoomId()));
+
         // 채팅방의 메세지 목록
         return chatMessageRepository.findByChatRoom_ChatRoomId(chatRoom.getChatRoomId()).stream()
                 .map(chatMessage -> new ChatMessageDetails(chatMessage))
@@ -70,8 +97,19 @@ public class ChatService {
         chatMessage.addMember(from);
         chatMessage.addMessage(message.getMessage());
 
-        // 채팅 대상자에게 메세지 전송
-        messagingTemplate.convertAndSendToUser(message.getTo(), "/chat/subscribe", message);
+        // 채팅 대상자가 채팅에 참여하고 하고 있는 방 번호
+        String redisKey = "chat:member:" + to.getMemberId();
+        String joinedChatRoomIdWithTo = redisTemplate.opsForValue().get(redisKey);
+        if (joinedChatRoomIdWithTo != null) {
+            // 메세지를 받는 채팅 대상자가 동일한 방에 접속 중이면 채팅 대상자에게 메세지 전송
+            if (Long.valueOf(joinedChatRoomIdWithTo).equals(chatRoom.getChatRoomId())) {
+                // 채팅 대상자에게 실시간 메세지 전송
+                messagingTemplate.convertAndSendToUser(message.getTo(), "/chat/subscribe", message);
+                return;
+            }
+        }
+        // 채팅 대상자가 동일한 채팅방이 아닌 다른 페이지에 있으면 채팅 메세지 알림 전송
+        messagePublisher.publishChat(from.getMemberId(), to.getMemberId());
     }
 
     /**
@@ -128,9 +166,9 @@ public class ChatService {
         // 채팅방 참여
         joinChatRoom(chatRoom, from);
         joinChatRoom(chatRoom, to);
+        ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
 
-        // 채팅방 참여 정보 저장
-        return chatRoomRepository.save(chatRoom);
+        return savedChatRoom;
     }
 
     /**
@@ -143,5 +181,15 @@ public class ChatService {
         ChatParticipant participant = new ChatParticipant();
         participant.addChatRoom(chatRoom);
         participant.addMember(member);
+    }
+
+    /**
+     * 채팅방 나가기
+     *
+     * @param memberId 채팅방에서 나가는 회원 ID
+     */
+    public void exitChatRoom(Long memberId) {
+        String redisKey = "chat:member:" + memberId;
+        redisTemplate.delete(redisKey);
     }
 }

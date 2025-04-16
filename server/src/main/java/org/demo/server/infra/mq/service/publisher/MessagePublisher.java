@@ -85,5 +85,24 @@ public class MessagePublisher {
         sendAsyncService.publishNoticeAndSendMessage(publisherId);
     }
 
-    // 채팅
+    /**
+     * 채팅 메세지 알림
+     *
+     * @param publisherId 채팅 메세지를 보낸 회원 ID
+     * @param consumerId 채팅 메시지를 받는 회원 ID
+     */
+    @Transactional
+    public void publishChat(Long publisherId, Long consumerId) {
+        // 채팅 메세지를 보낸 회원
+        Member publisher = memberFinder.getMemberById(publisherId);
+        // 채팅 메세지를 받는 회원
+        Member consumer = memberFinder.getMemberById(consumerId);
+        // 메세지
+        String message = publisher.getUsername() + "님이 메세지를 보냈습니다";
+        // 메세지 저장 → RDB
+        MessageDetails savedMessage =
+                messageService.save(consumer.getMemberId(), message);
+        // 메세지 전송
+        rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_CHAT, savedMessage);
+    }
 }
