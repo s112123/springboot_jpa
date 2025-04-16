@@ -2,6 +2,7 @@ package org.demo.server.module.chat.service;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.server.module.chat.dto.Message;
+import org.demo.server.module.chat.dto.details.ChatMessageDetails;
 import org.demo.server.module.chat.dto.resquest.ChatRoomRequest;
 import org.demo.server.module.chat.entity.ChatMessage;
 import org.demo.server.module.chat.entity.ChatParticipant;
@@ -38,15 +39,16 @@ public class ChatService {
      * @Return 채팅 메시지 목록
      */
     @Transactional
-    public List<ChatMessage> joinChatRoom(ChatRoomRequest request) {
+    public List<ChatMessageDetails> joinChatRoom(ChatRoomRequest request) {
         // 회원 엔티티
         Member from = memberFinder.getMemberById(request.getFrom());
         Member to = memberFinder.getMemberById(request.getTo());
         // 채팅방 생성
         ChatRoom chatRoom = createAndJoinChatRoom(from, to);
-        // TODO:채팅방 목록 가져오기
-        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoom_ChatRoomId(chatRoom.getChatRoomId());
-        return chatMessages;
+        // 채팅방의 메세지 목록
+        return chatMessageRepository.findByChatRoom_ChatRoomId(chatRoom.getChatRoomId()).stream()
+                .map(chatMessage -> new ChatMessageDetails(chatMessage))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -69,7 +71,7 @@ public class ChatService {
         chatMessage.addMessage(message.getMessage());
 
         // 채팅 대상자에게 메세지 전송
-        messagingTemplate.convertAndSendToUser(message.getTo(), "/chat/subscribe", message.getMessage());
+        messagingTemplate.convertAndSendToUser(message.getTo(), "/chat/subscribe", message);
     }
 
     /**

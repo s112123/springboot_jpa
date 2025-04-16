@@ -1,6 +1,7 @@
 package org.demo.server.module.notice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.demo.server.infra.mq.service.publisher.MessagePublisher;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
 import org.demo.server.module.notice.dto.details.NoticeDetails;
@@ -20,6 +21,7 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
     private final MemberFinder memberFinder;
+    private final MessagePublisher messagePublisher;
 
     /**
      * 공지 사항 등록
@@ -39,8 +41,8 @@ public class NoticeService {
                 .build();
         Notice savedNotice = noticeRepository.save(notice);
 
-        // TODO: 공지 알림 전송
-
+        // 공지 알림 전송
+        messagePublisher.publishNotice(writer.getMemberId());
         return new NoticeDetails(savedNotice);
     }
 

@@ -1,6 +1,7 @@
 package org.demo.server.module.chat.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.demo.server.module.chat.dto.details.ChatMessageDetails;
 import org.demo.server.module.chat.dto.resquest.ChatRoomRequest;
 import org.demo.server.module.chat.entity.ChatMessage;
 import org.demo.server.module.chat.service.ChatService;
@@ -26,8 +27,8 @@ public class ChatController {
      * @Return 채팅 메시지 목록
      */
     @PostMapping("/rooms")
-    public ResponseEntity<List<ChatMessage>> joinChatRoom(@RequestBody ChatRoomRequest chatRoomRequest) {
-        List<ChatMessage> chatMessages = chatService.joinChatRoom(chatRoomRequest);
+    public ResponseEntity<List<ChatMessageDetails>> joinChatRoom(@RequestBody ChatRoomRequest chatRoomRequest) {
+        List<ChatMessageDetails> chatMessages = chatService.joinChatRoom(chatRoomRequest);
         return ResponseEntity.ok().body(chatMessages);
     }
 }

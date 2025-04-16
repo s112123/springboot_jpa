@@ -18,8 +18,8 @@
 .sign-in-box {
   width: 400px;
   padding: 50px 50px;
-	box-shadow: 0 0 5px rgb(150, 150, 150);
-	border-radius: 5px;
+  box-shadow: 0 0 5px rgb(150, 150, 150);
+  border-radius: 5px;
 }
 
 .sign-in-box h2 {

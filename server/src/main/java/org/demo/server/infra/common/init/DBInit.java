@@ -1,6 +1,5 @@
 package org.demo.server.infra.common.init;
 
-import org.demo.server.module.follow.entity.Follow;
 import org.demo.server.module.follow.repository.FollowRepository;
 import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.form.MemberSaveForm;
@@ -32,12 +31,10 @@ public class DBInit {
             user2.setPassword("a123412341234");
             MemberDetails user2Details = memberService.save(user2);
 
-//            for (int i = 0; i < 85; i++) {
-//                MemberSaveForm saveForm = new MemberSaveForm();
-//                saveForm.setEmail("email" + i + "@test.com");
-//                saveForm.setPassword("a123412341234");
-//                memberService.save(saveForm);
-//            }
+            MemberSaveForm user3 = new MemberSaveForm();
+            user3.setEmail("user3@test.com");
+            user3.setPassword("a123412341234");
+            MemberDetails user3Details = memberService.save(user3);
 
             // 권한 변경
             memberService.updateRole(adminDetails.getMemberId(), Role.ADMIN);

@@ -1,4 +1,5 @@
 import { accessTokenUtils } from '/js/common.js';
+import { showToast } from '/js/layouts/toast.js';
 
 // Navigation
 const login = document.getElementById('login');
@@ -40,10 +41,23 @@ window.addEventListener('DOMContentLoaded', () => {
         logoutProcess(accessTokenUtils.getMemberId()).then(() => {
             // Access Token 삭제
             accessTokenUtils.removeAccessToken();
+
+            // SSE 연결 제거
+            eventSource.close();
+            eventSource = null;
+
             location.replace('/');
         });
     });
 })
+
+// 페이지를 전환할 때 기존 SSE 연결 닫기
+window.addEventListener('beforeunload', () => {
+    if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+    }
+});
 
 // SSE 연결
 function connectSSE() {
@@ -52,7 +66,7 @@ function connectSSE() {
     eventSource.addEventListener('notification', (e) => {
         if (e.data !== 'ping') {
             // 알림 메세지 내용
-            alert(e.data);
+            showToast(e.data);
 
             // 헤더의 알림 아이콘 모양 변경
             let bell = document.getElementById('bell');
@@ -66,9 +80,8 @@ function connectSSE() {
         //console.error('SSE 연결 오류', err);
         eventSource.close();
 
-        // 1초마다 재연결
+        // Timeout 또는 연결이 끊어졌을 때, 1초마다 재연결 시도
         setTimeout(() => {
-            console.log('SSE 재연결');
             connectSSE();
         }, 1000);
     };

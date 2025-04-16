@@ -15,7 +15,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class SocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final JwtUtils jwtUtils;
     private final TokenCheckInterceptor tokenCheckInterceptor;
 
     @Override
