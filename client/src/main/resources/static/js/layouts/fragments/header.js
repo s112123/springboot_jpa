@@ -14,6 +14,15 @@ window.addEventListener('DOMContentLoaded', () => {
     // Access Token 여부에 따라 로그인 항목 활성화
     checkLoginStatus(accessTokenUtils.getAccessToken());
 
+    // 권한 확인 후, 헤더에서 관리자 페이지를 요청하는 아이콘 표시 처리
+    const roles = accessTokenUtils.getRoles();
+    if (!roles.includes('ADMIN')) {
+        const adminNavi = document.getElementById('admin');
+        if (adminNavi) {
+            adminNavi.style.display = 'none';
+        }
+    }
+
     // 로그인 시, 알림 구독
     if (accessTokenUtils.getAccessToken()) {
         // 알림 구독

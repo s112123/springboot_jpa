@@ -94,8 +94,7 @@ header {
   color: rgb(210, 40, 40);
 }
 
-// 페이지 이동시, 전체 항목이 아주 잠깐씩 보이기 때문에 모두 none 처리
-// DOMContentLoaded 와 함수로 로드한다
+/* 페이지 이동시, 전체 항목이 아주 잠깐씩 보이기 때문에 모두 none 처리 → DOMContentLoaded 와 함수로 로드한다 */
 #login, #notification, #profile, #admin, #logout {
-    display: none;
+  display: none;
 }

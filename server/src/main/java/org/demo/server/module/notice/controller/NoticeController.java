@@ -1,20 +1,17 @@
 package org.demo.server.module.notice.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.common.dto.response.PagedListResponse;
-import org.demo.server.module.notice.dto.details.NoticeDetails;
 import org.demo.server.module.notice.dto.request.NoticeCreateRequest;
 import org.demo.server.module.notice.dto.response.NoticeResponse;
 import org.demo.server.module.notice.service.NoticeService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-import java.util.List;
-import java.util.stream.Collectors;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/notices")
 @RequiredArgsConstructor
@@ -28,6 +25,7 @@ public class NoticeController {
      * @param request 공지 정보
      * @return Void
      */
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<NoticeResponse> addNotice(
             @RequestBody NoticeCreateRequest request

@@ -1,9 +1,14 @@
 package org.demo.server.infra.common.scheduler;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
+import org.demo.server.infra.mq.dto.details.MessageDetails;
+import org.demo.server.module.member.entity.Member;
+import org.demo.server.module.member.service.base.MemberFinder;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,17 +19,63 @@ import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class DeleteFileScheduler {
+public class DeleteScheduler {
 
     private final FileUtils fileUtils;
+    private final MemberFinder memberFinder;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
+
+    public DeleteScheduler(
+            FileUtils fileUtils,
+            MemberFinder memberFinder,
+            @Qualifier("redisTemplate02") RedisTemplate<String, Object> redisTemplate,
+            ObjectMapper objectMapper
+    ) {
+        this.fileUtils = fileUtils;
+        this.memberFinder = memberFinder;
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
+    }
 
     /**
-     * temp 폴더 내 폴더가 1일 전이면 삭제
+     * 12시간 마다 Redis 에 캐시된 알림 메세지가 7일 전이면 삭제
+     */
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 12)
+    public void deleteCachedNotifications() {
+        // 전체 회원의 ID
+        Set<Long> memberIds = memberFinder.getAllMembers().stream()
+                .map(member -> member.getMemberId())
+                .collect(Collectors.toSet());
+
+        // 캐시된 알림 메세지 삭제
+        for (Long memberId : memberIds) {
+            String redisKey = "notification:consumer:" + memberId;
+            Set<Object> notifications = redisTemplate.opsForSet().members(redisKey);
+
+            if (notifications.isEmpty()) {
+                continue;
+            }
+
+            for (Object notification : notifications) {
+                MessageDetails messageDetails = objectMapper.convertValue(notification, MessageDetails.class);
+                // 7일 전
+                if (messageDetails.getCreatedAt().isBefore(LocalDateTime.now().minusDays(7))) {
+                    redisTemplate.opsForSet().remove(redisKey, notification);
+                }
+            }
+        }
+    }
+
+    /**
+     * 24시간 마다 temp 폴더 내 폴더가 2일 전이면 삭제
      */
     @Scheduled(fixedRate = 1000 * 60 * 60 * 24)
     public void deleteTempDirectories() {
@@ -40,7 +91,7 @@ public class DeleteFileScheduler {
                 try {
                     // 현재 시간에서 1일 전 시간
                     // 1분 전인 경우 → LocalDateTime.now().minusMinutes(1L);
-                    LocalDateTime beforeOneDay = LocalDateTime.now().minusDays(1L);
+                    LocalDateTime beforeOneDay = LocalDateTime.now().minusDays(2L);
                     // 파일의 마지막 수정 날짜
                     FileTime lastModifiedTime = Files.getLastModifiedTime(path);
                     // FileTime → LocalDateTime
