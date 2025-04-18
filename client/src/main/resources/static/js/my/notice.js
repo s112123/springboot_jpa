@@ -1,10 +1,13 @@
 import { accessTokenUtils } from '/js/common.js';
 
 // 변수 선언
-const noticeContent = document.getElementById('content');
-const btnSendNotice = document.getElementById('btn-send-notice');
-const noticeListElement = document.getElementById('admin-notices');
+const noticeListElement = document.getElementById('my-notices');
 const pageableElement = document.getElementById('pageable');
+
+// URL 에서 쿼리 스트링 추출
+const queryString = window.location.search;
+const params = new URLSearchParams(queryString);
+const noticeId = params.get('noticeId');
 
 // 처음 페이지 로드 시, 1페이지 화면 렌더링
 render(1);
@@ -50,7 +53,12 @@ function getNoticeListHTML(notices) {
     for (let notice of notices) {
         html += '<tr>';
         html += '    <td>' + notice.id + '</td>';
-        html += '    <td>' + notice.content + '</td>';
+        console.log(noticeId !== null && noticeId === notice.id);
+        if (noticeId !== null && Number(noticeId) === notice.id) {
+            html += '    <td class="notice-new">' + notice.content + '</td>';
+        } else {
+            html += '    <td>' + notice.content + '</td>';
+        }
         html += '    <td>' + notice.writer + '</td>';
         html += '    <td>' + formatDate(notice.createdAt) + '</td>';
         html += '</tr>'
@@ -96,53 +104,6 @@ function getPaginationHTML(list) {
     html += '</ul>';
 
     return html;
-}
-
-// 공지 발송 → 보내기 버튼 클릭
-btnSendNotice.addEventListener('click', () => {
-    // 유효성 검사 → AccessToken 여부
-    accessTokenUtils.redirectLoginPage();
-    // 공지 발송
-    sendNotice();
-});
-
-// 공지 발송 → 공지 내용을 입력하고 Enter 를 누른 경우
-noticeContent.addEventListener('keydown', (e) => {
-    // 유효성 검사 → AccessToken 여부
-    accessTokenUtils.redirectLoginPage();
-    // 공지 발송
-    if (e.key === 'Enter') {
-        sendNotice();
-    }
-});
-
-// 공지 발송
-function sendNotice() {
-    // 공지 메세지
-    const jsonData = {
-        writerId: accessTokenUtils.getMemberId(),
-        content: content.value.trim()
-    };
-
-    // 공지 발송
-    addNotice(jsonData).then(() => {
-        alert('공지가 등록되었습니다');
-        noticeContent.value = '';
-        noticeContent.focus();
-        render(1);
-    });
-}
-
-// 공지 발송 API
-async function addNotice(jsonData) {
-    const api = 'http://localhost:8081/api/v1/notices';
-    const response = await axios.post(api, jsonData, {
-        headers: {
-            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
-            'Content-Type': 'application/json'
-        }
-    });
-    return response;
 }
 
 // 현재 notice.js 는 모듈 상태이므로 전역 스코프에 render() 를 노출한다

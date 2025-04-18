@@ -25,6 +25,10 @@
                 <span><i class="fa-solid fa-comments fa-sm"></i></span>
                 <a href="/my/chat">1:1 채팅</a>
             </li>
+            <li class="item" th:classappend="${menuOption == 5} ? 'menu-active' : 'menu-deactive'">
+                <span><i class="fa-solid fa-list"></i></span>
+                <a href="/my/notice">공지사항</a>
+            </li>
         </ul>
     </aside>
 </body>

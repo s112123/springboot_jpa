@@ -89,3 +89,8 @@
 .notification-box .notification-list .notification-content .no-read-content {
   font-weight: 500;
 }
+
+#no-content {
+  width: 100%;
+  text-align: center;
+}

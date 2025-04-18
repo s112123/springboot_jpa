@@ -63,4 +63,15 @@ public class MyController {
         model.addAttribute("menuOption", 4);
         return "my/chat";
     }
+
+    /**
+     * 공지사항 페이지
+     *
+     * @return
+     */
+    @GetMapping("/notice")
+    public String myNoticePage(Model model) {
+        model.addAttribute("menuOption", 5);
+        return "my/notice";
+    }
 }

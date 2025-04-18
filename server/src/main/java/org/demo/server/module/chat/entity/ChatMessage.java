@@ -34,7 +34,7 @@ public class ChatMessage extends BaseEntity {
      *
      * @param message 메세지
      */
-    public void addMessage(String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 

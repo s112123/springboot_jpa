@@ -1,0 +1,85 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.my-notice-wrap {
+  width: 100%;
+  padding: 50px 0px 50px 50px;
+}
+
+.my-notice-wrap p {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.my-notice-box {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.my-notice-box .my-notice-list {
+  margin-bottom: 20px;
+}
+
+/* TABLE */
+.my-notice-box .my-notice-list table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.my-notice-box .my-notice-list table tr {
+	height: 45px;
+	border: 1px solid #ccc;
+}
+
+.my-notice-box .my-notice-list table thead tr {
+	border-top: 3px solid rgb(52, 52, 54);
+}
+
+.my-notice-box .my-notice-list table th {
+	font-weight: bold;
+}
+
+.my-notice-box .my-notice-list table th, table td {
+	padding: 0 10px;
+	font-size: 14px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.my-notice-list td:nth-child(1) {
+	width: 8%;
+}
+
+.my-notice-list td:nth-child(2) {
+	width: 50%;
+	text-align: left;
+}
+
+/*
+.my-notice-list td:nth-child(2) a {
+  color: rgb(210, 40, 40);
+  font-weight: 600;
+}
+
+.my-notice-list td:nth-child(2) a:hover {
+	color: rgb(210, 40, 40);
+	transition: 0.1s;
+}
+*/
+
+.my-notice-list td:nth-child(3) {
+	width: 20%;
+	text-align: center;
+}
+
+.my-notice-list td:nth-child(4) {
+	width: 17%;
+}
+
+.my-notice-list .notice-new {
+    color: rgb(210, 40, 40);
+    font-weight: 600;
+}

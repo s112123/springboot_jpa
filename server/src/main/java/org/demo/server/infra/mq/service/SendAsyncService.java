@@ -3,6 +3,7 @@ package org.demo.server.infra.mq.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.mq.config.MQConfig;
+import org.demo.server.infra.mq.constant.MessageType;
 import org.demo.server.infra.mq.dto.details.MessageDetails;
 import org.demo.server.module.follow.service.FollowFinder;
 import org.demo.server.module.member.dto.details.MemberDetails;
@@ -50,8 +51,11 @@ public class SendAsyncService {
         for (MemberDetails follower : followers) {
             // 메세지
             String message = publisher.getUsername() + "님이 [" + review.getTitle() + "] 리뷰를 등록하였습니다";
+            // URL
+            String url = "/review/view?review_id=" + review.getReviewId();
             // 메세지 저장 → RDB
-            MessageDetails savedMessage = messageService.save(follower.getMemberId(), message);
+            MessageDetails savedMessage =
+                    messageService.save(MessageType.POST, follower.getMemberId(), message, url);
             // 메세지 전송
             rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_NOTICE, savedMessage);
         }
@@ -65,7 +69,7 @@ public class SendAsyncService {
      * @param publisherId 공지를 작성한 작성자 ID
      */
     @Async("sendNoticeTaskExecutor")
-    public void publishNoticeAndSendMessage(Long publisherId) {
+    public void publishNoticeAndSendMessage(Long publisherId, Long noticeId) {
         log.info("publishNoticeAndSendMessage: {}", Thread.currentThread().getName());
 
         // 전체 회원 조회
@@ -76,8 +80,11 @@ public class SendAsyncService {
             if (consumer.getMemberId() != publisherId) {
                 // 메세지
                 String message = "새 공지가 있습니다";
+                // URL
+                String url = "/my/notice?noticeId=" + noticeId;
                 // 메세지 저장 → RDB
-                MessageDetails savedMessage = messageService.save(consumer.getMemberId(), message);
+                MessageDetails savedMessage =
+                        messageService.save(MessageType.NOTICE, consumer.getMemberId(), message, url);
                 // 메세지 전송
                 rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_NOTICE, savedMessage);
             }

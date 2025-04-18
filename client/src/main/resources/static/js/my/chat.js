@@ -21,7 +21,7 @@ findFollows(accessTokenUtils.getMemberId()).then((response) => {
     if (follows) {
         // 목록 렌더링
         let followListElement = document.getElementById('chat-list');
-        followListElement.innerHTML = getFollowListHTML(follows.data);
+        followListElement.innerHTML = getFollowListHTML(follows);
 
         // 채팅 대상자에게 클릭 이벤트 적용
         const receivers = document.querySelectorAll('.chat-item');
@@ -85,7 +85,7 @@ findFollows(accessTokenUtils.getMemberId()).then((response) => {
 
 // 내가 구독한 사람 목록 (채팅 대상 목록) API
 async function findFollows(memberId) {
-    const api = 'http://localhost:8081/api/v1/follows/' + memberId + '/follow';
+    const api = 'http://localhost:8081/api/v1/chats/follows?memberId=' + memberId;
     const response = await axios.get(api, {
         headers: {
             'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
@@ -116,7 +116,13 @@ function getFollowListHTML(follows) {
         html += `    <li class="chat-item" data-member-id="${follow.memberId}">`;
         html += '        <img src="' + imgSrc + '">';
         html += '        <span>' + follow.username.substring(0, 9) + '</span>';
-//        html += '        <i class="fa-solid fa-circle fa-2xs"></i>';
+
+        /* 읽음 여부 표시
+        if () {
+            html += '        <i class="fa-solid fa-circle fa-2xs"></i>';
+        }
+        */
+
         html += '    </li>';
     }
     html += '</ul>'

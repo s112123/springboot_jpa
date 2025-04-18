@@ -60,7 +60,7 @@
 
 .my-goods-list td:nth-child(2) a {
 /*  color: rgb(210, 40, 40);*/
-  font-weight: 600;
+/*  font-weight: 600;*/
 }
 
 .my-goods-list td:nth-child(2) a:hover {
