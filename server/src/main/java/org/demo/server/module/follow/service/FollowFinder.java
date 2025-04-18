@@ -16,6 +16,21 @@ public class FollowFinder {
     private final FollowRepository followRepository;
 
     /**
+     * 내가 구독한 사람 목록 반환
+     * 내가 구독한 사람을 찾으려면 followerId 에 나의 식별자가 들어가야 한다
+     *
+     * @param followerId 회원 식별자
+     * @return 내가 구독한 사람 목록 반환
+     */
+    public List<MemberDetails> getFollows(Long followerId) {
+        List<Follow> findFollows = followRepository.findByFollower_MemberId(followerId);
+        return findFollows.stream()
+                .map(follow -> follow.getFollowed())
+                .map(followed -> followed.toDetails())
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 나를 구독한 사람 목록 반환
      *
      * @param followedId 회원 식별자

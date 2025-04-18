@@ -5,7 +5,7 @@ const goodReviewsListElement = document.getElementById('my-good-reviews');
 const pageableElement = document.getElementById('pageable');
 let currentPage = 1;
 
-// 리뷰 제목을 눌러 조회하고 뒤로가기를 누르면 currentPage 초기화되어 1페이지로 로드된다
+// 좋아요 제목을 눌러 조회하고 뒤로가기를 누르면 currentPage 초기화되어 1페이지로 로드된다
 // 그래서 getReviewsByMemberId() 함수를 누를 때, 상태를 저장해둔다
 if (!history.state) {
     // 처음 페이지 로드 시, 1페이지 화면 렌더링
@@ -16,7 +16,7 @@ if (!history.state) {
     render(currentPage);
 }
 
-// 리뷰 목록 화면 렌더링
+// 좋아요 목록 화면 렌더링
 function render(page) {
     // Access Token 이 없으면 로그인 화면으로 이동
     accessTokenUtils.redirectLoginPage();
@@ -38,7 +38,7 @@ function render(page) {
         const state = { currentPage };
         history.pushState(state, '');
 
-        // 리뷰 목록 렌더링
+        // 좋아요 목록 렌더링
         let reviewListHTML = getReviewListHTML(reviews.data, currentPage);
         if (reviewListHTML.length === 0) {
             goodReviewsListElement.innerHTML = '<td colspan="7">좋아요를 누른 리뷰가 없습니다</td>';

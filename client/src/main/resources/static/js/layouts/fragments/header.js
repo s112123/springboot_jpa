@@ -125,7 +125,7 @@ search.addEventListener('keypress', () => {
 
 // 읽지 않은 알림 확인 API
 async function existsNotReadNotification(memberId) {
-    const api = 'http://localhost:8081/api/v1/notifications?memberId=' + memberId;
+    const api = 'http://localhost:8081/api/v1/notifications/no-read/exists?memberId=' + memberId;
     const response = await axios.get(api, {
         headers: {
             'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()

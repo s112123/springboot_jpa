@@ -87,12 +87,12 @@
 }
 
 .admin-notices-list td:nth-child(1) {
-	width: 6%;
+	width: 8%;
 }
 
 .admin-notices-list td:nth-child(2) {
 	width: 50%;
-	/* text-align: left;*/
+	text-align: left;
 }
 
 /*

@@ -42,7 +42,7 @@ public class NoticeService {
         Notice savedNotice = noticeRepository.save(notice);
 
         // 공지 알림 전송
-        messagePublisher.publishNotice(writer.getMemberId());
+        messagePublisher.publishNotice(writer.getMemberId(), savedNotice.getId());
         return new NoticeDetails(savedNotice);
     }
 

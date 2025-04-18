@@ -3,6 +3,7 @@ package org.demo.server.module.chat.service;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.mq.service.publisher.MessagePublisher;
 import org.demo.server.module.chat.dto.Message;
+import org.demo.server.module.chat.dto.details.ChatMemberDetails;
 import org.demo.server.module.chat.dto.details.ChatMessageDetails;
 import org.demo.server.module.chat.dto.resquest.ChatRoomRequest;
 import org.demo.server.module.chat.entity.ChatMessage;
@@ -11,6 +12,10 @@ import org.demo.server.module.chat.entity.ChatRoom;
 import org.demo.server.module.chat.repository.ChatMessageRepository;
 import org.demo.server.module.chat.repository.ChatParticipantRepository;
 import org.demo.server.module.chat.repository.ChatRoomRepository;
+import org.demo.server.module.follow.entity.Follow;
+import org.demo.server.module.follow.repository.FollowRepository;
+import org.demo.server.module.follow.service.FollowFinder;
+import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,6 +36,7 @@ public class ChatService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final MemberFinder memberFinder;
+    private final FollowRepository followRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
@@ -40,6 +46,7 @@ public class ChatService {
     public ChatService(
             @Qualifier("redisTemplate03") RedisTemplate<String, String> redisTemplate,
             MemberFinder memberFinder,
+            FollowRepository followRepository,
             ChatRoomRepository chatRoomRepository,
             ChatParticipantRepository chatParticipantRepository,
             ChatMessageRepository chatMessageRepository,
@@ -47,6 +54,7 @@ public class ChatService {
     ) {
         this.redisTemplate = redisTemplate;
         this.memberFinder = memberFinder;
+        this.followRepository = followRepository;
         this.chatRoomRepository = chatRoomRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.chatMessageRepository = chatMessageRepository;
@@ -95,7 +103,7 @@ public class ChatService {
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.addChatRoom(chatRoom);
         chatMessage.addMember(from);
-        chatMessage.addMessage(message.getMessage());
+        chatMessage.setMessage(message.getMessage());
 
         // 채팅 대상자가 채팅에 참여하고 하고 있는 방 번호
         String redisKey = "chat:member:" + to.getMemberId();
@@ -191,5 +199,19 @@ public class ChatService {
     public void exitChatRoom(Long memberId) {
         String redisKey = "chat:member:" + memberId;
         redisTemplate.delete(redisKey);
+    }
+
+    /**
+     * 채팅 대상자 목록 (= 내가 구독한 사람 목록)
+     *
+     * @param memberId 회원의 ID
+     * @return 채팅 대상자 목록
+     */
+    public List<ChatMemberDetails> getChatMembers(Long memberId) {
+        // 내가 구독한 사람 목록
+        List<ChatMemberDetails> chatMembers = followRepository.findByFollower_MemberId(memberId).stream()
+                .map(follow -> new ChatMemberDetails(follow))
+                .collect(Collectors.toList());
+        return chatMembers;
     }
 }
