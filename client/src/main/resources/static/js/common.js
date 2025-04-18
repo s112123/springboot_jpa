@@ -45,6 +45,18 @@ function getMemberId() {
     return JSON.parse(jsonPayload).memberId;
 }
 
+// Access Token 에서 roles 추출
+function getRoles() {
+    let accessToken = getAccessToken();
+    if (!accessToken) {
+        return null;
+    }
+    const payload = accessToken.split('.')[1];
+    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const jsonPayload = decodeURIComponent(escape(decoded));
+    return JSON.parse(jsonPayload).roles;
+}
+
 // AccessToken 이 없으면 로그인 페이지로 이동
 function redirectLoginPage() {
     // accessToken 변수는 최초 로그인 후에는 값이 할당이 되어 있다
@@ -62,5 +74,6 @@ export const accessTokenUtils = {
     removeAccessToken,
     getUsername,
     getMemberId,
+    getRoles,
     redirectLoginPage
 };
