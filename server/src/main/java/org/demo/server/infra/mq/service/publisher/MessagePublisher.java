@@ -48,7 +48,7 @@ public class MessagePublisher {
         String url = "/review/view?review_id=" + findReview.getReviewId();
         // 메세지 저장 → RDB
         MessageDetails savedMessage =
-                messageService.save(MessageType.LIKE, findReview.getMember().getMemberId(), message, url);
+                messageService.save(MessageType.LIKE, publisherId, findReview.getMember().getMemberId(), message, url);
         // 메세지 전송
         rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_LIKE, savedMessage);
     }
@@ -68,7 +68,7 @@ public class MessagePublisher {
         // URL
         String url = "/my/profile";
         // 메세지 저장 → RDB
-        MessageDetails savedMessage = messageService.save(MessageType.FOLLOW, consumerId, message, url);
+        MessageDetails savedMessage = messageService.save(MessageType.FOLLOW, publisherId, consumerId, message, url);
         // 메세지 전송
         rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_FOLLOW, savedMessage);
     }
@@ -127,7 +127,7 @@ public class MessagePublisher {
 
         // 메세지 저장 → RDB
         MessageDetails savedMessage =
-                messageService.save(MessageType.CHAT, consumer.getMemberId(), message, url);
+                messageService.save(MessageType.CHAT, publisherId, consumer.getMemberId(), message, url);
         // 메세지 전송
         rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_CHAT, savedMessage);
     }

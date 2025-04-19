@@ -36,6 +36,9 @@ public class Message {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "sender_id")
+    private Long senderId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     private Member consumer;

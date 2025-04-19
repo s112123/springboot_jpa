@@ -91,18 +91,22 @@ function connectSSE() {
                 if (notifications && notifications.length > 0) {
                     // 알림 메세지의 type 이 CHAT 인 경우
                     notifications.forEach(notification => {
-                        console.log(notification);
                         if (notification.type === 'CHAT' && urlPath === '/my/chat') {
+                            // 메세지를 보낸 회원의 ID
+                            let publisherId = notification.publisherId;
+
+                            // 채팅 대상 목록
                             const chatMembers = document.querySelectorAll('.chat-item');
                             chatMembers.forEach(chatMember => {
-                                console.log(chatMember);
-                                chatMember.getAttribute('data-member-id');
+                                let memberId = chatMember.getAttribute('data-member-id');
 
                                 // 읽지 않은 메세지 여부 표시
-                                const notReadMark = chatMember.querySelector('i');
-                                console.log(notReadMark);
-                                if (notReadMark) {
-                                    notReadMark.style.display = 'block';
+                                if (publisherId === Number(memberId)) {
+                                    const notReadMark = chatMember.querySelector('i');
+                                    console.log(notReadMark);
+                                    if (notReadMark) {
+                                        notReadMark.style.display = 'block';
+                                    }
                                 }
                             });
                         }

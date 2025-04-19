@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class MessageDetails {
 
     private Long id;
+    private Long publisherId;
     private Long consumerId;
     private MessageType type;
     private String message;
@@ -24,6 +25,7 @@ public class MessageDetails {
 
     public MessageDetails(Message message) {
         this.id = message.getId();
+        this.publisherId = message.getSenderId();
         this.consumerId = message.getConsumer().getMemberId();
         this.type = message.getType();
         this.message = message.getMessage();
