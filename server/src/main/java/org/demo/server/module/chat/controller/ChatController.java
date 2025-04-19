@@ -47,6 +47,25 @@ public class ChatController {
     }
 
     /**
+     * 메세지 읽음 처리
+     * 읽지 않은 메세지 확인은 로그인 한 사용자가 상대방이 보낸 메세지를 확인하는 것이다
+     * sender 가 상대방이 되고 receiver 가 로그인 한 사용자가 된다
+     * 읽음 여부 데이터는 1회용이고 DB 에 데이터가 많이 저장되므로 읽은 경우 삭제 처리를 한다
+     *
+     * @param senderId 메세지를 보낸 사람
+     * @param receiverId 메세지를 받은 사람
+     * @return Void
+     */
+    @DeleteMapping("/mark_read")
+    public ResponseEntity<Void> markAsRead(
+            @RequestParam("senderId") Long senderId,
+            @RequestParam("receiverId") Long receiverId
+    ) {
+        chatService.markAsRead(senderId, receiverId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * 채팅방 나가기
      *
      * @param memberId 채팅방에서 나가는 회원 ID
@@ -57,6 +76,6 @@ public class ChatController {
             @RequestParam("memberId") Long memberId
     ) {
         chatService.exitChatRoom(memberId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

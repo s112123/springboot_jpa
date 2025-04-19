@@ -53,6 +53,16 @@ findFollows(accessTokenUtils.getMemberId()).then((response) => {
                     // 메세지 입력 요소 초기화
                     message.value = '';
                     message.focus();
+
+                    // 읽지 않은 메세지 여부 표시 해제
+                    const notReadIcon = receiver.querySelector('i');
+                    if (notReadIcon) {
+                        notReadIcon.style.display = 'none';
+                        // 데이터베이스에서 메세지 읽음 처리
+                        // 읽지 않은 메세지 여부는 보낸 사람이 상대방이다
+                        // 그러므로 sender 가 보낸 사람이고 receiver 가 로그인한 회원이다
+                        readMessage(receiverId, accessTokenUtils.getMemberId());
+                    }
                 });
 
                 // stompClient 연결
@@ -117,11 +127,12 @@ function getFollowListHTML(follows) {
         html += '        <img src="' + imgSrc + '">';
         html += '        <span>' + follow.username.substring(0, 9) + '</span>';
 
-        /* 읽음 여부 표시
-        if () {
-            html += '        <i class="fa-solid fa-circle fa-2xs"></i>';
+        // 읽음 여부 표시
+        if (follow.hasUnreadMessages) {
+            html += '        <i class="fa-solid fa-circle fa-2xs" style="display: block"></i>';
+        } else {
+            html += '        <i class="fa-solid fa-circle fa-2xs" style="display: none"></i>';
         }
-        */
 
         html += '    </li>';
     }
@@ -233,6 +244,17 @@ function sendMessage() {
 window.addEventListener('beforeunload', () => {
     exitChatRoom(accessTokenUtils.getMemberId())
 });
+
+// 메세지 읽음 처리 API
+async function readMessage(senderId, receiverId) {
+    const api = 'http://localhost:8081/api/v1/chats/mark_read?senderId=' + senderId + '&receiverId=' + receiverId;
+    const response = await axios.delete(api, {
+        headers: {
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
+        }
+    });
+    return response;
+}
 
 // 채팅방 참여 캐시 삭제 API
 async function exitChatRoom(memberId) {

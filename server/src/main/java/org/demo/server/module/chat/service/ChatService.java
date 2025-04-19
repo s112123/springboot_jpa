@@ -9,6 +9,7 @@ import org.demo.server.module.chat.dto.resquest.ChatRoomRequest;
 import org.demo.server.module.chat.entity.ChatMessage;
 import org.demo.server.module.chat.entity.ChatParticipant;
 import org.demo.server.module.chat.entity.ChatRoom;
+import org.demo.server.module.chat.repository.ChatMessageReadRepository;
 import org.demo.server.module.chat.repository.ChatMessageRepository;
 import org.demo.server.module.chat.repository.ChatParticipantRepository;
 import org.demo.server.module.chat.repository.ChatRoomRepository;
@@ -24,10 +25,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,6 +38,7 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatMessageReadRepository chatMessageReadRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final MessagePublisher messagePublisher;
 
@@ -50,6 +49,7 @@ public class ChatService {
             ChatRoomRepository chatRoomRepository,
             ChatParticipantRepository chatParticipantRepository,
             ChatMessageRepository chatMessageRepository,
+            ChatMessageReadRepository chatMessageReadRepository,
             SimpMessagingTemplate messagingTemplate, MessagePublisher messagePublisher
     ) {
         this.redisTemplate = redisTemplate;
@@ -58,6 +58,7 @@ public class ChatService {
         this.chatRoomRepository = chatRoomRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.chatMessageRepository = chatMessageRepository;
+        this.chatMessageReadRepository = chatMessageReadRepository;
         this.messagingTemplate = messagingTemplate;
         this.messagePublisher = messagePublisher;
     }
@@ -103,7 +104,7 @@ public class ChatService {
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.addChatRoom(chatRoom);
         chatMessage.addMember(from);
-        chatMessage.setMessage(message.getMessage());
+        chatMessage.setMessage(from.getMemberId(), to.getMemberId(), message.getMessage());
 
         // 채팅 대상자가 채팅에 참여하고 하고 있는 방 번호
         String redisKey = "chat:member:" + to.getMemberId();
@@ -159,9 +160,7 @@ public class ChatService {
     private ChatRoom createAndJoinChatRoom(Member from, Member to) {
         // 유효성 검사 → 채팅방 존재 여부 확인
         if (!findChatRoom(from, to).isEmpty()) {
-            Long chatRoomId = findChatRoom(from, to).stream()
-                    .findFirst()
-                    .get();
+            Long chatRoomId = getChatRoomId(from, to);
             return chatRoomRepository.findById(chatRoomId)
                     .orElseThrow(() -> new NoSuchElementException());
         }
@@ -208,10 +207,43 @@ public class ChatService {
      * @return 채팅 대상자 목록
      */
     public List<ChatMemberDetails> getChatMembers(Long memberId) {
-        // 내가 구독한 사람 목록
-        List<ChatMemberDetails> chatMembers = followRepository.findByFollower_MemberId(memberId).stream()
-                .map(follow -> new ChatMemberDetails(follow))
-                .collect(Collectors.toList());
+        List<ChatMemberDetails> chatMembers = new ArrayList<>();
+
+        // 채팅 대상자 목록
+        List<Follow> follows = followRepository.findByFollower_MemberId(memberId);
+        for (Follow follow : follows) {
+            // 팔로우가 보낸 메세지 중 읽지 않은 메세지가 있는지 여부
+            // 만약, 회원 ID 가 1인 회원이 읽지 않은 메세지를 조회하려면 receiverId 에 1, senderId 에 다른 회원 ID 를 넣는다
+            boolean hasUnreadMessages = chatMessageReadRepository
+                        .existsBySenderIdAndReceiverIdAndReadFalse(follow.getFollowed().getMemberId(), memberId);
+            ChatMemberDetails chatMemberDetails = new ChatMemberDetails(follow, hasUnreadMessages);
+            chatMembers.add(chatMemberDetails);
+        }
+
         return chatMembers;
+    }
+
+    /**
+     * 참여하고 있는 채팅방 ID
+     *
+     * @param from 메세지를 전송하는 회원
+     * @param to 메세지를 받는 회원
+     * @return 채팅방 ID
+     */
+    public Long getChatRoomId(Member from, Member to) {
+        return findChatRoom(from, to).stream()
+                .findFirst()
+                .get();
+    }
+
+    /**
+     * 모두 읽음 처리
+     *
+     * @param senderId 메세지를 보낸 사람
+     * @param receiverId 메세지를 받은 사람
+     */
+    @Transactional
+    public void markAsRead(Long senderId, Long receiverId) {
+        chatMessageReadRepository.markAsRead(senderId, receiverId);
     }
 }

@@ -36,6 +36,20 @@ public class MessageController {
     }
 
     /**
+     * 읽지 않은 메세지
+     *
+     * @param memberId 회원 ID
+     * @return
+     */
+    @GetMapping("/no-read")
+    public ResponseEntity<List<MessageDetails>> findNotReadMessage(
+            @RequestParam("memberId") Long memberId
+    ) {
+        List<MessageDetails> notReadMessages = messageService.findAllNotRead(memberId);
+        return ResponseEntity.ok().body(notReadMessages);
+    }
+
+    /**
      * 읽지 않은 메세지 존재 여부
      *
      * @param memberId 회원 ID

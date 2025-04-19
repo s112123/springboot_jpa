@@ -74,6 +74,12 @@
   font-size: 8px;
 }
 
+/*
+.chat-box .chat-list .chat-item i {
+  display: none;
+}
+*/
+
 .chat-active {
   background-color: rgb(235, 235, 235);
 }
