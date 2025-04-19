@@ -1,6 +1,9 @@
 package org.demo.server.module.chat.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.demo.server.infra.mq.constant.MessageType;
+import org.demo.server.infra.mq.dto.details.MessageDetails;
+import org.demo.server.infra.mq.service.MessageService;
 import org.demo.server.infra.mq.service.publisher.MessagePublisher;
 import org.demo.server.module.chat.dto.Message;
 import org.demo.server.module.chat.dto.details.ChatMemberDetails;
@@ -41,6 +44,7 @@ public class ChatService {
     private final ChatMessageReadRepository chatMessageReadRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final MessagePublisher messagePublisher;
+    private final MessageService messageService;
 
     public ChatService(
             @Qualifier("redisTemplate03") RedisTemplate<String, String> redisTemplate,
@@ -50,7 +54,8 @@ public class ChatService {
             ChatParticipantRepository chatParticipantRepository,
             ChatMessageRepository chatMessageRepository,
             ChatMessageReadRepository chatMessageReadRepository,
-            SimpMessagingTemplate messagingTemplate, MessagePublisher messagePublisher
+            SimpMessagingTemplate messagingTemplate, MessagePublisher messagePublisher,
+            MessageService messageService
     ) {
         this.redisTemplate = redisTemplate;
         this.memberFinder = memberFinder;
@@ -61,6 +66,7 @@ public class ChatService {
         this.chatMessageReadRepository = chatMessageReadRepository;
         this.messagingTemplate = messagingTemplate;
         this.messagePublisher = messagePublisher;
+        this.messageService = messageService;
     }
 
     /**
@@ -80,6 +86,18 @@ public class ChatService {
         // 채팅방 참여 정보 저장
         String redisKey = "chat:member:" + from.getMemberId();
         redisTemplate.opsForValue().set(redisKey, String.valueOf(chatRoom.getChatRoomId()));
+
+        // 이전의 to 가 보낸 채팅 알림 메세지 내역이 있으면 모두 읽음 처리로 한다
+        // 읽지 않은 메세지 조회 -> 메세지의 type 이 Chat
+        List<MessageDetails> notReadMessages = messageService.findAllNotRead(from.getMemberId());
+        notReadMessages.stream()
+                .forEach(messageDetails -> {
+                    if (messageDetails.getType().equals(MessageType.CHAT)) {
+                        if (to.getMemberId().equals(messageDetails.getPublisherId())) {
+                            messageService.updateRead(from.getMemberId(), messageDetails.getId());
+                        }
+                    }
+                });
 
         // 채팅방의 메세지 목록
         return chatMessageRepository.findByChatRoom_ChatRoomId(chatRoom.getChatRoomId()).stream()

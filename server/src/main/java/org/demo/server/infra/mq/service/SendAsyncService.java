@@ -55,7 +55,7 @@ public class SendAsyncService {
             String url = "/review/view?review_id=" + review.getReviewId();
             // 메세지 저장 → RDB
             MessageDetails savedMessage =
-                    messageService.save(MessageType.POST, follower.getMemberId(), message, url);
+                    messageService.save(MessageType.POST, publisherId, follower.getMemberId(), message, url);
             // 메세지 전송
             rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_NOTICE, savedMessage);
         }
@@ -84,7 +84,7 @@ public class SendAsyncService {
                 String url = "/my/notice?noticeId=" + noticeId;
                 // 메세지 저장 → RDB
                 MessageDetails savedMessage =
-                        messageService.save(MessageType.NOTICE, consumer.getMemberId(), message, url);
+                        messageService.save(MessageType.NOTICE, publisherId, consumer.getMemberId(), message, url);
                 // 메세지 전송
                 rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_NOTICE, savedMessage);
             }

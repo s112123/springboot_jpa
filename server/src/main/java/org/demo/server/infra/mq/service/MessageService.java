@@ -51,13 +51,14 @@ public class MessageService {
      * @return 저장된 메세지
      */
     @Transactional
-    public MessageDetails save(MessageType type, Long consumerId, String message, String url) {
+    public MessageDetails save(MessageType type, Long publisherId, Long consumerId, String message, String url) {
         // 메세지 받는 사람 조회
         Member consumer = memberFinder.getMemberById(consumerId);
 
         // 메세지 저장
         Message savedMessage = messageRepository.save(Message.builder()
                 .type(type)
+                .senderId(publisherId)
                 .consumer(consumer)
                 .message(message)
                 .read(false)
