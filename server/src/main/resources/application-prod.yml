@@ -28,7 +28,7 @@ spring:
       max-file-size: 3MB
       max-request-size: 10MB
 
-# Upload File Path
+# Upload File Path (WAR)
 file:
   upload:
     root: s112123/tomcat/webapps/ROOT/WEB-INF/classes/static/uploads/
@@ -46,3 +46,11 @@ logging:
 jwt:
   secret:
     key: 01234567890123456789012345678901234567890123456789
+
+# Email
+email:
+  naver:
+    host: smtp.naver.com
+    username: Naver Email ID
+    password: Naver Email Password
+    port: 465

@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Slf4j
-@Component
 @Profile(value = "dev")
+@Component
 public class SendConfirmCodeConsole extends SendConfirmCode {
 
-    public SendConfirmCodeConsole(RedisTemplate<String, String> redisTemplate) {
+    public SendConfirmCodeConsole(
+            RedisTemplate<String, String> redisTemplate
+    ) {
         super(redisTemplate);
     }
 
