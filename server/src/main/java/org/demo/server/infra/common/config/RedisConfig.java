@@ -41,7 +41,7 @@ public class RedisConfig {
 
     /**
      * Redis DB 0번을 사용하는 RedisTemplate 빈 등록
-     * 가입 인증 코드, 임시 비밀번호
+     * 가입 인증 코드
      *
      * @param connectionFactory RedisTemplate 에서 사용한 ConnectionFactory
      * @return RedisTemplate

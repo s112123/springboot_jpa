@@ -43,3 +43,11 @@ file:
 jwt:
   secret:
     key: 01234567890123456789012345678901234567890123456789
+
+# Email
+email:
+  naver:
+    host: smtp.naver.com
+    username: Naver Email ID
+    password: Naver Email Password
+    port: 465
