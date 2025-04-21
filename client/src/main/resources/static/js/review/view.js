@@ -20,6 +20,9 @@ getReview(reviewId).then((response) => {
     const storeAddress = document.getElementById('store-address');
     storeAddress.textContent = review.storeAddress;
 
+    // KaKao Map
+    getKaKaoMap(review.storeAddress);
+
     // 평점 색상 처리
     // 만약, REST API 가 아니라 Model 로 넘긴 경우, 다음 주석과 같이 처리한다
     // view.html 에서 <ul id="reviewer-star" th:data-reviewer-star="${review.star}"> 로 받으면 된다
