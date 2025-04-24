@@ -65,7 +65,6 @@ function render(page) {
         let contents = document.querySelectorAll('.content');
         contents.forEach((content) => {
             content.addEventListener('click', (e) => {
-                console.log(e.target);
                 let redirectURL = e.target.getAttribute('data-notification-url');
 
                 // 읽지 않은 알림인 경우, 데이터베이스에서 읽음 처리
@@ -77,8 +76,6 @@ function render(page) {
                 location.href = redirectURL;
             });
         });
-
-        console.log(contents);
     });
 }
 

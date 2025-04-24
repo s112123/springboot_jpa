@@ -116,7 +116,8 @@ async function loginProcess(formData) {
     const response = await axios.post('http://localhost:8081/api/v1/login', formData, {
         headers: {
             'Content-Type': 'application/json'
-        }
+        },
+        withCredentials: true
     });
     return response;
 }

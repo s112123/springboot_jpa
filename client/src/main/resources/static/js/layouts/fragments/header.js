@@ -191,7 +191,7 @@ async function logoutProcess(memberId) {
     const api = 'http://localhost:8081/api/v1/logout';
     const response = await axios.post(api, JSON.stringify(memberId), {
         headers: {
-            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
+            //'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
             'Content-Type': 'application/json'
         }
     });
