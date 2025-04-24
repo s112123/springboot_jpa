@@ -1,4 +1,4 @@
-// AccessToken 가져오기
+// AccessToken 저장하기
 function saveAccessToken(accessToken) {
     return localStorage.setItem('todayReviewsAccessToken', accessToken);
 }
@@ -6,6 +6,17 @@ function saveAccessToken(accessToken) {
 // AccessToken 가져오기
 function getAccessToken() {
     return localStorage.getItem('todayReviewsAccessToken');
+}
+
+// Access Token 재발급 API
+// 만료된 Access Token 은 넣을 필요 없다
+async function refreshAccessToken() {
+    const api = 'http://localhost:8081/api/v1/tokens/refresh';
+    const response = await axios.post(api, {}, {
+        // 쿠키로 보내는 Refresh Token 포함
+       withCredentials: true
+    });
+    return response;
 }
 
 // AccessToken 삭제하기
@@ -55,6 +66,17 @@ function getRoles() {
     const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     const jsonPayload = decodeURIComponent(escape(decoded));
     return JSON.parse(jsonPayload).roles;
+}
+
+// Access Token 에서 exp 추출
+function getExp(accessToken) {
+    if (!accessToken) {
+        return null;
+    }
+    const payload = accessToken.split('.')[1];
+    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const jsonPayload = decodeURIComponent(escape(decoded));
+    return JSON.parse(jsonPayload).exp;
 }
 
 // AccessToken 이 없으면 로그인 페이지로 이동

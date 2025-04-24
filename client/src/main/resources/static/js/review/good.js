@@ -13,6 +13,7 @@ let btnGoodCancel = document.getElementById('good-cancel');
 btnGood.addEventListener('click', (e) => {
     // Access Token 이 없으면 로그인 화면으로 이동
     if (!accessTokenUtils.getAccessToken()) {
+        alert('로그인이 필요합니다');
         // 현재 URL 에서 도메인을 제거한 경로
         // http://localhost:8080/review/view?review_id=1 → /review/view?review_id=1
         let redirectUrl = window.location.pathname + window.location.search;

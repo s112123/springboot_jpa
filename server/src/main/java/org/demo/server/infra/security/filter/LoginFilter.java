@@ -5,12 +5,16 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.demo.server.infra.security.constant.TokenExpiration;
 import org.demo.server.infra.security.dto.LoginRequest;
 import org.demo.server.infra.security.util.JwtUtils;
 import org.demo.server.module.member.service.base.MemberFinder;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -25,12 +29,19 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
 
     private final JwtUtils jwtUtils;
     private final MemberFinder memberFinder;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public LoginFilter(String defaultFilterProcessesUrl, JwtUtils jwtUtils, MemberFinder memberFinder) {
+    public LoginFilter(
+            String defaultFilterProcessesUrl,
+            JwtUtils jwtUtils,
+            MemberFinder memberFinder,
+            RedisTemplate<String, String> redisTemplate
+    ) {
         // 로그인 경로
         super(defaultFilterProcessesUrl);
         this.jwtUtils = jwtUtils;
         this.memberFinder = memberFinder;
+        this.redisTemplate = redisTemplate;
     }
 
     /**
@@ -96,12 +107,31 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         claims.put("memberId", memberId);
 
         // JWT 생성
-        String accessToken = jwtUtils.create(claims, 30000);
+        String accessToken = jwtUtils.create(claims, TokenExpiration.ACCESS_TOKEN_EXPIRATION);
+        String refreshToken = jwtUtils.create(claims, TokenExpiration.REFRESH_TOKEN_EXPIRATION);
 
-        // Todo: Refresh Token 은 Redis 에 저장
-        // String refreshToken = jwtUtils.create(claims, 50000);
+        // Refresh Token 은 Redis 에 저장
+        redisTemplate.opsForValue().set(
+                "refreshToken:member:" + memberId, refreshToken,
+                TokenExpiration.REFRESH_TOKEN_EXPIRATION
+        );
+        // Refresh Token 은 쿠키로 저장한다
+        Cookie refreshTokenCookie = new Cookie("todayReviewsRefreshToken", refreshToken);
+        // 전체 경로에서 유효
+        refreshTokenCookie.setPath("/");
+        // 유효 기간 3분
+        refreshTokenCookie.setMaxAge(60 * TokenExpiration.REFRESH_TOKEN_EXPIRATION);
+        // 현재 클라이언트는 8080 포트이고 서버는 8081 포트이므로 쿠키는 다른 도메인으로 간주된다
+        // 그래서 클라이언트의 도메인을 허용해주어야 한다 + CORS 설정도 필요
+        refreshTokenCookie.setDomain("localhost");
+        // true 를 하면 JS 에서 접근 불가 → document.cookie 로 refreshToken 을 볼 수 없다
+        refreshTokenCookie.setHttpOnly(false);
+        // true 를 하면 HTTPS 에서만 전송 가능
+        // SameSite 설정을 강화하려면 Set-Cookie 헤더를 조작하거만 ResponseCookie 를 사용할 수 있다
+        refreshTokenCookie.setSecure(false);
+        response.addCookie(refreshTokenCookie);
 
-        // 응답 보내기
+        // Access Token 은 클라이언트에 응답으로 전송하여 클라이언트에서 localStorage 에 저장
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(Map.of("accessToken", accessToken));
         sendResponseJson(response, HttpServletResponse.SC_OK, body);
