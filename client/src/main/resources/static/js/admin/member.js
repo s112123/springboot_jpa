@@ -130,7 +130,7 @@ async function changeRole(memberId, role) {
     const api = 'http://localhost:8081/api/v1/members/' + memberId + '/roles';
     const response = await axios.patch(api, role, {
         headers: {
-            'Authorization': accessTokenUtils.getAccessToken(),
+            'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
             'Content-Type': 'application/json'
         }
     });

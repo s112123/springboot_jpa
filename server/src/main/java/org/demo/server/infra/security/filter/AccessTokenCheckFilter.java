@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.security.exception.TokenException;
 import org.demo.server.infra.security.exception.TokenStatus;
 import org.demo.server.infra.security.util.JwtUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,7 +24,11 @@ import java.util.List;
 public class AccessTokenCheckFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private List<String> exactWhiteList = List.of(
+    private List<String> exactWhiteListForGetMethod = List.of(
+            "/",
+            "/ws/info"
+    );
+    private List<String> exactWhiteListForPostMethod = List.of(
             "/api/v1/login",
             "/api/v1/logout",
             "/api/v1/members",
@@ -32,14 +37,16 @@ public class AccessTokenCheckFilter extends OncePerRequestFilter {
             "/ws/info",
             "/api/v1/tokens/refresh"
     );
-    private List<String> prefixWhiteList = List.of(
+    private List<String> prefixWhiteListForGetMethod = List.of(
             "/api/v1/reviews/",
             "/api/v1/reviews/pages/",
             "/api/v1/reviews/content-images/",
             "/api/v1/members/profile-images/",
-            "/api/v1/members/codes/",
             "/api/v1/sse/",
             "/ws/"
+    );
+    private List<String> prefixWhiteListForPostMethod = List.of(
+            "/api/v1/members/codes/"
     );
 
     public AccessTokenCheckFilter(JwtUtils jwtUtils) {
@@ -53,7 +60,11 @@ public class AccessTokenCheckFilter extends OncePerRequestFilter {
         // 검증 안할 경로
         String requestURI = request.getRequestURI();
         log.info("[1] requestURI={}", requestURI);
-        if (isStaticResource(requestURI) || isWhiteList(requestURI)) {
+        if (
+                isStaticResource(requestURI) ||
+                isWhiteListForGetMethod(request, requestURI) ||
+                isWhiteListForPostMethod(request, requestURI)
+        ) {
             log.info("[2] requestURI={}", requestURI);
             filterChain.doFilter(request, response);
             return;
@@ -106,9 +117,21 @@ public class AccessTokenCheckFilter extends OncePerRequestFilter {
         return uri.equals("/favicon.ico") || uri.startsWith("/js/") || uri.startsWith("/css/");
     }
 
-    // Access Token 을 검증하지 않을 경로인지 확인
-    private boolean isWhiteList(String uri) {
-        return exactWhiteList.contains(uri) ||
-                prefixWhiteList.stream().anyMatch(pattern -> uri.startsWith(pattern));
+    // Access Token 을 검증하지 않을 경로인지 확인 → GET 요청
+    private boolean isWhiteListForGetMethod(HttpServletRequest request, String uri) {
+        if (request.getMethod().equals("GET")) {
+            return exactWhiteListForGetMethod.contains(uri) ||
+                    prefixWhiteListForGetMethod.stream().anyMatch(pattern -> uri.startsWith(pattern));
+        }
+        return false;
+    }
+
+    // Access Token 을 검증하지 않을 경로인지 확인 → POST 요청
+    private boolean isWhiteListForPostMethod(HttpServletRequest request, String uri) {
+        if (request.getMethod().equals("POST")) {
+            return exactWhiteListForPostMethod.contains(uri) ||
+                    prefixWhiteListForPostMethod.stream().anyMatch(pattern -> uri.startsWith(pattern));
+        }
+        return false;
     }
 }
