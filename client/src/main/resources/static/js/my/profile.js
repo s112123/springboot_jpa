@@ -223,7 +223,8 @@ btnUpdate.addEventListener('click', () => {
         updateMember(originalUsername, changedUserInfo).then(response => {
             // 새롭게 발급받은 Access Token 을 갱신
             const newAccessToken = response.data.accessToken;
-            localStorage.setItem('todayReviewsAccessToken', newAccessToken);
+            // localStorage.setItem('todayReviewsAccessToken', newAccessToken);
+            accessTokenUtils.saveAccessToken(newAccessToken);
 
             // 회원 정보 변경 완료 메시지
             eleUpdatedMessage.style.display = 'block';

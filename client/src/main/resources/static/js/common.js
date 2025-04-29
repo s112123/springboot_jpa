@@ -1,11 +1,11 @@
 // AccessToken 저장하기
 function saveAccessToken(accessToken) {
-    return localStorage.setItem('todayReviewsAccessToken', accessToken);
+    return sessionStorage.setItem('todayReviewsAccessToken', accessToken);
 }
 
 // AccessToken 가져오기
 function getAccessToken() {
-    return localStorage.getItem('todayReviewsAccessToken');
+    return sessionStorage.getItem('todayReviewsAccessToken');
 }
 
 // Access Token 재발급 API
@@ -21,7 +21,7 @@ async function refreshAccessToken() {
 
 // AccessToken 삭제하기
 function removeAccessToken() {
-    return localStorage.removeItem('todayReviewsAccessToken');
+    return sessionStorage.removeItem('todayReviewsAccessToken');
 }
 
 // Access Token 에서 username 추출

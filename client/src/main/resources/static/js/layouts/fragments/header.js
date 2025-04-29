@@ -193,7 +193,8 @@ async function logoutProcess(memberId) {
         headers: {
             //'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken(),
             'Content-Type': 'application/json'
-        }
+        },
+        withCredentials: true
     });
     return response;
 }

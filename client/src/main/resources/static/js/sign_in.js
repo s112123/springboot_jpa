@@ -1,3 +1,5 @@
+import { accessTokenUtils } from '/js/common.js';
+
 // 변수 선언
 let email = document.getElementById('email');
 let password = document.getElementById('password');
@@ -91,7 +93,8 @@ btnSignIn.addEventListener('click', () => {
 
     // 로그인 처리
     loginProcess(formData).then(response => {
-        localStorage.setItem('todayReviewsAccessToken', response.data.accessToken);
+        // localStorage.setItem('todayReviewsAccessToken', response.data.accessToken);
+        accessTokenUtils.saveAccessToken(response.data.accessToken);
         if (isRegister) {
             location.replace('/my/profile?register=true');
             isRegister = false;
