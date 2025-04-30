@@ -103,7 +103,6 @@ function connectSSE() {
                                 // 읽지 않은 메세지 여부 표시
                                 if (publisherId === Number(memberId)) {
                                     const notReadMark = chatMember.querySelector('i');
-                                    console.log(notReadMark);
                                     if (notReadMark) {
                                         notReadMark.style.display = 'block';
                                     }

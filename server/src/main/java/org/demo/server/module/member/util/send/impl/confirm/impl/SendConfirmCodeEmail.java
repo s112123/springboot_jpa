@@ -16,7 +16,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 @Slf4j
-@Profile(value = "prod")
+// @Profile(value = "prod")
+@Profile(value = "pass - 이메일을 발송하려면 실제 이메일이 필요하므로 원래는 prod 로 해야 한다")
 @Component
 public class SendConfirmCodeEmail extends SendConfirmCode {
 

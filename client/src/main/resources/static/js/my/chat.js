@@ -71,8 +71,6 @@ findFollows(accessTokenUtils.getMemberId()).then((response) => {
                 stompClient.connect({ 'Authorization': accessTokenUtils.getAccessToken() }, () => {
                     // 구독
                     stompClient.subscribe(`/user/${accessTokenUtils.getMemberId()}/chat/subscribe`, (response) => {
-                        console.log(response.body);
-
                         // 현재 받은 채팅 메세지 출력
                         let chatMessage = JSON.parse(response.body);
                         let html = '';

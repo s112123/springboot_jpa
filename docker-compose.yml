@@ -1,0 +1,63 @@
+version: '3'
+services:
+    mysql:
+        image: mysql:8.0.38
+        container_name: today-review-mysql
+        ports:
+            - "3310:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=0000
+            - MYSQL_DATABASE=review
+        networks:
+            - today-review-network
+    redis:
+        image: redis
+        container_name: today-review-redis
+        ports:
+            - "6390:6379"
+        networks:
+            - today-review-network
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: today-review-rabbitmq
+        ports:
+            - "5680:5672"
+            - "15672:15672"
+            - "15674:15674"
+        networks:
+            - today-review-network
+    server:
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+        container_name: today-review-server
+        ports:
+            - "8081:8081"
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod
+            - RDB_HOST=today-review-mysql
+            - RDB_PORT=3306
+            - REDIS_HOST=today-review-redis
+            - REDIS_PORT=6379
+            - RABBIT_HOST=today-review-rabbitmq
+            - RABBIT_PORT=5672
+        depends_on:
+            - mysql
+            - redis
+            - rabbitmq
+        networks:
+            - today-review-network
+    client:
+        build:
+            context: ./client
+            dockerfile: Dockerfile
+        container_name: today-review-client
+        ports:
+            - "9090:9090"
+        depends_on:
+            - server
+        networks:
+            - today-review-network
+networks:
+    today-review-network:
+        driver: bridge

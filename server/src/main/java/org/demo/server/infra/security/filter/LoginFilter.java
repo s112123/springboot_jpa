@@ -21,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -113,15 +114,16 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         // Refresh Token 은 Redis 에 저장
         redisTemplate.opsForValue().set(
                 "refreshToken:member:" + memberId, refreshToken,
-                TokenExpiration.REFRESH_TOKEN_EXPIRATION
+                Duration.ofMinutes(TokenExpiration.REFRESH_TOKEN_EXPIRATION)
         );
+
         // Refresh Token 은 쿠키로 저장한다
         Cookie refreshTokenCookie = new Cookie("todayReviewsRefreshToken", refreshToken);
         // 전체 경로에서 유효
         refreshTokenCookie.setPath("/");
         // 유효 기간 3분
         refreshTokenCookie.setMaxAge(60 * TokenExpiration.REFRESH_TOKEN_EXPIRATION);
-        // 현재 클라이언트는 8080 포트이고 서버는 8081 포트이므로 쿠키는 다른 도메인으로 간주된다
+        // 현재 클라이언트는 9090 포트이고 서버는 8081 포트이므로 쿠키는 다른 도메인으로 간주된다
         // 그래서 클라이언트의 도메인을 허용해주어야 한다 + CORS 설정도 필요
         refreshTokenCookie.setDomain("localhost");
         // true 를 하면 JS 에서 접근 불가 → document.cookie 로 refreshToken 을 볼 수 없다

@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Slf4j
-@Profile(value = "dev")
+// @Profile(value = "dev")
+@Profile(value = {"dev", "prod"})
 @Component
 @RequiredArgsConstructor
 public class SendTempPasswordConsole extends SendTempPassword {

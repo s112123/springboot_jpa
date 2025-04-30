@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Slf4j
-@Profile(value = "dev")
+// @Profile(value = "dev")
+@Profile(value = {"dev", "prod"})
 @Component
 public class SendConfirmCodeConsole extends SendConfirmCode {
 
