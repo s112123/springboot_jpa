@@ -53,7 +53,9 @@ public class RedisConfig {
     ) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-        template.setDefaultSerializer(StringRedisSerializer.UTF_8);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        template.afterPropertiesSet();
         return template;
     }
 
@@ -85,7 +87,9 @@ public class RedisConfig {
     ) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-        template.setDefaultSerializer(StringRedisSerializer.UTF_8);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        template.afterPropertiesSet();
         return template;
     }
 
@@ -131,6 +135,7 @@ public class RedisConfig {
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
         template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
 
+        template.afterPropertiesSet();
         return template;
     }
 
@@ -162,7 +167,9 @@ public class RedisConfig {
     ) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-        template.setDefaultSerializer(StringRedisSerializer.UTF_8);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        template.afterPropertiesSet();
         return template;
     }
 }

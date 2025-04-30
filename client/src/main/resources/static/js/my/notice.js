@@ -53,7 +53,6 @@ function getNoticeListHTML(notices) {
     for (let notice of notices) {
         html += '<tr>';
         html += '    <td>' + notice.id + '</td>';
-        console.log(noticeId !== null && noticeId === notice.id);
         if (noticeId !== null && Number(noticeId) === notice.id) {
             html += '    <td class="notice-new">' + notice.content + '</td>';
         } else {

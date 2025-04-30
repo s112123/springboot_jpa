@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.security.constant.TokenExpiration;
 import org.demo.server.infra.security.exception.TokenException;
 import org.demo.server.infra.security.exception.TokenStatus;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 
+@Slf4j
 public class RefreshTokenCheckFilter extends OncePerRequestFilter {
 
     private final String requestURLForRefreshAccessToken;
@@ -62,7 +64,7 @@ public class RefreshTokenCheckFilter extends OncePerRequestFilter {
             String newRefreshToken = getNewRefreshToken(refreshTokenClaims);
 
             // RefreshToken → Redis 에 저장
-            long memberId = refreshTokenClaims.get("mid", Integer.class).longValue();
+            long memberId = refreshTokenClaims.get("memberId", Integer.class).longValue();
             redisTemplate.opsForValue().set(
                     "refreshToken:member:" + memberId, newRefreshToken,
                     Duration.ofMinutes(TokenExpiration.REFRESH_TOKEN_EXPIRATION)
@@ -97,9 +99,10 @@ public class RefreshTokenCheckFilter extends OncePerRequestFilter {
             // Refresh Token 검증
             Claims refreshTokenClaims = jwtUtils.validate(refreshToken);
 
+
             // Refresh Token 이 Redis 에 존재하는 Refresh Token 과 일치하는지 확인한다
             // 유효하지 않은 Token 은 신뢰해서는 안된다
-            long memberId = refreshTokenClaims.get("mid", Integer.class).longValue();
+            Long memberId = refreshTokenClaims.get("memberId", Long.class);
             String savedRefreshToken = redisTemplate.opsForValue().get("refreshToken:member:" + memberId);
 
             if (!savedRefreshToken.equals(refreshToken)) {
@@ -135,7 +138,7 @@ public class RefreshTokenCheckFilter extends OncePerRequestFilter {
         Claims newAccessTokenClaims = Jwts.claims();
         newAccessTokenClaims.put("username", refreshTokenClaims.get("username"));
         newAccessTokenClaims.put("roles", refreshTokenClaims.get("roles"));
-        newAccessTokenClaims.put("mid", refreshTokenClaims.get("mid"));
+        newAccessTokenClaims.put("memberId", refreshTokenClaims.get("memberId"));
 
         // 새로운 Access Token 재발행
         return jwtUtils.create(newAccessTokenClaims, TokenExpiration.ACCESS_TOKEN_EXPIRATION);
@@ -147,7 +150,7 @@ public class RefreshTokenCheckFilter extends OncePerRequestFilter {
         Claims newRefreshTokenClaims = Jwts.claims();
         newRefreshTokenClaims.put("username", refreshTokenClaims.get("username"));
         newRefreshTokenClaims.put("roles", refreshTokenClaims.get("roles"));
-        newRefreshTokenClaims.put("mid", refreshTokenClaims.get("mid"));
+        newRefreshTokenClaims.put("memberId", refreshTokenClaims.get("memberId"));
 
         // 새로운 Refresh Token 재발행
         return jwtUtils.create(newRefreshTokenClaims, TokenExpiration.REFRESH_TOKEN_EXPIRATION);

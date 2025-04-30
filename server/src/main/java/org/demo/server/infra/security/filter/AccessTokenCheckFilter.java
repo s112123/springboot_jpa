@@ -46,7 +46,7 @@ public class AccessTokenCheckFilter extends OncePerRequestFilter {
             "/ws/"
     );
     private List<String> prefixWhiteListForPostMethod = List.of(
-            "/api/v1/members/codes/"
+            "/api/v1/members/codes"
     );
 
     public AccessTokenCheckFilter(JwtUtils jwtUtils) {

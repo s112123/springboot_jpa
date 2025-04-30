@@ -26,7 +26,7 @@ public abstract class SendConfirmCode implements SendUtils {
      */
     protected void save(String email, String code) {
         ValueOperations<String, String> operations = redisTemplate.opsForValue();
-        operations.set(generateKey(email), code, 60L, TimeUnit.SECONDS);
+        operations.set(generateKey(email), code, 180L, TimeUnit.SECONDS);
     }
 
     /**
