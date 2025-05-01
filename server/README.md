@@ -10,6 +10,10 @@
 &#8209; Redis Key → refreshToken:member:{memberId} <br>
 &#8209; 로그인을 완료하면 SseEmitter 를 생성하여 메모리의 Map 객체에서 접속 상태를 관리하고 알림을 전송 <br>
 &#8209; 클라이언트의 Header 영역에서 EventSource 를 연결 <br>
+&#8209; 기본 ADMIN 계정 → admin@test.com / a123412341234 <br>
+&#8209; 기본 USER 계정 → user1@test.com / a123412341234 <br>
+&#8209; 기본 USER 계정 → user2@test.com / a123412341234 <br>
+&#8209; 기본 USER 계정 → user3@test.com / a123412341234 <br>
 
 <br>
 <br>
@@ -197,29 +201,115 @@
 
 #### 11) 리뷰 일괄 삭제 → DELETE /api/v1/reviews
 &#8209; JWT 인증 필요 <br>
-&#8209; 로그인 한 사용자가 내 정보의 내가 쓴 리뷰 목록에서 선택한 리뷰를 일괄삭제 <br>
+&#8209; 로그인 한 사용자가 내 정보의 내가 쓴 리뷰 목록에서 선택한 리뷰를 일괄 삭제 <br>
 
 <br>
 <br>
 
 ## 좋아요 관리
 #### 1) 테이블
+&#8209; `member (1)-(*) good (*)-(1) review` <br>
+
+#### 2) 좋아요 등록 → POST /api/v1/goods
+&#8209; JWT 인증 필요 <br>
+&#8209; 리뷰의 좋아요 버튼을 클릭하여 등록 <br>
+&#8209; 유효성 검사 → 로그인 여부 <br>
+&#8209; 본인 리뷰에는 좋아요 버튼이 표시되지 않는다 <br>
+&#8209; 해당 리뷰의 좋아요 개수를 +1 한다 <br>
+
+#### 3) 좋아요 누른 리뷰 목록 → GET /api/v1/chats/follows
+&#8209; JWT 인증 필요 <br>
+&#8209; 마이 페이지 > 좋아요 한 리뷰 <br>
+&#8209; 내 정보 페이지의 "좋아요 한 리뷰" 항목을 클릭하여 리뷰 목록을 확인 <br>
+
+#### 4) 좋아요를 눌렀는지 여부 → GET /api/v1/chats/follows
+&#8209; JWT 인증 필요 <br>
+&#8209; 좋아요를 눌렀는지 여부를 확인하여 리뷰에 좋아요 버튼 모양을 변경 <br>
+
+#### 5) 좋아요 취소 → GET /api/v1/chats/follows
+&#8209; JWT 인증 필요 <br>
+&#8209; 좋아요를 취소하고 버튼 모양을 변경한다 <br>
+&#8209; 해당 리뷰의 좋아요 개수를 -1 한다 <br>
 
 <br>
 <br>
 
 ## 구독 관리
 #### 1) 테이블
+&#8209; `member (1)-(*) follow (*)-(1) member` <br>
+
+#### 2) 구독하기 → POST /api/v1/follows
+&#8209; JWT 인증 필요 <br>
+&#8209; 리뷰에서 구독하기 버튼을 클릭하면 작성자를 구독한다 <br>
+&#8209; 또는 내 프로필 화면에서 나를 구독한 사람을 구독한다 <br>
+&#8209; 구독을 한 경우, 구독하기 버튼은 구독취소 버튼으로 모양이 변경된다 <br>
+&#8209; 유효성 검사 → 로그인 여부 <br>
+&#8209; 본인 리뷰에는 구독하기 버튼이 표시되지 않는다 <br>
+
+#### 3) 구독 여부 확인 → GET /api/v1/follows/{memberId}/{username}
+&#8209; JWT 인증 필요 <br>
+&#8209; 구독 여부에 따라 리뷰 화면에서 구독 버튼 모양을 변경한다 <br>
+
+#### 4) 내가 구독한 사람 목록 (팔로우) → GET /api/v1/follows/{memberId}/follow
+&#8209; JWT 인증 필요 <br>
+&#8209; 마이 페이지 > 내 프로필 <br>
+&#8209; 내가 구독한 사람 (팔로우) 목록을 표시한다 <br>
+
+#### 5) 나를 구독한 사람 목록 (팔로워) → GET /api/v1/follows/{memberId}/follower
+&#8209; JWT 인증 필요 <br>
+&#8209; 마이 페이지 > 내 프로필 <br>
+&#8209; 나를 구독한 사람 (팔로워) 를 표시하며 팔로워를 사용자도 구독하였으면 목록에서 제외된다 <br>
+
+#### 6) 구독취소 → DELETE /api/v1/follows/{memberId}/{username}
+&#8209; JWT 인증 필요 <br>
+&#8209; 리뷰에서 구독취소 버튼을 클릭하면 작성자를 구독 취소한다 <br>
+&#8209; 또는 내 프로필 화면에서 내가 구독한 사람을 구독 취소한다 <br>
+&#8209; 구독을 취소한 경우, 구독취소 버튼은 구독하기 버튼으로 모양이 변경된다 <br>
+&#8209; 유효성 검사 → 로그인 여부 <br>
+&#8209; 본인 리뷰에는 구독취소 버튼이 표시되지 않는다 <br>
 
 <br>
 <br>
 
 ## 채팅 관리
 #### 1) 테이블
-&#8209; `member (1)-(*) chat_participant (*)-(1) chat_room ` <br>
-&#8209; `member (1)-(*) chat_message ` <br>
-&#8209; `chat_room (1)-(*) chat_message ` <br>
-&#8209; `chat_message (1)-(*) chat_message_read ` <br>
+&#8209; `member (1)-(*) chat_participant (*)-(1) chat_room` <br>
+&#8209; `member (1)-(*) chat_message` <br>
+&#8209; `chat_room (1)-(*) chat_message` <br>
+&#8209; `chat_message (1)-(*) chat_message_read` <br>
+
+#### 2) 채팅 대상자 목록 → GET /api/v1/chats/follows
+&#8209; JWT 인증 필요 <br>
+&#8209; 마이 페이지 > 1:1 채팅 클릭 <br>
+&#8209; 채팅 대상자 목록은 사용자가 구독한 회원 목록으로 구독한 회원에게만 메세지를 보낼 수 있다 <br>
+
+#### 3) 채팅방 참여 → GET /api/v1/chats/rooms
+&#8209; JWT 인증 필요 <br>
+&#8209; 채팅 대상자 목록에서 채팅 메세지를 보낼 대상자를 선택하면 채팅방에 참여할 수 있다 <br>
+&#8209; 참여한 채팅방 정보를 Redis (DB 3) 에 저장 <br>
+&#8209; Redis Key → chat:member:{memberId} <br>
+&#8209; 채팅방을 참여하면 해당 채팅방의 메세지 내역을 조회한다 <br>
+&#8209; 채팅방이 개설되면서 서버와 클라이언트가 WebSocket 으로 연결된다 → SockJS: /ws <br>
+&#8209; 채팅 메시지를 실시간 수신하기 위해 사용자 본인을 구독하여 메세지를 수신한다 → /user/${memberId}/chat/subscribe <br>
+&#8209; 상대방이 WebSocket 의 MessageTemplate 으로 수신자의 memberId 와 /chat/subscribe 로 메세지를 보낸다 <br>
+
+#### 4) 채팅 메세지 보내기 → @MessageMapping /pub/chat/message/send
+&#8209; JWT 인증 필요 → ChannelInterceptor 를 구현하여 Access Token 체크 <br>
+&#8209; 유효성 검사 → 채팅 대상자 선택 여부, 메세지 입력 여부 <br>
+&#8209; 메세지를 보낼 대상자를 선택하고 채팅 메세지를 보낸다 <br>
+&#8209; Redis (DB 3) 에 상대가 동일한 채팅방에서 채팅을 참여하고 있으면 실시간 메세지를 보낸다 <br>
+&#8209; 상대가 다른 페이지를 보는 등 참여하고 있지 않다면 채팅 메세지 알림을 전송한다 <br>
+
+#### 5) 채팅 메세지 읽음 처리 → DELETE /api/v1/chats/mark_read
+&#8209; JWT 인증 필요 <br>
+&#8209; 상대가 메세지를 보냈을 때, 채팅방에 참여하고 있지 않다면 채팅 대상자 목록에서 빨간 동그라미로 표시한다 <br>
+&#8209; 채팅 메세지를 읽으면 빨간 동그라미를 미표시하여 읽지 않은 새로운 메세지가 없는 것을 인지한다 <br>
+&#8209; 채팅 메세지 읽음 확인은 새로운 메세지가 있는지 확인 여부이며 상대방은 메세지를 읽었는지 알 수 없다 <br>
+
+#### 6) 채팅방 나가기 → DELETE /api/v1/chats/unjoin
+&#8209; JWT 인증 필요 <br>
+&#8209; Redis (DB 3) 에서 참여하고 있는 채팅방 번호를 제거한다 <br>
+&#8209; Redis Key → chat:member:{memberId} <br>
 
 <br>
 <br>
@@ -245,7 +335,10 @@
 <br>
 
 ## 알림 관리
-#### 1) 좋아요 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.like) > Queue (ntf.queue.like)
+#### 1) 테이블
+&#8209; `member (1)-(*) notification` <br>
+
+#### 2) 좋아요 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.like) > Queue (ntf.queue.like)
 &#8209; JWT 인증 필요 없음 (로그인을 요구하는 기능이므로 알림 메세지 전송시, Access Token 검증 안하는 방향으로 결정) <br>
 &#8209; 사용자가 리뷰를 조회하고 좋아요 버튼을 클릭하면 리뷰 작성자에게 알림이 전송된다 <br>
 &#8209; 알림이 전송될 때, RDB 에 알림이 저장되고 알림을 수신하는 측에서 Redis 에 알림을 캐시한다 <br>
@@ -254,7 +347,7 @@
 &#8209; 12시간 마다 Redis 에 캐시된 알림 메세지가 7일 전이면 삭제한다 <br>
 &#8209; Redis 에 캐시된 알림이 없으면 RDB 를 한번 더 확인하여 읽지 않은 알림이 있는지 확인한다 <br>
 
-#### 2) 구독 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.follow) > Queue (ntf.queue.follow)
+#### 3) 구독 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.follow) > Queue (ntf.queue.follow)
 &#8209; JWT 인증 필요 없음 (로그인을 요구하는 기능이므로 알림 메세지 전송시, Access Token 검증 안하는 방향으로 결정) <br>
 &#8209; 사용자가 리뷰를 조회하고 구독 버튼을 클릭하면 리뷰 작성자에게 알림이 전송된다 <br>
 &#8209; 알림이 전송될 때, RDB 에 알림이 저장되고 알림을 수신하는 측에서 Redis 에 알림을 캐시한다 <br>
@@ -263,7 +356,7 @@
 &#8209; 12시간 마다 Redis 에 캐시된 알림 메세지가 7일 전이면 삭제한다 <br>
 &#8209; Redis 에 캐시된 알림이 없으면 RDB 를 한번 더 확인하여 읽지 않은 알림이 있는지 확인한다 <br>
 
-#### 3) 새 글 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.post) > Queue (ntf.queue.post)
+#### 4) 새 글 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.post) > Queue (ntf.queue.post)
 &#8209; JWT 인증 필요 없음 (로그인을 요구하는 기능이므로 알림 메세지 전송시, Access Token 검증 안하는 방향으로 결정) <br>
 &#8209; 사용자가 리뷰를 작성하면 구독자에게 알림이 전송된다 <br>
 &#8209; 알림이 전송될 때, RDB 에 알림이 저장되고 알림을 수신하는 측에서 Redis 에 알림을 캐시한다 <br>
@@ -273,7 +366,7 @@
 &#8209; Redis 에 캐시된 알림이 없으면 RDB 를 한번 더 확인하여 읽지 않은 알림이 있는지 확인한다 <br>
 &#8209; 여러 사용자가 새 글을 동시에 작성해서 많은 구독자에게 알림을 보낼 수 있기 때문에 비동기로 처리한다 <br>
 
-#### 4) 전체 공지 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.notice) > Queue (ntf.queue.notice)
+#### 5) 전체 공지 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.notice) > Queue (ntf.queue.notice)
 &#8209; JWT 인증 필요 없음 (로그인을 요구하는 기능이므로 알림 메세지 전송시, Access Token 검증 안하는 방향으로 결정) <br>
 &#8209; ADMIN 권한을 가진 사용자가 전체 회원에게 공지를 전송한다 <br>
 &#8209; 알림이 전송될 때, RDB 에 알림이 저장되고 알림을 수신하는 측에서 Redis 에 알림을 캐시한다 <br>
@@ -283,7 +376,7 @@
 &#8209; Redis 에 캐시된 알림이 없으면 RDB 를 한번 더 확인하여 읽지 않은 알림이 있는지 확인한다 <br>
 &#8209; 전체 회원에게 공지를 전송하고 동시에 다른 관리자가 공지를 할 수 있으므로 비동기로 처리한다 <br>
 
-#### 5) 채팅 메세지 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.chat) > Queue (ntf.queue.chat)
+#### 6) 채팅 메세지 알림 → Exchange (ntf.exchange.topic) > Routing Key (ntf.chat) > Queue (ntf.queue.chat)
 &#8209; JWT 인증 필요 없음 (로그인을 요구하는 기능이므로 알림 메세지 전송시, Access Token 검증 안하는 방향으로 결정) <br>
 &#8209; 사용자가 구독한 사람에게 채팅 메세지를 전송하면 상대에게 알림을 전송한다 <br>
 &#8209; 알림이 전송될 때, RDB 에 알림이 저장되고 알림을 수신하는 측에서 Redis 에 알림을 캐시한다 <br>
@@ -291,6 +384,36 @@
 &#8209; Redis Key → notification:consumer:{memberId} <br>
 &#8209; 12시간 마다 Redis 에 캐시된 알림 메세지가 7일 전이면 삭제한다 <br>
 &#8209; Redis 에 캐시된 알림이 없으면 RDB 를 한번 더 확인하여 읽지 않은 알림이 있는지 확인한다 <br>
+
+#### 7) 알림 목록 조회 → GET /api/v1/notifications
+&#8209; JWT 인증 필요 <br>
+&#8209; 마이 페이지 > 알림 내역 <br>
+&#8209; 메세지 목록이 표시되며 읽지 않은 메세지는 빨간 점, 읽은 메세지는 회색 점으로 표시된다 <br>
+&#8209; 좋아요 알림 메세지 → OOO님이 "OOO" 리뷰에 좋아요를 눌렀습니다 <br>
+&#8209; 구독 알림 메세지 → OOO님이 구독하였습니다 <br>
+&#8209; 새 글 알림 메세지 → OOO님이 "OOO" 리뷰를 등록하였습니다 <br>
+&#8209; 전체 공지 알림 메세지 → 새 공지가 있습니다 <br>
+&#8209; 채팅 알림 메세지 (구독한 사용자가 보낸 경우) → OOO님이 메세지를 보냈습니다 <br>
+&#8209; 채팅 알림 메세지 (구독하지 않은 사용자가 보낸 경우) → "친구로 등록되지 않은 사용자" OOO님이 메세지를 보냈습니다 <br>
+
+#### 8) 읽지 않은 메세지 존재 여부 → GET /api/v1/notifications/no-read/exists
+&#8209; JWT 인증 필요 <br>
+&#8209; 읽지 않은 메세지가 있는 경우, 헤더 영역에 알림 표시 아이콘을 빨간 색으로 변경한다 <br>
+
+#### 9) 읽지 않은 메세지 개수 → GET /api/v1/notifications/no-read/count
+&#8209; JWT 인증 필요 <br>
+&#8209; 마이 페이지 > 알림 내역 <br>
+&#8209; 알림 내역 목록 화면에서 읽지 않은 메세지 개수를 표시한다 <br>
+
+#### 10) 읽음 처리 → GET /api/v1/notifications/{notificationId}/mark_read
+&#8209; JWT 인증 필요 <br>
+&#8209; 마이 페이지 > 알림 내역 <br>
+&#8209; 알림 내역 목록 화면에서 읽지 않은 메세지를 클릭하면 읽음 처리 되고 회색 점으로 표시하여 읽음 여부를 표시한다 <br>
+
+#### 11) 모두 읽음 처리 → GET /api/v1/notifications/mark_all_read
+&#8209; JWT 인증 필요 <br>
+&#8209; 마이 페이지 > 알림 내역 <br>
+&#8209; 알림 내역 목록 화면에서 모두 읽음 버튼을 클릭하면 읽지 않은 메세지가 모두 읽음 처리된다 <br>
 
 <br>
 <br>
