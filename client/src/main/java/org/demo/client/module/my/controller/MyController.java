@@ -32,7 +32,7 @@ public class MyController {
     }
 
     /**
-     * 내가 찜한 리뷰 페이지
+     * 좋아요 한 리뷰 페이지
      *
      * @return
      */
