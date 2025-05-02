@@ -59,13 +59,12 @@ public class AccessTokenCheckFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         // 검증 안할 경로
         String requestURI = request.getRequestURI();
-        log.info("[1] requestURI={}", requestURI);
+        log.info("requestURI={}", requestURI);
         if (
                 isStaticResource(requestURI) ||
                 isWhiteListForGetMethod(request, requestURI) ||
                 isWhiteListForPostMethod(request, requestURI)
         ) {
-            log.info("[2] requestURI={}", requestURI);
             filterChain.doFilter(request, response);
             return;
         }

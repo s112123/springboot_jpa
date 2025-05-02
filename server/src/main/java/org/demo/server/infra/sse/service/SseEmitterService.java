@@ -32,7 +32,7 @@ public class SseEmitterService {
             emitters.remove(memberId).complete();
         }
 
-        // Timeout 10분
+        // Timeout 30초
         SseEmitter emitter = new SseEmitter(1000L * 30);
         emitters.put(memberId, emitter);
 

@@ -425,3 +425,8 @@
 &#8209; Refresh Token 의 유효기간이 남아있어야 하며 Access Token 을 갱신하면 Refresh Token 도 갱신한다 <br>
 &#8209; 클라이언트의 쿠키에 있는 Refresh Token 과 Redis (DB 1) 에 저장된 Refresh Token 값이 동일한지 검증한다 <br>
 &#8209; Refresh Token 의 유효기간은 30분으로 만료되면 자동 갱신하지 않고 재로그인을 요구한다 <br>
+&#8209; Access Token 이 갱신될 때, 함께 새로 발급되므로 Access Token 이 재발급되지 않고 Refresh Token 유효기간이 지나면 소멸된다 <br>
+&#8209; 하나의 페이지에서 여러 API 가 호출되어 Refresh Token 의 동시성 문제가 발생하여 해결이 필요하다 <br>
+&#8209; 예를 들어, A 페이지를 요청할 때, API 가 1, 2, 3 이 호출될 때 API 1 이 새로운 Refresh Token 값을 Redis 에 저장한다 <br>
+&#8209; 이 때, 동시에 요청된 API 2 와 3은 Redis 의 새로운 Refresh Token 으로 인해 쿠키의 값과 동일하지 않아 유효하지 않다고 판단한다 <br>
+&#8209; 그래서 해당 기능은 주석처리 되었다 <br>
