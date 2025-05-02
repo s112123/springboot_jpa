@@ -27,9 +27,10 @@ services:
         networks:
             - today-review-network
     server:
-        build:
-            context: ./server
-            dockerfile: Dockerfile
+        # build:
+        #     context: ./server
+        #     dockerfile: Dockerfile
+        image: s112123/server:1.0
         container_name: today-review-server
         ports:
             - "8081:8081"
@@ -48,9 +49,10 @@ services:
         networks:
             - today-review-network
     client:
-        build:
-            context: ./client
-            dockerfile: Dockerfile
+        # build:
+        #     context: ./client
+        #     dockerfile: Dockerfile
+        image: s112123/client:1.0
         container_name: today-review-client
         ports:
             - "9090:9090"
