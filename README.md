@@ -32,5 +32,5 @@ docker compose up --build
 &#8209; Container 종료 → 터미널에서 Ctrl + C → 아래 명령 실행 <br>
 
 ```
-docker compose down
+docker compose down --rmi all -v
 ```
