@@ -24,14 +24,14 @@ public class LogInterceptor implements HandlerInterceptor {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
-            // if (principal instanceof CustomUserDetails) {
-                // String username = ((CustomUserDetails) principal).getUsername();
+            if (principal instanceof CustomUserDetails) {
+                String username = ((CustomUserDetails) principal).getUsername();
                 log.info("request: principal={}, httpMethod={}, requestURI={}, handler={}",
                         principal, httpMethod, requestURI, handler);
-            // }
+            }
         }
 
-        // log.info("request: httpMethod={}, requestURI={}, handler={}", httpMethod, requestURI, handler);
+        log.info("request: httpMethod={}, requestURI={}, handler={}", httpMethod, requestURI, handler);
         return true;
     }
 

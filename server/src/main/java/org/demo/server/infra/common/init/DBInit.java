@@ -1,5 +1,6 @@
 package org.demo.server.infra.common.init;
 
+import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.common.exception.NotFoundException;
 import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.form.MemberSaveForm;
@@ -12,6 +13,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Slf4j
 @Configuration
 public class DBInit {
 
@@ -61,6 +63,8 @@ public class DBInit {
                 user3.setPassword("a123412341234");
                 memberService.save(user3);
             }
+
+            log.info("Server Initialization Completed.");
         };
     }
 }
