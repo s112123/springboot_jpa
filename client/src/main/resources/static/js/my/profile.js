@@ -366,7 +366,7 @@ btnWithdrawMembership.addEventListener('click', () => {
             accessTokenUtils.removeAccessToken();
             // 탈퇴 완료
             alert('회원 탈퇴가 완료되었습니다');
-            location.replace('http://localhost:8080/');
+            location.replace('/');
         });
     }
 });
@@ -376,7 +376,8 @@ async function removeMemberShip(email) {
     let response = await axios.delete('http://localhost:8081/api/v1/members/' + email, {
         headers: {
             'Authorization': 'Bearer ' + accessTokenUtils.getAccessToken()
-        }
+        },
+        withCredentials: true
     });
     return response;
 }

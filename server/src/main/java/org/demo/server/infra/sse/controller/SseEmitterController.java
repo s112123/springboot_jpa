@@ -2,6 +2,7 @@ package org.demo.server.infra.sse.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.server.infra.sse.service.SseEmitterService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,7 @@ public class SseEmitterController {
     private final SseEmitterService sseEmitterService;
 
     // 구독하기
-    @GetMapping("/subscribe")
+    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> subscribe(
             @RequestParam("memberId") Long memberId
     ) {

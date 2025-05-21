@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
 import org.demo.server.infra.mq.service.publisher.MessagePublisher;
+import org.demo.server.module.good.repository.GoodRepository;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
 import org.demo.server.module.review.dto.details.ReviewDetails;
@@ -32,6 +33,7 @@ import java.util.List;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final GoodRepository goodRepository;
     private final FileUtils fileUtils;
     private final MemberFinder memberFinder;
     private final ReviewFinder reviewFinder;
@@ -254,6 +256,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         // DB 내역 삭제
+        goodRepository.deleteByReviewIdIn(deletedReviewIds);
         reviewRepository.deleteReviewImagesByReviewIds(deletedReviewIds);
         reviewRepository.deleteByReviewIds(deletedReviewIds);
     }

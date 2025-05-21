@@ -39,7 +39,7 @@ public class Message {
     @Column(name = "sender_id")
     private Long senderId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "receiver_id")
     private Member consumer;
 

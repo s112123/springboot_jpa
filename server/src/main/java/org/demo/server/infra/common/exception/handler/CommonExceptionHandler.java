@@ -5,6 +5,7 @@ import org.demo.server.infra.common.exception.NotFoundException;
 import org.demo.server.infra.common.exception.response.BindErrorResponse;
 import org.demo.server.infra.common.exception.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -34,7 +35,7 @@ public class CommonExceptionHandler {
                 .map(err -> new BindErrorResponse(httpStatus.value(), err.getField(), err.getDefaultMessage()))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.status(httpStatus).body(errorResponses);
+        return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(errorResponses);
     }
 
     /**
@@ -47,7 +48,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), e.getMessage());
-        return ResponseEntity.status(httpStatus).body(errorResponse);
+        return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(errorResponse);
     }
 
     /**
@@ -60,6 +61,6 @@ public class CommonExceptionHandler {
     public ResponseEntity<ErrorResponse> NotFoundException(NotFoundException e) {
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
         ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), e.getMessage());
-        return ResponseEntity.status(httpStatus).body(errorResponse);
+        return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(errorResponse);
     }
 }

@@ -5,11 +5,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.demo.server.infra.common.entity.BaseEntity;
+import org.demo.server.infra.mq.entity.Message;
 import org.demo.server.module.chat.entity.ChatMessage;
 import org.demo.server.module.chat.entity.ChatParticipant;
 import org.demo.server.module.follow.entity.Follow;
 import org.demo.server.module.good.entity.Good;
 import org.demo.server.module.member.dto.details.MemberDetails;
+import org.demo.server.module.review.entity.Review;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,9 +46,17 @@ public class Member extends BaseEntity {
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProfileImage profileImage;
 
+    // Member (1)-(*) Review
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
     // Member (1)-(*) Good (*)-(1) Review
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Good> goods = new ArrayList<>();
+
+    // Member (1)-(*) notification
+    @OneToMany(mappedBy = "consumer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> messages = new ArrayList<>();
 
     // Member (1)-(*) Follow (*)-(1) Member
     // 팔로워 (Follower) → A 가 B 를 친구 추가하면 A 는 B 의 팔로워이다

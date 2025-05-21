@@ -46,7 +46,7 @@ public class Review extends BaseEntity {
     private Long goodCount;
 
     // Member (1)-(*) Review
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 

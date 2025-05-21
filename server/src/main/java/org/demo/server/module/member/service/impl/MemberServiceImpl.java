@@ -192,8 +192,6 @@ public class MemberServiceImpl implements MemberService {
             fileUtils.deleteFile(profileImageName, UploadDirectory.PROFILES);
         }
 
-        // todo: 게시물 첨부 파일 삭제 처리
-
         // 회원 삭제
         memberRepository.deleteByEmail(email);
     }

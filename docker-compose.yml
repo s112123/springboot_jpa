@@ -22,8 +22,8 @@ services:
         container_name: today-review-rabbitmq
         ports:
             - "5680:5672"
-            - "15672:15672"
-            - "15674:15674"
+            - "15680:15672"
+            - "15684:15674"
         networks:
             - today-review-network
     server:

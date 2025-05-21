@@ -2,6 +2,9 @@ package org.demo.server.module.member.controller;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,17 +14,22 @@ import org.demo.server.infra.common.util.file.FileDetails;
 import org.demo.server.infra.common.util.file.FileUtils;
 import org.demo.server.infra.common.util.file.UploadDirectory;
 import org.demo.server.infra.security.util.JwtUtils;
+import org.demo.server.infra.sse.service.SseEmitterService;
 import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.dto.form.MemberSaveForm;
 import org.demo.server.module.member.dto.form.MemberUpdateForm;
 import org.demo.server.module.member.dto.response.MemberResponse;
+import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.entity.Role;
+import org.demo.server.module.member.service.base.MemberFinder;
 import org.demo.server.module.member.service.base.MemberService;
 import org.demo.server.module.member.util.send.impl.confirm.base.SendConfirmCode;
 import org.demo.server.module.member.util.send.impl.password.base.SendTempPassword;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -39,14 +47,36 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/members")
-@RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberFinder memberFinder;
     private final FileUtils fileUtils;
     private final SendConfirmCode sendConfirmCode;
     private final SendTempPassword sendTempPassword;
     private final JwtUtils jwtUtils;
+    private final SseEmitterService sseEmitterService;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public MemberController(
+            MemberService memberService,
+            MemberFinder memberFinder,
+            FileUtils fileUtils,
+            SendConfirmCode sendConfirmCode,
+            SendTempPassword sendTempPassword,
+            JwtUtils jwtUtils,
+            SseEmitterService sseEmitterService,
+            @Qualifier("redisTemplate01") RedisTemplate<String, String> redisTemplate
+    ) {
+        this.memberService = memberService;
+        this.memberFinder = memberFinder;
+        this.fileUtils = fileUtils;
+        this.sendConfirmCode = sendConfirmCode;
+        this.sendTempPassword = sendTempPassword;
+        this.jwtUtils = jwtUtils;
+        this.sseEmitterService = sseEmitterService;
+        this.redisTemplate = redisTemplate;
+    }
 
     /**
      * 회원 등록
@@ -210,7 +240,27 @@ public class MemberController {
      * @return 정상 삭제인 경우, 204 반환
      */
     @DeleteMapping("/{email}")
-    public ResponseEntity<Void> deleteMemberByEmail(@PathVariable("email") String email) {
+    public ResponseEntity<Void> deleteMemberByEmail(
+            @PathVariable("email") String email,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        // 회원 식별자를 가져오기 위해 회원 조회
+        Member findMember = memberFinder.getMemberByEmail(email);
+        // SseEmitter 삭제
+        sseEmitterService.removeEmitter(findMember.getMemberId());
+        // Redis 에서 Refresh Token 제거
+        redisTemplate.delete("refreshToken:member:" + findMember.getMemberId());
+
+        // 쿠키 제거
+        Cookie refreshTokenCookie = getRefreshTokenCooke(request);
+        if (refreshTokenCookie != null) {
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(0);
+            response.addCookie(refreshTokenCookie);
+        }
+
+        // 회원 삭제
         memberService.deleteByEmail(email);
         return ResponseEntity.noContent().build();
     }
@@ -272,5 +322,18 @@ public class MemberController {
     ) {
         fileUtils.deleteFiles(imageFileNames, UploadDirectory.PROFILES, memberId);
         return ResponseEntity.noContent().build();
+    }
+
+    // RefreshToken 쿠키 가져오기
+    private Cookie getRefreshTokenCooke(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("todayReviewsRefreshToken")) {
+                    return cookie;
+                }
+            }
+        }
+        return null;
     }
 }
