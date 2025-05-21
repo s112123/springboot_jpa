@@ -25,7 +25,7 @@ spring:
         port: ${RABBIT_PORT:5680}
 servlet:
     multipart:
-        max-file-size: 1MB
+        max-file-size: 2MB
         max-request-size: 10MB
 jwt:
     secret:

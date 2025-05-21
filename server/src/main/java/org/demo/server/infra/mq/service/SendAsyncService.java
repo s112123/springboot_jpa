@@ -29,7 +29,7 @@ public class SendAsyncService {
     private final FollowFinder followFinder;
 
     /**
-     * 새글  메세지를 RDB 에 저장하고 RabbitMQ 로 메세지 알림
+     * 새 글 메세지를 RDB 에 저장하고 RabbitMQ 로 메세지 알림
      * MessageService 의 save() 에 @Transactional 이 있고 RabbitTemplate 는 트랜잭션 외부에서 동작된다
      * 그러므로 @Transactional 을 붙이지 않아도 된다
      *
@@ -57,7 +57,7 @@ public class SendAsyncService {
             MessageDetails savedMessage =
                     messageService.save(MessageType.POST, publisherId, follower.getMemberId(), message, url);
             // 메세지 전송
-            rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_NOTICE, savedMessage);
+            rabbitTemplate.convertAndSend(MQConfig.EXCHANGE_TOPIC, MQConfig.ROUTING_POST, savedMessage);
         }
     }
 
