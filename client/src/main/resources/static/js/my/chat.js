@@ -117,7 +117,7 @@ function getFollowListHTML(follows) {
         } else {
             // uploads > profiles > memberId
             imgSrc = 'http://localhost:8081/api/v1/members/profile-images/' +
-                      accessTokenUtils.getMemberId() + '/' + profileImage.savedFileName;
+                      follow.memberId + '/' + profileImage.savedFileName;
         }
 
         // HTML 생성
