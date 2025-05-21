@@ -7,7 +7,6 @@ import org.demo.server.infra.mq.dto.details.MessageDetails;
 import org.demo.server.infra.mq.service.MessageService;
 import org.demo.server.infra.mq.service.SendAsyncService;
 import org.demo.server.module.follow.service.FollowFinder;
-import org.demo.server.module.member.dto.details.MemberDetails;
 import org.demo.server.module.member.entity.Member;
 import org.demo.server.module.member.service.base.MemberFinder;
 import org.demo.server.module.review.entity.Review;
@@ -15,6 +14,8 @@ import org.demo.server.module.review.service.base.ReviewFinder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,10 +80,18 @@ public class MessagePublisher {
      * @param publisherId 메세지를 발송하는 회원 ID (= 글 작성자)
      * @param reviewId 등록된 새 글 ID
      */
-    @Transactional
+    //@Transactional
     public void publishPost(Long publisherId, Long reviewId) {
-        // 비동기로 알림 메세지를 RDB 에 저장하고 새 글 알림 메세지를 팔로워에게 전송
-        sendAsyncService.publishPostAndSendMessage(publisherId, reviewId);
+        // 로컬 PC 에서는 CPU 스케줄러가 비동기 메서드를 조금 늦게 실행하여 save() 의 트랜잭션이 커밋되고 실행되어 문제없다
+        // Docker 컨테이너에서는 비동기 메서드를 매우 빨리 실행하여 Review 가 save() 되기 전에 실행되어 에러가 발생할 수 있다
+        // 그래서 save() 의 트랜잭션이 커밋된 후에 비동기 메서드로 알림을 전송한다
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                // 비동기로 알림 메세지를 RDB 에 저장하고 새 글 알림 메세지를 팔로워에게 전송
+                sendAsyncService.publishPostAndSendMessage(publisherId, reviewId);
+            }
+        });
     }
 
     /**
